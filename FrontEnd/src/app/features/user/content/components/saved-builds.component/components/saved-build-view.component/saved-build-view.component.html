@@ -1,0 +1,37 @@
+<div class="overflow-hidden w-full">
+  <img
+    src="assets/images/keyboard-image.png"
+    class="w-full aspect-3/2 group-hover:scale-110 transition-transform duration-700"
+  />
+</div>
+
+<div class="flex flex-col p-6 gap-5">
+  <div class="flex justify-between">
+    <div class="flex flex-col gap-1">
+      <span class="text-2xl font-bold text-off-white"> test name </span>
+      <span class="text-sm text-off-white/50"> Saved on test date </span>
+    </div>
+    <span>
+      <i
+        class="fa-solid fa-trash-can text-off-white/50 text-2xl hover:text-red-500/50 hover:scale-110 cursor-pointer transition-all"
+        title="Delete Design"
+      ></i>
+    </span>
+  </div>
+
+  <div class="flex gap-5 flex-wrap">
+    <button
+      class="max-[385px]:w-full font-bold text-white flex gap-2.5 items-center justify-center px-5 py-4 bg-deep-blue rounded-xl hover:bg-white/20 transition-all cursor-pointer active:scale-95"
+    >
+      <i class="fa-solid fa-pen"></i>
+      <span>Edit Design</span>
+    </button>
+
+    <button
+      class="max-[385px]:w-full font-bold text-white flex gap-2.5 items-center justify-center px-5 py-4 bg-secondary brightness-125 hover:brightness-100 rounded-xl hover:bg-secondary/90 transition-all cursor-pointer active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+    >
+      <i class="fa-solid fa-cart-shopping"></i>
+      <span>Add to Cart</span>
+    </button>
+  </div>
+</div>

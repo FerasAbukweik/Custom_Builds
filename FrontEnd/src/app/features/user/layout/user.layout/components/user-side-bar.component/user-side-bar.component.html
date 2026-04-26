@@ -1,0 +1,28 @@
+>
+<a routerLink=""
+class="text-white text-xl font-bold pl-8 cursor-pointer"
+title="home page"
+>{{ projectName }}</a>
+
+<ul class="mt-13 flex flex-col gap-3">
+  @for (data of pagesData; track data.id) {
+    <li>
+      <a
+        [routerLink]="data.goTo"
+        routerLinkActive=""
+        (click)="onClick()"
+        #rla="routerLinkActive"
+        [class]="
+          `flex gap-2 items-center px-4 py-3.5 rounded-xl transition-colors duration-200 no-underline ${
+            rla.isActive
+              ? 'text-secondary/90 bg-secondary/20 border border-secondary/50'
+              : 'text-light-steel-blue/80 hover:bg-white/10'
+          }`
+        "
+      >
+        <i [class]="data.icon"></i>
+        <span class="font-bold">{{ data.name }}</span>
+      </a>
+    </li>
+  }
+</ul>

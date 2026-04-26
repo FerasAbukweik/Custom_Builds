@@ -1,0 +1,20 @@
+<div
+  class="h-full grid lg:grid-cols-[1fr_auto] lg:grid-rows-[auto_1fr] grid-rows-[auto_1fr_auto] [grid-template-areas:'topNav_topNav'_'content_content'_'sideBar_sideBar'] lg:[grid-template-areas:'topNav_topNav'_'content_sideBar'] bg-dark-deep-blue text-off-white"
+>
+  <nav topNav class="[grid-area:topNav]"></nav>
+  <div class="flex-1 relative flex items-center justify-center p-10 [grid-area:content]">
+    <div
+      class="absolute top-6 left-8 z-10 flex items-center gap-2 px-4 py-2 bg-deep-blue/40 backdrop-blur-md rounded-full border border-white/5"
+    >
+      <span class="text-dark-gray text-xs font-bold uppercase"> X-Pro Stealth </span>
+    </div>
+
+    <main>
+      <router-outlet />
+    </main>
+  </div>
+  <aside
+    customizerSideBar
+    class="lg:max-h-[calc(100vh-66px)] max-h-[450px] [grid-area:sideBar]"
+  ></aside>
+</div>

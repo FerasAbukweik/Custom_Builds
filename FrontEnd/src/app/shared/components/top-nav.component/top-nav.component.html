@@ -1,0 +1,44 @@
+<div class="flex justify-center items-center gap-4 w-full ">
+  <a routerLink="/">
+    <app-logo goTo="/" />
+  </a>
+
+  <ul class="flex items-center gap-4 @max-[1024px]:hidden">
+    @for (item of leftNavItems; track $index) {
+      <li class="whitespace-nowrap">
+        <a
+          [routerLink]="item.goTo"
+          class="text-off-white hover:text-secondary cursor-pointer text-[1rem]"
+        >
+          {{ item.text }}
+        </a>
+      </li>
+    }
+  </ul>
+
+  <div class="flex-1"></div>
+
+  <div class="relative @max-[636px]:w-full">
+    <input
+      type="text"
+      class="w-full h-11 bg-deep-blue rounded-[0.4rem] outline-0 pl-8 pr-4 text-off-white text-[1.125rem]"
+      placeholder="Search Builds..."
+    />
+    <i
+      class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-[0.75rem] text-soft-gray"
+    ></i>
+  </div>
+
+  <ul class="flex items-center gap-2">
+    @for (item of rightNavItems; track $index) {
+      <li>
+        <a
+          [routerLink]="item.goTo"
+          class="text-off-white p-2 rounded-md hover:bg-deep-blue transition-colors flex items-center justify-center"
+        >
+          <i [class]="item.icon + ' text-[1.2rem]'"></i>
+        </a>
+      </li>
+    }
+  </ul>
+</div>

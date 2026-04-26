@@ -1,0 +1,152 @@
+<app-user-content-wrapper
+  [pageName]="'Order History'"
+  [subText]="'Review and manage your past custom builds and purchases.'"
+  class="max-w-450 mx-auto"
+>
+  <section class="flex flex-col gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      @for (stat of statsData; track stat.label) {
+        <div
+          class="bg-deep-blue border border-dark-blue-gray rounded-xl p-6 transition-all duration-300 hover:border-secondary/30 hover:shadow-lg hover:shadow-secondary/5 group"
+        >
+          <p
+            class="text-xs font-bold text-light-steel-blue uppercase tracking-wider mb-2 group-hover:text-secondary transition-colors"
+          >
+            {{ stat.label }}
+          </p>
+          <div class="flex items-center gap-3">
+            <p
+              class="text-3xl font-bold {{ stat.highlight ? 'text-secondary' : 'text-off-white' }}"
+            >
+              {{ stat.value }}
+            </p>
+            @if (stat.badge) {
+              <span
+                class="bg-yellow-500/10 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded border border-yellow-500/20 animate-pulse"
+              >
+                {{ stat.badge }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="bg-deep-blue border border-dark-blue-gray rounded-xl overflow-hidden shadow-xl">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr
+              class="border-b border-dark-blue-gray bg-dark-deep-blue/50 text-xs font-bold text-light-steel-blue uppercase tracking-wider"
+            >
+              <th class="p-6">Order & Date</th>
+              <th class="p-6">Items</th>
+              <th class="p-6">Status</th>
+              <th class="p-6">Total</th>
+              <th class="p-6 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-dark-blue-gray">
+            @for (order of orderHistory; track order.id) {
+              <tr
+                class="hover:bg-dark-deep-blue/30 transition-colors group border-b border-dark-blue-gray"
+              >
+                <td class="p-6">
+                  <div
+                    class="font-bold text-off-white group-hover:text-secondary transition-colors"
+                  >
+                    {{ order.id }}
+                  </div>
+                  <div class="text-sm text-dark-gray mt-1">{{ order.date }}</div>
+                </td>
+                <td class="p-6">
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="w-12 h-12 bg-dark-blue-gray rounded-lg shrink-0 flex items-center justify-center group-hover:bg-secondary/20 transition-colors"
+                    >
+                      <i
+                        class="fa-solid fa-microchip text-soft-gray group-hover:text-secondary text-xl transition-colors"
+                      ></i>
+                    </div>
+                    <div>
+                      <div class="font-medium text-off-white">{{ order.item }}</div>
+                      <div class="text-xs text-dark-gray mt-1">{{ order.specs }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="p-6">
+                  <span
+                    [class]="
+                      `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+                        order.statusType === 'ok'
+                          ? 'bg-ok/10 text-ok border-ok/20'
+                          : 'bg-error/10 text-error border-error/20'
+                      }`
+                    "
+                  >
+                    <span
+                      [class]="
+                        `w-1.5 h-1.5 rounded-full ${
+                          order.statusType === 'ok' ? 'bg-ok' : 'bg-error'
+                        }`
+                      "
+                    ></span>
+                    {{ order.status }}
+                  </span>
+                </td>
+                <td class="p-6 font-bold text-off-white">{{ order.price }}</td>
+                <td class="p-6 text-right">
+                  <div
+                    class="flex items-center justify-end gap-3 md:opacity-0 md:group-hover:opacity-100 transition-all md:translate-x-2 md:group-hover:translate-x-0"
+                  >
+                    <button
+                      class="text-soft-gray hover:text-secondary transition-colors p-2"
+                      title="View Invoice"
+                    >
+                      <i class="fa-solid fa-file-invoice text-xl"></i>
+                    </button>
+                    <button
+                      class="bg-dark-blue-gray hover:bg-secondary active:scale-90 text-off-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shadow-lg"
+                    >
+                      Buy Again
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="border-t border-dark-blue-gray bg-dark-deep-blue/30 p-4">
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p class="text-xs text-dark-gray font-medium">Showing 1 to 4 of 12 orders</p>
+          <div class="flex items-center gap-2">
+            <button
+              class="px-3 py-1.5 rounded-md border border-dark-blue-gray text-xs text-soft-gray font-medium hover:bg-dark-blue-gray transition-colors cursor-pointer active:scale-95"
+            >
+              Previous
+            </button>
+            @for (page of pages; track page) {
+              <button
+                [class]="
+                  'px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer active:scale-90 ' +
+                  (page === currentPage()
+                    ? 'bg-secondary text-white shadow-lg shadow-secondary/20'
+                    : 'border border-dark-blue-gray text-soft-gray hover:bg-dark-blue-gray')
+                "
+              >
+                {{ page }}
+              </button>
+            }
+            <button
+              class="px-3 py-1.5 rounded-md border border-dark-blue-gray text-xs text-soft-gray font-medium hover:bg-dark-blue-gray transition-colors cursor-pointer active:scale-95"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</app-user-content-wrapper>

@@ -1,0 +1,11 @@
+<app-user-content-wrapper 
+  [pageName]="'Saved Builds'" 
+  [subText]="'You have ' + builds.length + ' custom peripherals designs saved in your library.'">
+  
+  <section class="flex flex-wrap gap-8 max-[630px]:flex-col">
+    @for (build of builds; track $index) {
+      <app-saved-build-view></app-saved-build-view>
+    }
+  </section>
+
+</app-user-content-wrapper>

@@ -1,0 +1,24 @@
+<div class="[grid-area:TopNav] w-full transition-all relative">
+  <nav userTopNav></nav>
+</div>
+
+<div
+  [class]="
+    `[grid-area:sideBar] transition-all duration-300 overflow-hidden max-[650px]:fixed bg-primary h-full z-100 ${
+      isSideBarShown ? 'max-w-73.75' : 'max-w-0'
+    }`
+  "
+>
+  <aside userSideBar></aside>
+</div>
+
+<main class="[grid-area:content] mx-auto overflow-y-auto pt-19.5 w-full">
+  <router-outlet />
+</main>
+
+<div
+  class="absolute top-3.75 left-5 cursor-pointer z-101"
+  (click)="userPageService.toggleShowSideBar()"
+>
+  <img src="logo-image.png" alt="logo" class="w-12 aspect-square object-cover" />
+</div>

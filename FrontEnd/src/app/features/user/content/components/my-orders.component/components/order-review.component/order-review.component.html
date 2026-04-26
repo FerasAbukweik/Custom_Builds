@@ -1,0 +1,94 @@
+<div class="grid grid-cols-1 xl:grid-cols-[300px_1fr] gap-6 lg:gap-8">
+  <div class="rounded-xl overflow-hidden h-52 md:h-64 border border-dark-gray/20 w-full">
+    <img
+      [src]="order.image"
+      [alt]="order.name"
+      class="group-hover:scale-110 transition-all w-full h-full object-cover duration-700 ease-out"
+    />
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+      <div class="min-w-0">
+        <span class="text-light-steel-blue text-xs font-bold tracking-[0.2em] uppercase">{{
+          order.category
+        }}</span>
+        <h2 class="text-xl md:text-2xl lg:text-3xl font-bold mt-1 text-off-white leading-tight">
+          {{ order.name }}
+        </h2>
+      </div>
+      <span
+        class="bg-secondary/10 text-secondary border border-secondary/20 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide whitespace-nowrap shrink-0"
+      >
+        {{ order.status }}
+      </span>
+    </div>
+
+    <div class="flex flex-wrap gap-x-12 gap-y-4 pt-6">
+      <div class="flex flex-col gap-1">
+        <span class="text-soft-gray text-xs uppercase font-semibold tracking-wider"
+          >Order Number</span
+        >
+        <span class="font-mono text-base md:text-lg font-bold text-off-white">#{{ order.id }}</span>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-soft-gray text-xs uppercase font-semibold tracking-wider"
+          >Est. Delivery</span
+        >
+        <span class="font-bold text-base md:text-lg text-off-white">{{ order.deliveryDate }}</span>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+      <button
+        class="whitespace-nowrap flex items-center text-sm font-bold justify-center gap-2 bg-dark-blue-gray hover:bg-dark-blue-gray/60 cursor-pointer text-off-white px-4 py-2 rounded-lg transition-all flex-1 sm:flex-none"
+      >
+        <i class="fa-solid fa-sliders text-light-steel-blue"></i> Configuration
+      </button>
+      <button
+        class="whitespace-nowrap flex items-center text-sm font-bold justify-center text-soft-gray hover:text-off-white px-5 py-2 transition-colors border border-soft-gray/20 rounded-lg cursor-pointer flex-1 sm:flex-none"
+      >
+        Support Chat
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="relative mt-12 mb-8 w-full">
+  <div class="absolute top-5 left-0 w-full h-0.5 bg-dark-gray"></div>
+  <div
+    class="absolute top-5 left-0 h-0.5 bg-secondary shadow-[0_0_10px_rgba(19,91,236,0.5)] duration-500 transition-all"
+    [style.width]="order.progress + '%'"
+  ></div>
+
+  <div class="flex justify-between w-full relative">
+    @for (step of steps; track step.id) {
+      @let isActive = isStepActive(step.id);
+
+      <div class="relative flex flex-col items-center">
+        <div
+          class="w-10 h-10 rounded-full flex items-center justify-center border-4 z-10 duration-300"
+          [ngClass]="
+            isActive
+              ? 'bg-secondary border-deep-blue text-white shadow-[0_0_15px_rgba(19,91,236,0.6)] scale-110'
+              : 'bg-deep-blue border-dark-gray text-dark-gray'
+          "
+        >
+          <i [class]="'fa-solid ' + step.icon + ' text-sm'"></i>
+        </div>
+
+        <div class="absolute top-12 left-1/2 -translate-x-1/2 text-center w-max">
+          <p
+            class="max-w-20 text-center text-[10px] uppercase font-bold tracking-wider mb-1 transition-colors"
+            [ngClass]="isActive ? 'text-off-white' : 'text-dark-gray'"
+          >
+            {{ step.label }}
+          </p>
+          <p class="text-[10px] text-soft-gray font-medium">
+            {{ isActive ? step.date : 'Pending' }}
+          </p>
+        </div>
+      </div>
+    }
+  </div>
+</div>

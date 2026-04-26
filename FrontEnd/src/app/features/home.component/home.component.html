@@ -1,0 +1,153 @@
+<div class="flex flex-col items-center">
+  <nav topNav class="fixed"></nav>
+  <main
+    class="max-[1300px]:px-7 max-w-300 flex flex-col gap-40 pt-40 max-[1400px]:pt-25 max-[1120px]:pt-7"
+  >
+    <section class="flex flex-wrap justify-center items-center gap-10 max-[1120px]:flex-col">
+      <div class="flex-1 w-full">
+        <div class="flex gap-7 flex-col">
+          <div
+            class="rounded-full border border-secondary/20 bg-secondary/10 py-0.75 px-3 flex gap-2 items-center w-fit"
+          >
+            <div class="relative flex h-2 w-2">
+              <span class="animate-ping absolute h-full w-full rounded-full bg-secondary"></span>
+              <span class="rounded-full h-2 w-2 bg-secondary"></span>
+            </div>
+            <span class="text-sm font-bold text-secondary/90">NEW SERIES DROPS TODAY</span>
+          </div>
+          <div
+            class="flex flex-wrap text-7xl font-bold text-white gap-2 max-[600px]:text-6xl max-[480px]:text-5xl max-[350px]:text-4xl"
+          >
+            <span>Engineered for</span>
+            <span class="text-secondary">Performance.</span>
+            <span>Styled By You.</span>
+          </div>
+          <div class="flex flex-col text-slate-400 gap-1">
+            <span>Design your ultimate setup with high-performance custom</span>
+            <span>controllers and mechanical keyboards.</span>
+            <span>Professional grade hardware meeting bespoke aesthetics</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap mt-8.5 gap-4">
+          <button
+            routerLink="customizer"
+            class="flex items-center justify-center text-md font-bold text-white bg-secondary min-h-14 px-7 rounded-xl cursor-pointer hover:scale-102 transition-all hover:brightness-110 active:scale-95"
+          >
+            Start Customizing <i class="fa-solid fa-list-check ml-2"></i>
+          </button>
+          <button
+            routerLink="user/saved-builds"
+            class="text-md font-bold text-white bg-gray-800 min-h-14 px-7 rounded-xl cursor-pointer border border-dark-gray hover:bg-gray-700 transition-all active:scale-95"
+          >
+            View Gallery
+          </button>
+        </div>
+      </div>
+
+      <div class="relative flex-1 w-full">
+        <img
+          src="assets/images/keyboard-image.png"
+          alt="image"
+          class="w-full h-full object-cover rounded-2xl max-[1120px]:aspect-3/2 aspect-14/10"
+        />
+        <div
+          class="flex flex-col absolute bottom-6 w-[calc(100%-3rem)] left-6 bg-primary border border-dark-gray/50 rounded-xl p-3.5 leading-6 font-bold cursor-pointer hover:brightness-110 transition-colors z-20"
+        >
+          <span class="text-secondary text-xs">FEATURED BUILD</span>
+          <span class="font-bold text-white/90">The Obsidian Edge-65</span>
+          <span class="absolute top-1/2 -translate-y-1/2 right-4 text-secondary text-xl">
+            <i class="fa-solid fa-arrow-right"></i>
+          </span>
+        </div>
+        <span
+          class="absolute inset-0 m-auto rounded-full blur-[120px] bg-secondary/30 -z-10"
+        ></span>
+      </div>
+    </section>
+
+    <section>
+      <div class="flex flex-col gap-2">
+        <span class="text-3xl font-bold text-white tracking-tight"
+          >Why Choose {{ projectName }}?</span
+        >
+        <span class="text-slate-400 tracking-wide"
+          >We use only highest grade components for long-lasting durability.</span
+        >
+      </div>
+      <div class="flex flex-wrap gap-5 mt-12">
+        @for (item of whyChooseUs; track item.id) {
+          <div
+            class="group flex-1 flex flex-col gap-4 max-w-100 min-w-80 p-8 bg-gray-800 rounded-2xl border border-dark-gray/50 max-[715px]:max-w-none max-[400px]:min-w-50"
+          >
+            <div
+              class="group-hover:bg-secondary group-hover:text-off-white text-secondary p-4 w-14 aspect-square flex justify-center items-center transition-colors bg-secondary/10 rounded-lg"
+            >
+              <i [className]="item.icon"></i>
+            </div>
+            <span class="text-lg font-bold text-white">{{ item.title }}</span>
+            <span class="text-slate-400">{{ item.description }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="w-full">
+      <div class="flex justify-between">
+        <div class="flex flex-col gap-2">
+          <span class="text-3xl font-bold text-white tracking-tight"
+            >Trending Community Designs</span
+          >
+          <span class="text-slate-400 tracking-wide"
+            >Discover what the pro community is building this month.</span
+          >
+        </div>
+        <div class="flex gap-2 self-end max-[600px]:hidden">
+          <button
+            (click)="scroll('left')"
+            class="p-2 text-off-white border border-dark-gray/50 rounded-md hover:bg-deep-blue cursor-pointer"
+          >
+            <i class="fa-solid fa-angle-left"></i>
+          </button>
+          <button
+            (click)="scroll('right')"
+            class="p-2 text-off-white border border-dark-gray/50 rounded-md hover:bg-deep-blue cursor-pointer"
+          >
+            <i class="fa-solid fa-angle-right"></i>
+          </button>
+        </div>
+      </div>
+      <div #designsDiv class="overflow-x-scroll mt-10 flex gap-6.5 max-w-[calc(100vw-3.5rem)]">
+        @for (product of trendingProducts; track $index) {
+          <app-product-card />
+        }
+      </div>
+    </section>
+
+    <section
+      class="flex flex-col lg:flex-row justify-between items-center p-8 sm:p-12 lg:p-15 bg-secondary rounded-3xl gap-10"
+    >
+      <div class="flex-1 flex flex-col gap-5 text-center lg:text-left">
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
+          Ready to build your masterpiece?
+        </h2>
+        <p class="text-off-white sm:text-lg max-w-xl">
+          Join all gamers who have elevated their experience with our customization engine.
+        </p>
+      </div>
+      <div class="flex-1 flex flex-wrap justify-center gap-4">
+        <button
+          class="text-secondary bg-white w-full sm:w-50 h-15 sm:h-17.5 rounded-2xl text-lg font-bold cursor-pointer hover:opacity-75 hover:shadow-xl transition-all active:scale-95"
+        >
+          Get Started Now
+        </button>
+        <button
+          class="text-white bg-transparent w-full sm:w-50 h-15 sm:h-17.5 rounded-2xl text-lg font-bold border border-off-white/50 cursor-pointer hover:bg-white/10 transition-all active:scale-95"
+        >
+          Watch Tutorial
+        </button>
+      </div>
+    </section>
+
+    <footer appFooter></footer>
+  </main>
+</div>

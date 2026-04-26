@@ -1,0 +1,109 @@
+<div class="border-b border-dark-blue-gray bg-deep-blue/30 px-2 pt-4">
+  <div class="flex overflow-x-auto gap-2 px-2">
+    @for (tab of customizeData | keyvalue; track tab.key) {
+      <button
+        (click)="setActiveTab(tab.key)"
+        [class]="
+          `flex-1 flex flex-col items-center justify-center w-20 pb-3 pt-2 border-b-2 transition-all ${
+            activeTab() === tab.key
+              ? 'border-secondary text-white'
+              : 'border-transparent text-dark-gray'
+          }`
+        "
+      >
+        <i [class]="tab.value.icon"></i>
+        <span class="text-[10px] font-bold uppercase tracking-widest">
+          {{ tab.key }}
+        </span>
+      </button>
+    }
+  </div>
+</div>
+
+<div class="flex-1 p-6 space-y-8 overflow-y-scroll">
+  @for (section of currentTabContent().sections; track section.id) {
+    <section>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-white text-xs font-bold uppercase tracking-widest">
+          {{ section.title }}
+        </h3>
+        <span class="text-secondary text-[10px] font-bold uppercase">
+          {{ section.price }}
+        </span>
+      </div>
+
+      <div class="flex flex-wrap gap-3">
+        @for (item of section.items; track item.id) {
+          <button
+            (click)="customizerService.toggleProduct(section.id, item.id)"
+            [class]="
+              `flex-1 min-w-40 max-w-60 max-[381px]:max-w-none! relative flex transition-all rounded-lg border-2 ${
+                selectedProduct[section.id] === item.id
+                  ? 'border-secondary bg-white/5 ring-1 ring-secondary/30'
+                  : 'border-dark-blue-gray hover:border-soft-gray/30 bg-transparent'
+              } ${
+                section.type === 'card'
+                  ? 'p-3 items-center justify-between'
+                  : 'flex-col items-center p-2'
+              }`
+            "
+          >
+            @if (section.type === 'color') {
+              <div class="flex items-center gap-3 w-full">
+                <div
+                  class="w-10 h-10 rounded border border-white/10"
+                  [style.backgroundColor]="item.value"
+                ></div>
+                <span
+                  class="text-xs font-bold"
+                  [class.text-white]="selectedProduct[section.id] === item.id"
+                  [class.text-soft-gray]="selectedProduct[section.id] !== item.id"
+                >
+                  {{ item.name }}
+                </span>
+              </div>
+            }
+
+            @if (section.type === 'image') {
+              <div
+                class="w-full aspect-square rounded bg-cover bg-center mb-2"
+                [style.backgroundImage]="'url(' + item.value + ')'"
+              ></div>
+              <span class="text-[10px] font-bold uppercase text-dark-gray">
+                {{ item.name }}
+              </span>
+            }
+
+            @if (section.type === 'card') {
+              <div class="flex items-center gap-3">
+                <div
+                  class="p-2 bg-deep-blue rounded text-white w-9 h-9 flex items-center justify-center"
+                >
+                  <i [class]="item.icon + ' text-lg'"></i>
+                </div>
+                <div class="text-left">
+                  <p class="text-xs font-bold text-white">{{ item.name }}</p>
+                  <p class="text-[10px] text-soft-gray">{{ item.desc }}</p>
+                </div>
+              </div>
+            }
+          </button>
+        }
+      </div>
+    </section>
+  }
+</div>
+
+<div class="p-6 bg-deep-blue border-t border-dark-blue-gray shadow-2xl max-[335px]:p-3">
+  <div class="flex items-end justify-between gap-3 mb-2">
+    <div>
+      <p class="text-dark-gray text-[10px] font-bold uppercase tracking-wider">Estimated Total</p>
+      <h4 class="text-white text-3xl font-bold max-[335px]:text-lg">$189.99</h4>
+    </div>
+    <button
+      class="whitespace-nowrap bg-secondary text-white px-8 py-3 rounded-lg font-bold text-sm hover:bg-blue-600 transition-all uppercase tracking-wider cursor-pointer max-[335px]:px-4 max-[335px]:text-xs"
+    >
+      Add to Cart
+    </button>
+  </div>
+</div>

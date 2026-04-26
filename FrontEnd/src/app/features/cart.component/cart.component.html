@@ -1,0 +1,122 @@
+<nav topNav></nav>
+
+<div
+  class="p-10 pt-0 w-full max-w-300 max-[450px]:p-5 relative mx-auto overflow-y-scroll max-h-screen"
+>
+  <div class="flex gap-3 text-sm mt-5">
+    <a routerLink="/" class="text-slate-400 hover:text-secondary cursor-pointer"> Home </a>
+    <span class="text-slate-400">&gt;</span>
+    <span class="text-white">Your Arsenal</span>
+  </div>
+
+  <h3 class="text-white text-4xl font-bold mt-9">Your Arsenal</h3>
+  <span class="text-slate-400 mt-2 block">
+    Review your customized configurations before deployment.
+  </span>
+
+  <div class="mt-9 flex flex-wrap max-[1168px]:flex-col gap-12">
+    <section
+      class="flex flex-col gap-7 flex-1 overflow-y-auto min-[1169px]:max-h-[calc(100vh-300px)]"
+    >
+      @for (item of cartItems; track $index) {
+        <div
+          class="group flex h-fit flex-wrap gap-6 bg-dark-deep-blue p-6 rounded-xl border border-dark-gray/50 min-w-170 max-[760px]:min-w-75 justify-center"
+        >
+          <div class="rounded-lg overflow-hidden max-[565px]:w-full">
+            <img
+              src="assets/images/keyboard-image.png"
+              alt="Product image"
+              class="h-48 w-full object-cover group-hover:scale-110 duration-700 ease-out transition-transform"
+            />
+          </div>
+
+          <div class="flex-1 flex flex-col">
+            <div class="flex flex-col justify-between flex-1 gap-5">
+              <div class="flex flex-col gap-2">
+                <div class="flex justify-between gap-2 flex-wrap">
+                  <h3 class="text-[1.25rem] text-white font-bold">
+                    Apex-Pro Custom Mechanical Keyboard
+                  </h3>
+                  <span>
+                    <i
+                      class="fa-regular fa-trash-can hover:text-error text-xl text-off-white/50 cursor-pointer transition-colors"
+                    ></i>
+                  </span>
+                </div>
+
+                <div class="flex gap-2 flex-wrap text-xs font-bold text-slate-400">
+                  @for (spec of specs; track $index) {
+                    <span class="px-2 py-1 bg-slate-800 rounded-sm">
+                      {{ spec }}
+                    </span>
+                  }
+                </div>
+              </div>
+
+              <div class="flex justify-between gap-3 flex-wrap">
+                <div class="flex justify-between p-1 w-30 bg-slate-800 rounded-md text-white">
+                  <span class="px-3 py-1 rounded-sm hover:bg-white/10 cursor-pointer">-</span>
+                  <span class="self-center">1</span>
+                  <span class="px-3 py-1 rounded-sm hover:bg-white/10 cursor-pointer text-secondary"
+                    >+</span
+                  >
+                </div>
+                <span class="text-secondary text-2xl font-bold">$249.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </section>
+
+    <section
+      class="bg-dark-deep-blue p-6 rounded-xl border border-dark-gray/50 flex flex-col gap-4.5 max-w-90 w-full h-fit min-w-75 max-[1168px]:max-w-none"
+    >
+      <h2 class="mb-2 text-2xl text-white font-bold">Order Summary</h2>
+
+      <div class="flex justify-between gap-5 items-center">
+        <span class="text-slate-400 text-lg">Subtotal (2 items)</span>
+        <span class="text-slate-400 text-lg">{{ 438.0 | currency }}</span>
+      </div>
+
+      <div class="flex justify-between gap-5 items-center">
+        <span class="text-slate-400 text-lg">Shipping</span>
+        <span class="text-ok text-xs font-bold">FREE</span>
+      </div>
+
+      <div class="flex justify-between gap-5 items-center">
+        <span class="text-slate-400 text-lg">Tax</span>
+        <span class="text-ok text-lg">$0.00</span>
+      </div>
+
+      <hr class="border-dark-gray/50 my-2" />
+
+      <div class="flex justify-between gap-5 items-center">
+        <span class="text-white text-xl">Total</span>
+        <span class="text-white font-bold text-3xl">{{ 473.04 | currency }}</span>
+      </div>
+
+      <button
+        class="w-full px-2 py-5 bg-secondary brightness-105 text-white font-bold rounded-lg hover:brightness-95 cursor-pointer transition-all duration-100 flex items-center justify-center gap-2 group"
+      >
+        <span>PROCEED TO CHECKOUT</span>
+        <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
+      </button>
+
+      <div class="w-full relative">
+        <input
+          type="text"
+          placeholder="Promo Code"
+          class="w-full px-4 py-3 bg-slate-800 rounded-lg font-bold text-white outline-none"
+        />
+        <span
+          class="absolute top-1/2 -translate-y-1/2 right-4 font-bold text-secondary hover:text-white cursor-pointer"
+        >
+          Apply
+        </span>
+      </div>
+
+      <hr class="border-dark-gray/50 mt-5" />
+    </section>
+  </div>
+</div>

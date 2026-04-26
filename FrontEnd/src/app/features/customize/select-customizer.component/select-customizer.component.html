@@ -1,0 +1,14 @@
+<div
+  class="h-full flex flex-col min-[950px]:overflow-hidden transition-colors duration-300 overflow-y-scroll"
+>
+  <nav topNav></nav>
+  <div class="fixed inset-0 bg-dark-deep-blue -z-20"></div>
+
+  <main
+    class="flex-1 flex flex-col min-[950px]:flex-row w-full h-fit min-[950px]:h-full relative z-10"
+  >
+    @for (option of options; track $index; let idx = $index) {
+      <app-controller-customizer [data]="{ option, idx }"></app-controller-customizer>
+    }
+  </main>
+</div>

@@ -1,0 +1,44 @@
+<div
+  class="absolute inset-0 bg-secondary/0 group-hover:bg-secondary/5 transition-colors duration-500"
+></div>
+
+<div
+  class="relative w-full h-full flex flex-col items-center justify-center p-6 sm:p-8 min-[950px]:px-12 z-10 min-[950px]:py-16 text-center"
+>
+  <div class="mb-6 min-[950px]:mb-4 flex flex-col">
+    <span
+      class="text-[10px] min-[950px]:text-xs font-bold tracking-[0.3em] uppercase text-secondary block opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-4 duration-750"
+    >
+      {{ data().option.subtitle }}
+    </span>
+    <h2
+      class="text-4xl sm:text-5xl min-[950px]:text-7xl font-bold text-off-white uppercase leading-none tracking-tight"
+    >
+      {{ data().option.title }}
+    </h2>
+  </div>
+
+  <div
+    class="w-full my-6 min-[950px]:my-10 pointer-events-none animate-float max-w-70 sm:max-w-xs min-[950px]:max-w-lg!"
+    [style.animation-delay]="data().idx * 3 + 's'"
+  >
+    <img
+      [src]="data().option.imgSrc"
+      [alt]="data().option.title"
+      class="rounded-sm w-full h-auto object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-105 group-hover:-translate-y-2 filter group-hover:drop-shadow-[0_0_30px_rgba(19,91,236,0.3)]"
+    />
+  </div>
+
+  <p
+    class="text-soft-gray max-w-70 sm:max-w-xs text-center mb-6 min-[950px]:mb-8 font-medium text-xs sm:text-sm min-[950px]:text-base leading-relaxed"
+  >
+    {{ data().option.description }}
+  </p>
+
+  <button
+    [routerLink]="['./', data().option.goTo]"
+    class="bg-secondary hover:bg-blue-600 text-white font-bold py-3 px-8 min-[950px]:py-4 min-[950px]:px-10 rounded-lg text-xs min-[950px]:text-sm tracking-widest uppercase transition-all transform active:scale-95 shadow-xl shadow-secondary/20 cursor-pointer"
+  >
+    Customize {{ data().option.title }}
+  </button>
+</div>

@@ -1,0 +1,37 @@
+<ul class="flex items-center gap-4 @max-[620px]:hidden w-full">
+  @for (data of leftNavItems; track $index; let isLast = $last) {
+    <li class="whitespace-nowrap" [class.flex-1]="isLast">
+      <a
+        [routerLink]="data.goTo"
+        routerLinkActive="text-secondary"
+        class="text-light-steel-blue hover:text-secondary cursor-pointer text-[1rem] no-underline"
+      >
+        {{ data.text }}
+      </a>
+    </li>
+  }
+</ul>
+
+<div class="relative @max-[620px]:w-full lg:min-w-100 md:min-w-70">
+  <input
+    type="text"
+    class="w-full h-11 bg-deep-blue rounded-[0.4rem] outline-0 pl-8 pr-4 text-off-white text-[1.125rem]"
+    placeholder="Track Order #"
+  />
+  <i
+    class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-[0.75rem] text-soft-gray"
+  ></i>
+</div>
+
+<ul class="flex items-center gap-2">
+  @for (data of rightNavItems; track $index) {
+    <li>
+      <a
+        [routerLink]="data.goTo"
+        class="text-off-white p-2 rounded-md hover:bg-deep-blue transition-colors flex items-center justify-center no-underline"
+      >
+        <i [class]="data.icon + ' text-[1.2rem]'"></i>
+      </a>
+    </li>
+  }
+</ul>
