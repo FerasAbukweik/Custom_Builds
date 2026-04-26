@@ -25,7 +25,7 @@ namespace Custom_Builds.Infrastructure.Repositories
 
         public async Task AddRefrehTokenAsync(AddRefreshTokenDTO tokenInfo)
         {
-            if(GetRefreshTokenFromRefreshTokenStringAsync(tokenInfo.RefreshTokenString) != null)
+            if(await GetRefreshTokenFromRefreshTokenStringAsync(tokenInfo.RefreshTokenString) != null)
             {
                 throw new Exception("Refresh Token ALready Exirsts");
             }
@@ -35,7 +35,7 @@ namespace Custom_Builds.Infrastructure.Repositories
                 Id = Guid.NewGuid(),
                 ExpierDate = tokenInfo.ExpierDate,
                 RefreshTokenString = tokenInfo.RefreshTokenString,
-                UserId = Guid.NewGuid(),
+                UserId = tokenInfo.UserId,
             };
 
             _dbcontext.RefreshTokens.Add(toAdd);

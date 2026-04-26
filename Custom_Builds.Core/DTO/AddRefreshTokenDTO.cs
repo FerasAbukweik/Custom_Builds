@@ -9,6 +9,6 @@ namespace Custom_Builds.Core.DTO
     {
         public required string RefreshTokenString { get; set; }
         public required DateTime ExpierDate { get; set; }
-        public required Guid UserID { get; set; }
+        public required Guid UserId { get; set; }
     }
 }

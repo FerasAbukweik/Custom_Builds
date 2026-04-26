@@ -10,11 +10,11 @@ namespace Custom_Builds.Core.ServiceContracts
 {
     public interface IJWTService
     {
-        string GenerateRefreshToken(ApplicationUser user);
-        Task<string> GenerateAccessToken(ApplicationUser user);
+        Task<string> GenerateRefreshTokenAsync(ApplicationUser user);
+        Task<string> GenerateAccessTokenAsync(ApplicationUser user);
         Task<AccessAndRefreshTokenDTO> GenerateNewAccessAndRefreshTokensAsync(HttpRequest request);
         bool IsValidJWTSecurityToken(string accessToken , bool validateExpireDate = true);
         ClaimsPrincipal GetPrincipalFromAccessToken(string accessToken , bool validateExpireDate = true);
-        Task<bool> AreRefreshTokenAndAccessTokenValidAsync(HttpRequest request);
+        Task<bool> AreRefreshTokenAndAccessTokenValidAsync(HttpRequest request , bool validateExpireDate = true);
     }
 }

@@ -26,7 +26,6 @@ namespace Custom_Builds.Core.Utils
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddMinutes(-1),
-                Path = "/"
             };
 
             response.Cookies.Delete(key, cookieOptions);

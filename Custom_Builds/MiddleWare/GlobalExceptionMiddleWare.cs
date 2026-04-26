@@ -38,8 +38,8 @@ namespace custom_Peripherals.MiddleWare
 
                 var response = new
                 {
-                    ErrorMessage = ex.Message,
-                    statusCode = statusCode
+                    ErrorMessage = "Unexpected Error",
+                    statusCode
                 };
 
                 await context.Response.WriteAsync(JsonSerializer.Serialize(response));

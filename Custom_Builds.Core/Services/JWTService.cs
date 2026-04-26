@@ -34,7 +34,7 @@ namespace Custom_Builds.Core.Services
             _userManager = userManager;
         }
 
-        public async Task<string> GenerateAccessToken(ApplicationUser user)
+        public async Task<string> GenerateAccessTokenAsync(ApplicationUser user)
         {
             List<Claim> claims = new List<Claim> {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -53,12 +53,12 @@ namespace Custom_Builds.Core.Services
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:KEY"]!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:key"]!));
             SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             JwtSecurityToken token = new JwtSecurityToken(
                     _configuration["JWT:Issuer"],
-                    _configuration["JWT:Audiance"],
+                    _configuration["JWT:Audience"],
                     claims,
                     expires: DateTime.UtcNow.AddMinutes(double.Parse(_configuration["JWT:AccessTokenLife"]!)),
                     signingCredentials: creds
@@ -70,13 +70,13 @@ namespace Custom_Builds.Core.Services
         public async Task<AccessAndRefreshTokenDTO> GenerateNewAccessAndRefreshTokensAsync(HttpRequest request)
         {
             // check if tokens are valid
-            if (!(await AreRefreshTokenAndAccessTokenValidAsync(request)))
+            if (!(await AreRefreshTokenAndAccessTokenValidAsync(request , validateExpireDate: false)))
             {
                 throw new SecurityTokenException("Invalid Token");
             }
 
             string accessToke = CookiesUtils.GetFromCookies(request, "AccessToken")!;
-            string? userId = GetPrincipalFromAccessToken(accessToke)?.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            string? userId = GetPrincipalFromAccessToken(accessToke , validateExpireDate: false)?.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
             if(userId == null)
             {
@@ -92,14 +92,14 @@ namespace Custom_Builds.Core.Services
 
             AccessAndRefreshTokenDTO tokens = new AccessAndRefreshTokenDTO()
             {
-                AccessToken = await GenerateAccessToken(user),
-                RefreshToken = GenerateRefreshToken(user)
+                AccessToken = await GenerateAccessTokenAsync(user),
+                RefreshToken = await GenerateRefreshTokenAsync(user)
             };
 
             return tokens;
         }
 
-        public string GenerateRefreshToken(ApplicationUser user)
+        public async Task<string> GenerateRefreshTokenAsync(ApplicationUser user)
         {
             byte[] bytes = new byte[64];
 
@@ -108,7 +108,17 @@ namespace Custom_Builds.Core.Services
                 rng.GetBytes(bytes);
             }
 
-            return Convert.ToBase64String(bytes);
+            string refToken = Convert.ToBase64String(bytes);
+
+            // store refresh token in the DB
+            await _refreshTokenRepositry.AddRefrehTokenAsync(new AddRefreshTokenDTO()
+            {
+                ExpierDate = DateTime.UtcNow.AddDays(double.Parse(_configuration["JWT:RefreshTokenLife"]!)),
+                RefreshTokenString = refToken,
+                UserId = user.Id,
+            });
+
+            return refToken;
         }
 
         public ClaimsPrincipal GetPrincipalFromAccessToken(string accessToken , bool validateExpireDate = true)
@@ -121,7 +131,7 @@ namespace Custom_Builds.Core.Services
             TokenValidationParameters tokenParams = new TokenValidationParameters()
             {
                 ValidateAudience = true,
-                ValidAudience = _configuration["JWT:Audiance"],
+                ValidAudience = _configuration["JWT:Audience"],
                 ValidateIssuer = true,
                 ValidIssuer = _configuration["JWT:Issuer"],
                 ValidateIssuerSigningKey = true,
@@ -135,7 +145,7 @@ namespace Custom_Builds.Core.Services
             ClaimsPrincipal principal = jwtSecurityTokenHandler.ValidateToken(accessToken, tokenParams, out SecurityToken validToken);
 
             if (validToken is not JwtSecurityToken jwtSecurityToken ||
-                jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
                                                    StringComparison.InvariantCultureIgnoreCase))
             {
                 throw new SecurityTokenException("Invalid Token");
@@ -154,7 +164,7 @@ namespace Custom_Builds.Core.Services
             TokenValidationParameters tokenParams = new TokenValidationParameters()
             {
                 ValidateAudience = true,
-                ValidAudience = _configuration["JWT:Audiance"],
+                ValidAudience = _configuration["JWT:Audience"],
                 ValidateIssuer = true,
                 ValidIssuer = _configuration["JWT:Issuer"],
                 ValidateIssuerSigningKey = true,
@@ -168,7 +178,7 @@ namespace Custom_Builds.Core.Services
             jwtSecurityTokenHandler.ValidateToken(accessToken, tokenParams, out SecurityToken validToken);
 
             if (validToken is not JwtSecurityToken jwtSecurityToken ||
-                jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
                                                    StringComparison.InvariantCultureIgnoreCase))
             {
                 return false;
@@ -177,32 +187,31 @@ namespace Custom_Builds.Core.Services
             return true;
         }
 
-        public async Task<bool> AreRefreshTokenAndAccessTokenValidAsync(HttpRequest request)
+        public async Task<bool> AreRefreshTokenAndAccessTokenValidAsync(HttpRequest request , bool validateExpireDate = true)
         {
             string? accessToken = CookiesUtils.GetFromCookies(request, "AccessToken");
-
-            if (string.IsNullOrEmpty(accessToken))
-            {
-                return false;
-            }
-
             string? refreshToken = CookiesUtils.GetFromCookies(request, "RefreshToken");
 
-            if (string.IsNullOrEmpty(refreshToken))
+            if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
             {
                 return false;
             }
 
+            if (!IsValidJWTSecurityToken(accessToken, validateExpireDate))
+            {
+                return false;
+            }
 
             ApplicationUser? refreshTokenUser = await _refreshTokenRepositry.GetUserFromRefreshTokenStringAsync(refreshToken);
+            RefreshToken? refToken = await _refreshTokenRepositry.GetRefreshTokenFromRefreshTokenStringAsync(refreshToken);
 
-            if (refreshTokenUser == null)
+            if (refreshTokenUser == null || refToken == null || refToken.ExpierDate <= DateTime.UtcNow)
             {
                 return false;
             }
 
 
-            ClaimsPrincipal principal = GetPrincipalFromAccessToken(accessToken);
+            ClaimsPrincipal principal = GetPrincipalFromAccessToken(accessToken , validateExpireDate);
             if(!Guid.TryParse(principal.FindFirstValue(JwtRegisteredClaimNames.Sub) , out Guid accessTokenUserId))
             {
                 return false;

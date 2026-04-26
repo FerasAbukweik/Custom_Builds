@@ -92,8 +92,8 @@ namespace custom_Peripherals.Controllers
 
 
             // generate Tokens
-            string accessToken = await _jwtService.GenerateAccessToken(newUser);
-            string refreshToken = _jwtService.GenerateRefreshToken(newUser);
+            string accessToken = await _jwtService.GenerateAccessTokenAsync(newUser);
+            string refreshToken = await _jwtService.GenerateRefreshTokenAsync(newUser);
 
             // store Tokens in http only cookies
             // use RefreshToken lifetime for AccessToken
