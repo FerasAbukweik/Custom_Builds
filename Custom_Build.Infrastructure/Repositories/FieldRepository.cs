@@ -11,7 +11,7 @@ using System.Text;
 
 namespace Custom_Builds.Infrastructure.Repositories
 {
-    internal class FieldRepository : IFieldRepository
+    public class FieldRepository : IFieldRepository
     {
         private readonly ApplicationDbContext _dbContext;
 

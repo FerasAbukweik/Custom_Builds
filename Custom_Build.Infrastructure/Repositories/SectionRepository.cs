@@ -11,7 +11,7 @@ namespace Custom_Builds.Infrastructure.Repositories
 {
     public class SectionRepository : ISectionRepository
     {
-        public readonly ApplicationDbContext _dbContext;
+        private readonly ApplicationDbContext _dbContext;
 
         public SectionRepository(ApplicationDbContext dbContext)
         {

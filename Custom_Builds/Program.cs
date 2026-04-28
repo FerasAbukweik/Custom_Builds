@@ -1,4 +1,5 @@
 using Custom_Builds.Core.Domain.Identity;
+using Custom_Builds.Core.Domain.RepositoryContracts;
 using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.ServiceContracts;
@@ -135,15 +136,19 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
 
 
 //DI
-builder.Services.AddTransient<IJWTService, JWTService>();
+builder.Services.AddScoped<IJWTService, JWTService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<ISectionRepository, SectionRepository>();
+builder.Services.AddScoped<IFieldRepository, IFieldRepository>();
+builder.Services.AddScoped<IItemsRepository, ItemsRepository>();
+
 
 builder.Services.AddCors(Options =>
 {
     Options.AddPolicy("AllowExternalFrontEnd", policy => 
     {
         policy
-        .WithOrigins([""])
+        .WithOrigins()
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials();

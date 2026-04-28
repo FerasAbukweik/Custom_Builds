@@ -16,6 +16,7 @@ namespace Custom_Builds.Core.DTO
         public string? Icon { get; set; }
 
         [Required(ErrorMessage = "{0} Is Reqiered")]
+        [Range(minimum:0 , maximum: 100000000 , ErrorMessage = "Invalid {0} Price Should Be Between {1} and {2}")]
         public required decimal Price { get; set; }
 
         [Required(ErrorMessage = "{0} Is Requiered")]

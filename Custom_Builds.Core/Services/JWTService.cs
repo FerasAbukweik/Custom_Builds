@@ -133,11 +133,6 @@ namespace Custom_Builds.Core.Services
         }
         public Result<ClaimsPrincipal> GetPrincipalFromAccessToken(string accessToken , bool ValidateLifetime = true)
         {
-            if (accessToken == null)
-            {
-                throw new SecurityTokenException("Invalid Token");
-            }
-
             TokenValidationParameters tokenParams = new TokenValidationParameters()
             {
                 ValidateAudience = true,
@@ -165,11 +160,6 @@ namespace Custom_Builds.Core.Services
         }
         public Result IsValidJWTSecurityToken(string accessToken , bool validateExpireDate = true)
         {
-            if (accessToken == null)
-            {
-                throw new Exception("Access Token Not Found In Cookies");
-            }
-
             TokenValidationParameters tokenParams = new TokenValidationParameters()
             {
                 ValidateAudience = true,
