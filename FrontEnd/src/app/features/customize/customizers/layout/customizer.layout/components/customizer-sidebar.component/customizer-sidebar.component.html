@@ -21,14 +21,14 @@
 </div>
 
 <div class="flex-1 p-6 space-y-8 overflow-y-scroll">
-  @for (section of currentTabContent().sections; track section.id) {
+  @for (section of currentTabContent().fields; track section.id) {
     <section>
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-white text-xs font-bold uppercase tracking-widest">
           {{ section.title }}
         </h3>
         <span class="text-secondary text-[10px] font-bold uppercase">
-          {{ section.price }}
+          to modify later
         </span>
       </div>
 

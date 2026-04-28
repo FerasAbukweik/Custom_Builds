@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Custom_Builds.Core": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:62139;http://localhost:62140"
+    }
+  }
+}

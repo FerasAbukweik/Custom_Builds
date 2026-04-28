@@ -26,7 +26,7 @@ namespace custom_Peripherals.Controllers
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly SignInManager<ApplicationUser> _signinManager;
         private readonly IJWTService _jwtService;
-        private readonly IRefreshTokenRepositry _refreshTokenRepositry;
+        private readonly IRefreshTokenRepository _refreshTokenRepositry;
         private readonly IConfiguration _configuration;
 
         public AccountController(
@@ -34,7 +34,7 @@ namespace custom_Peripherals.Controllers
                 RoleManager<ApplicationRole> roleManager,
                 SignInManager<ApplicationUser> signinManager,
                 IJWTService jwtService,
-                IRefreshTokenRepositry refreshTokenRepositry,
+                IRefreshTokenRepository refreshTokenRepositry,
                 IConfiguration configuration)
         {
             _userManager = userManager;
@@ -110,6 +110,11 @@ namespace custom_Peripherals.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> Login(LoginDTO loginInfo)
         {
+            if (!ModelState.IsValid)
+            {
+                string errors = ModelState.CollectErrors();
+                return BadRequest(errors);
+            }
             ApplicationUser? user = await _userManager.FindByEmailAsync(loginInfo.Email);
 
             if(user == null)
@@ -127,8 +132,8 @@ namespace custom_Peripherals.Controllers
             }
 
             // generate Tokens
-            string accessToken = await _jwtService.GenerateAccessToken(user);
-            string refreshToken = _jwtService.GenerateRefreshToken(user);
+            string accessToken = await _jwtService.GenerateAccessTokenAsync(user);
+            string refreshToken = await _jwtService.GenerateRefreshTokenAsync(user);
 
             // use RefreshToken lifetime for AccessToken
             // so we can require both expiered Date accessToken and valid refresh token for more security
@@ -159,6 +164,7 @@ namespace custom_Peripherals.Controllers
 
 
             // remove User from IdentityUser table
+            // also removes all user refreshTokens because DeleteBehavior.cascade
             var result = await _userManager.DeleteAsync(user);
 
             if (!result.Succeeded)
@@ -172,9 +178,6 @@ namespace custom_Peripherals.Controllers
             CookiesUtils.DeleteCookie(Response, "AccessToken");
             CookiesUtils.DeleteCookie(Response, "RefreshToken");
 
-            // remove All current User refreshTokens
-            await _refreshTokenRepositry.RemoveUserRefreshTokensAsync(Guid.Parse(userId));
-
             return Ok();
         }
 
@@ -182,6 +185,7 @@ namespace custom_Peripherals.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signinManager.SignOutAsync();
+
             CookiesUtils.DeleteCookie(Response, "AccessToken");
 
             string? refreshToken = CookiesUtils.GetFromCookies(Request, "RefreshToken");
@@ -189,7 +193,7 @@ namespace custom_Peripherals.Controllers
 
             if(refreshToken != null)
             {
-                await _refreshTokenRepositry.RemoveRefreshTokenByRefreshTokenStringAsync(refreshToken);
+                await _refreshTokenRepositry.RemoveByRefreshTokenStringAsync(refreshToken);
             }
 
             return Ok();

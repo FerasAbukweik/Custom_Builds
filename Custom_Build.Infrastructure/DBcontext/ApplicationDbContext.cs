@@ -1,4 +1,5 @@
-﻿using Custom_Builds.Core.Domain.Identity;
+﻿using Custom_Builds.Core.Domain.Entities;
+using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.Domain.TokenEntities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -21,8 +22,23 @@ namespace Custom_Builds.Infrastructure.DBcontext
                 .WithMany()
                 .HasForeignKey(rt => rt.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Item>()
+                .HasOne(it => it.Field)
+                .WithMany(f => f.Items)
+                .HasForeignKey(it => it.FieldId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Field>()
+                .HasOne(f => f.Section)
+                .WithMany(s => s.Fields)
+                .HasForeignKey(f => f.SectionId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+        public virtual DbSet<Item> Items { get; set; }
+        public virtual DbSet<Field> Fields { get; set; }
+        public virtual DbSet<Section> Sections { get; set; }
     }
 }

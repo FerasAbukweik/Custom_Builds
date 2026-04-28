@@ -1,5 +1,6 @@
 ﻿using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.DTO;
+using Custom_Builds.Core.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,9 @@ namespace Custom_Builds.Core.ServiceContracts
     {
         Task<string> GenerateRefreshTokenAsync(ApplicationUser user);
         Task<string> GenerateAccessTokenAsync(ApplicationUser user);
-        Task<AccessAndRefreshTokenDTO> GenerateNewAccessAndRefreshTokensAsync(HttpRequest request);
-        bool IsValidJWTSecurityToken(string accessToken , bool validateExpireDate = true);
-        ClaimsPrincipal GetPrincipalFromAccessToken(string accessToken , bool validateExpireDate = true);
-        Task<bool> AreRefreshTokenAndAccessTokenValidAsync(HttpRequest request , bool validateExpireDate = true);
+        Task<Result<AccessAndRefreshTokenDTO>> GenerateNewAccessAndRefreshTokensAsync(HttpRequest request);
+        Result IsValidJWTSecurityToken(string accessToken , bool validateExpireDate = true);
+        Result<ClaimsPrincipal> GetPrincipalFromAccessToken(string accessToken , bool validateExpireDate = true);
+        Task<Result> AreRefreshTokenAndAccessTokenValidAsync(HttpRequest request , bool validateExpireDate = true);
     }
 }

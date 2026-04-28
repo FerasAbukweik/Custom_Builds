@@ -1,1 +1,1 @@
-export const projectName = "Custom Peripherals";
+export const projectName = "Custom Builds";

@@ -1,45 +1,46 @@
 import { Injectable, signal } from '@angular/core';
-import { ICustomizeData } from '../layout/customizer.layout/customizer.model';
+import { ISection } from '../../../../core/interfaces/customize-data/customize-data.model';
 
 @Injectable()
 export class CustomizerService {
-  private controllerCustomizeData: Record<string, ICustomizeData> = {
+  private controllerCustomizeData: Record<string, ISection> = {
     shell: {
       id: 1,
       icon: 'fa-solid fa-shield-halved',
-      sections: [
+      fields: [
         {
           id: 1,
           title: 'Shell Finish',
-          price: 'Standard',
           type: 'color',
           items: [
-            { id: 1, name: 'Matte Black', value: '#111722' },
-            { id: 2, name: 'Soft White', value: '#cbd5e1' },
-            { id: 3, name: 'Cobalt Blue', value: '#135bec' },
-            { id: 4, name: 'Platinum', value: '#c0c0c0' },
+            { id: 1, name: 'Matte Black', value: '#111722', price: 15 },
+            { id: 2, name: 'Soft White', value: '#cbd5e1', price: 15 },
+            { id: 3, name: 'Cobalt Blue', value: '#135bec', price: 15 },
+            { id: 4, name: 'Platinum', value: '#c0c0c0', price: 15 },
           ],
         },
         {
           id: 2,
           title: 'Texture',
-          price: '+$15.00',
           type: 'image',
           items: [
             {
               id: 5,
               name: 'Carbon',
               value: 'assets/images/keyboard-image.png',
+              price: 20,
             },
             {
               id: 6,
               name: 'Honeycomb',
               value: 'assets/images/keyboard-image.png',
+              price: 20,
             },
             {
               id: 7,
               name: 'Digital Camo',
               value: 'assets/images/keyboard-image.png',
+              price: 20,
             },
           ],
         },
@@ -48,16 +49,15 @@ export class CustomizerService {
     Buttons: {
       id: 2,
       icon: 'fa-regular fa-circle-dot',
-      sections: [
+      fields: [
         {
           id: 3,
           title: 'Button Kit',
-          price: 'Standard',
           type: 'color',
           items: [
-            { id: 8, name: 'Standard Black', value: '#111' },
-            { id: 9, name: 'Crystal Clear', value: '#f8fafc' },
-            { id: 10, name: 'Neon Red', value: '#ff1f1f' },
+            { id: 8, name: 'Standard Black', value: '#111', price: 25 },
+            { id: 9, name: 'Crystal Clear', value: '#f8fafc', price: 25 },
+            { id: 10, name: 'Neon Red', value: '#ff1f1f', price: 25 },
           ],
         },
       ],
@@ -65,11 +65,10 @@ export class CustomizerService {
     Sticks: {
       id: 3,
       icon: 'fa-solid fa-crosshairs',
-      sections: [
+      fields: [
         {
           id: 4,
           title: 'Stick Type',
-          price: '+$10.00',
           type: 'card',
           items: [
             {
@@ -77,12 +76,14 @@ export class CustomizerService {
               name: 'Concave',
               desc: 'Classic grip',
               icon: 'fa-solid fa-circle-dot',
+              price: 25,
             },
             {
               id: 12,
               name: 'Domed',
               desc: 'Increased range',
               icon: 'fa-solid fa-circle',
+              price: 25,
             },
           ],
         },
@@ -91,11 +92,10 @@ export class CustomizerService {
     Paddles: {
       id: 4,
       icon: 'fa-solid fa-grip-lines',
-      sections: [
+      fields: [
         {
           id: 5,
           title: 'Rear Paddles',
-          price: '+$30.00',
           type: 'card',
           items: [
             {
@@ -103,12 +103,14 @@ export class CustomizerService {
               name: 'Standard 2-Pack',
               desc: 'Left/Right mapping',
               icon: 'fa-solid fa-grip-lines',
+              price: 25,
             },
             {
               id: 14,
               name: 'Ultimate 4-Pack',
               desc: 'Full control',
               icon: 'fa-solid fa-grip-lines-vertical',
+              price: 25,
             },
           ],
         },

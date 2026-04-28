@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": ".angular"
+		},
+		{
+			"path": ".vercel"
+		},
+		{
+			"path": ".vscode"
+		},
+		{
+			"path": "bin"
+		},
+		{
+			"path": "node_modules"
+		},
+		{
+			"path": "obj"
+		},
+		{
+			"path": "public"
+		},
+		{
+			"path": "src"
+		}
+	]
+}

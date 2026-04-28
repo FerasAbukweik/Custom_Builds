@@ -4,18 +4,18 @@ interface ISectionItem {
   value?: string;
   desc?: string;
   icon?: string;
+  price: Number;
 }
 
-interface ISelection {
+interface IField {
   id: number;
   title: string;
-  price: string;
   type: string;
   items: ISectionItem[];
 }
 
-export interface ICustomizeData {
+export interface ISection {
   id: number;
   icon: string;
-  sections: ISelection[];
+  fields: IField[];
 }

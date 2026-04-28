@@ -31,6 +31,8 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(new AuthorizeFilter(policy));
 });
 
+//so scalar can find the controllers and actions
+builder.Services.AddOpenApi();
 
 // implementing serilog
 builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider service, LoggerConfiguration configuration) =>
@@ -80,17 +82,28 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
                 IJWTService jwtService = context.HttpContext.RequestServices.GetRequiredService<IJWTService>();
 
-                AccessAndRefreshTokenDTO tokens = await jwtService.GenerateNewAccessAndRefreshTokensAsync(context.Request);
+                var tokens = await jwtService.GenerateNewAccessAndRefreshTokensAsync(context.Request);
+
+                if (!tokens.IsSuccess)
+                {
+                    return;
+                }
 
                 CookiesUtils.AddToCookies(context.Response, "AccessToken",
-                    tokens.AccessToken, double.Parse(builder.Configuration["JWT:RefreshTokenLife"]!));
+                    tokens.Value!.AccessToken, double.Parse(builder.Configuration["JWT:RefreshTokenLife"]!));
                 CookiesUtils.AddToCookies(context.Response, "RefreshToken",
-                    tokens.RefreshToken, double.Parse(builder.Configuration["JWT:RefreshTokenLife"]!));
+                    tokens.Value!.RefreshToken, double.Parse(builder.Configuration["JWT:RefreshTokenLife"]!));
 
 
-                var principal = jwtService.GetPrincipalFromAccessToken(tokens.AccessToken);
+                var principal = jwtService.GetPrincipalFromAccessToken(tokens.Value.AccessToken);
+
+                if (!principal.IsSuccess)
+                {
+                    return;
+                }
+
                 // update the principal with new principal
-                context.Principal = principal; 
+                context.Principal = principal.Value; 
                 context.Success();
             }
         };
@@ -101,7 +114,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("default") ,
     x=>x.MigrationsAssembly("Custom_Builds.Infrastructure"))
 );
-
 
 // add identity services and store users,roles in DB
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
@@ -124,7 +136,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
 
 //DI
 builder.Services.AddTransient<IJWTService, JWTService>();
-builder.Services.AddScoped<IRefreshTokenRepositry, RefreshTokenRepositry>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 builder.Services.AddCors(Options =>
 {
@@ -144,6 +156,9 @@ if (builder.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 
+
+    //so scalar can find the controllers and actions
+    app.MapOpenApi();
     // use scalar
     app.MapScalarApiReference();
 }
