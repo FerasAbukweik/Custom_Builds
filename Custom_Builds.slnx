@@ -1,5 +1,8 @@
 <Solution>
-  <Project Path="Custom_Build.Infrastructure/Custom_Builds.Infrastructure.csproj" />
-  <Project Path="Custom_Builds.Core/Custom_Builds.Core.csproj" />
-  <Project Path="Custom_Builds/Custom_Builds.WebApi.csproj" />
+  <Folder Name="/src/">
+    <Project Path="Custom_Build.Infrastructure/Custom_Builds.Infrastructure.csproj" />
+    <Project Path="Custom_Builds.Core/Custom_Builds.Core.csproj" />
+    <Project Path="Custom_Builds/Custom_Builds.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
 </Solution>
