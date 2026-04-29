@@ -34,11 +34,25 @@ namespace Custom_Builds.Infrastructure.DBcontext
                 .WithMany(s => s.Fields)
                 .HasForeignKey(f => f.SectionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Cart>()
+                .HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Order>()
+                .HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
         public virtual DbSet<Item> Items { get; set; }
         public virtual DbSet<Field> Fields { get; set; }
         public virtual DbSet<Section> Sections { get; set; }
+        public virtual DbSet<Cart> Carts { get; set; }
+        public virtual DbSet<Order> Orders { get; set; }
     }
 }

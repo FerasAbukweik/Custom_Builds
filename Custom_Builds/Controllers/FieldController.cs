@@ -1,7 +1,7 @@
 ﻿using Custom_Builds.Core.Domain.Entities;
-using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.extensionMethods;
+using Custom_Builds.Core.ServiceContracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,17 +12,27 @@ namespace custom_Peripherals.Controllers
     public class FieldController : ControllerBase
     {
 
-        private readonly IFieldRepository _fieldsRepository;
+        private readonly IGetFieldService _getFieldService;
+        private readonly IAddFieldService _addFieldService;
+        private readonly IEditFieldService _editFieldService;
+        private readonly IRemoveFieldService _removeFieldService;
 
-        public FieldController(IFieldRepository fieldsRepository)
+        public FieldController(
+            IGetFieldService getFieldService,
+            IAddFieldService addFieldService,
+            IEditFieldService editFieldService,
+            IRemoveFieldService removeFieldService)
         {
-            _fieldsRepository = fieldsRepository;
+            _getFieldService = getFieldService;
+            _addFieldService = addFieldService;
+            _editFieldService = editFieldService;
+            _removeFieldService = removeFieldService;
         }
 
         [HttpGet("[action]")]
         public async Task<ActionResult<Field>> Get(Guid fieldId)
         {
-            var result = await _fieldsRepository.GetByIdAsync(fieldId);
+            var result = await _getFieldService.GetByIdAsync(fieldId);
 
             if (!result.IsSuccess)
             {
@@ -40,7 +50,7 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(ModelState.CollectErrors());
             }
 
-            var result = await _fieldsRepository.AddAsync(toAdd);
+            var result = await _addFieldService.AddAsync(toAdd);
 
             if (!result.IsSuccess)
             {
@@ -58,7 +68,7 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(ModelState.CollectErrors());
             }
 
-            var result = await _fieldsRepository.EditByIdAsync(newData);
+            var result = await _editFieldService.EditByIdAsync(newData);
 
             if (!result.IsSuccess)
             {
@@ -71,7 +81,7 @@ namespace custom_Peripherals.Controllers
         [HttpDelete("[action]")]
         public async Task<IActionResult> Remove(Guid fieldId)
         {
-            var result = await _fieldsRepository.RemoveByIdAsync(fieldId);
+            var result = await _removeFieldService.RemoveByIdAsync(fieldId);
 
             if (!result.IsSuccess)
             {

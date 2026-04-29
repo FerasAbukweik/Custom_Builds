@@ -139,8 +139,31 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
 builder.Services.AddScoped<IJWTService, JWTService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<ISectionRepository, SectionRepository>();
-builder.Services.AddScoped<IFieldRepository, IFieldRepository>();
+builder.Services.AddScoped<IFieldRepository, FieldRepository>();
 builder.Services.AddScoped<IItemsRepository, ItemsRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IGetSectionService, GetSectionService>();
+builder.Services.AddScoped<IAddSectionService, AddSectionService>();
+builder.Services.AddScoped<IEditSectionService, EditSectionService>();
+builder.Services.AddScoped<IRemoveSectionService, RemoveSectionService>();
+builder.Services.AddScoped<IGetFieldService, GetFieldService>();
+builder.Services.AddScoped<IAddFieldService, AddFieldService>();
+builder.Services.AddScoped<IEditFieldService, EditFieldService>();
+builder.Services.AddScoped<IRemoveFieldService, RemoveFieldService>();
+builder.Services.AddScoped<IGetItemService, GetItemService>();
+builder.Services.AddScoped<IAddItemService, AddItemService>();
+builder.Services.AddScoped<IEditItemService, EditItemService>();
+builder.Services.AddScoped<IRemoveItemService, RemoveItemService>();
+builder.Services.AddScoped<IGetCartService, GetCartService>();
+builder.Services.AddScoped<IAddCartService, AddCartService>();
+builder.Services.AddScoped<IEditCartService, EditCartService>();
+builder.Services.AddScoped<IRemoveCartService, RemoveCartService>();
+builder.Services.AddScoped<IGetOrderService, GetOrderService>();
+builder.Services.AddScoped<IAddOrderService, AddOrderService>();
+builder.Services.AddScoped<IEditOrderService, EditOrderService>();
+builder.Services.AddScoped<IRemoveOrderService, RemoveOrderService>();
+builder.Services.AddScoped<IRevokeRefreshTokenService, RevokeRefreshTokenService>();
 
 
 builder.Services.AddCors(Options =>

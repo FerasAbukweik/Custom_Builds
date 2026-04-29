@@ -1,6 +1,5 @@
 ﻿using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.Domain.RepositryContracts;
-using Custom_Builds.Core.Domain.TokenEntities;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts;
@@ -13,10 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Security.Principal;
 using System.Text;
 
 namespace Custom_Builds.Core.Services
@@ -56,7 +53,7 @@ namespace Custom_Builds.Core.Services
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:key"]!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]!));
             SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             JwtSecurityToken token = new JwtSecurityToken(
@@ -79,9 +76,9 @@ namespace Custom_Builds.Core.Services
                 return Result<AccessAndRefreshTokenDTO>.Failure(checkTokensResult.ErrorMessage ?? "Invalid Tokens");
             }
 
-            string accessToke = CookiesUtils.GetFromCookies(request, "AccessToken")!;
+            string accessToken = CookiesUtils.GetFromCookies(request, "AccessToken")!;
 
-            var getPrincipalResult = GetPrincipalFromAccessToken(accessToke, ValidateLifetime: false);
+            var getPrincipalResult = GetPrincipalFromAccessToken(accessToken, validateExpireDate: false);
 
             if (!getPrincipalResult.IsSuccess)
             {
@@ -131,7 +128,7 @@ namespace Custom_Builds.Core.Services
 
             return refToken;
         }
-        public Result<ClaimsPrincipal> GetPrincipalFromAccessToken(string accessToken , bool ValidateLifetime = true)
+        public Result<ClaimsPrincipal> GetPrincipalFromAccessToken(string accessToken , bool validateExpireDate = true)
         {
             TokenValidationParameters tokenParams = new TokenValidationParameters()
             {
@@ -142,7 +139,7 @@ namespace Custom_Builds.Core.Services
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]!)),
 
-                ValidateLifetime = ValidateLifetime,
+                ValidateLifetime = validateExpireDate,
             };
 
             JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
@@ -222,7 +219,7 @@ namespace Custom_Builds.Core.Services
                 result.ErrorMessage += "No Refresh Token Was Found | ";
                 result.StatusCode = HttpStatusCode.Unauthorized;
             }
-            if(refTokenResult.Value!.ExpierDate <= DateTime.UtcNow)
+            if (refTokenResult.IsSuccess && refTokenResult.Value!.ExpierDate <= DateTime.UtcNow)
             {
                 result.ErrorMessage += "Expiered Refresh Token";
             }

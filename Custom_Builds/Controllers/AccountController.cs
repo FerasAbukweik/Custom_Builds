@@ -7,7 +7,6 @@ using Custom_Builds.Core.extensionMethods;
 using Custom_Builds.Core.ServiceContracts;
 using Custom_Builds.Core.Utils;
 using Custom_Builds.Infrastructure.DBcontext;
-using Custom_Builds.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -26,7 +25,7 @@ namespace custom_Peripherals.Controllers
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly SignInManager<ApplicationUser> _signinManager;
         private readonly IJWTService _jwtService;
-        private readonly IRefreshTokenRepository _refreshTokenRepositry;
+        private readonly IRevokeRefreshTokenService _revokeRefreshTokenService;
         private readonly IConfiguration _configuration;
 
         public AccountController(
@@ -34,14 +33,14 @@ namespace custom_Peripherals.Controllers
                 RoleManager<ApplicationRole> roleManager,
                 SignInManager<ApplicationUser> signinManager,
                 IJWTService jwtService,
-                IRefreshTokenRepository refreshTokenRepositry,
+                IRevokeRefreshTokenService revokeRefreshTokenService,
                 IConfiguration configuration)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signinManager = signinManager;
             _jwtService = jwtService;
-            _refreshTokenRepositry = refreshTokenRepositry;
+            _revokeRefreshTokenService = revokeRefreshTokenService;
             _configuration = configuration;
         }
 
@@ -193,7 +192,7 @@ namespace custom_Peripherals.Controllers
 
             if(refreshToken != null)
             {
-                await _refreshTokenRepositry.RemoveByRefreshTokenStringAsync(refreshToken);
+                await _revokeRefreshTokenService.RemoveByRefreshTokenStringAsync(refreshToken);
             }
 
             return Ok();

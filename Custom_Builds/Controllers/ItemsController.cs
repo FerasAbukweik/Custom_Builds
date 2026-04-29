@@ -1,7 +1,7 @@
 ﻿using Custom_Builds.Core.Domain.Entities;
-using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.extensionMethods;
+using Custom_Builds.Core.ServiceContracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +11,21 @@ namespace custom_Peripherals.Controllers
     [ApiController]
     public class ItemsController : ControllerBase
     {
-        private readonly IItemsRepository _itemsRepository;
+        private readonly IAddItemService _addItemService;
+        private readonly IRemoveItemService _removeItemService;
+        private readonly IEditItemService _editItemService;
+        private readonly IGetItemService _getItemService;
 
-        public ItemsController(IItemsRepository itemsRepository)
+        public ItemsController(
+            IAddItemService addItemService,
+            IRemoveItemService removeItemService,
+            IEditItemService editItemService,
+            IGetItemService getItemService)
         {
-            _itemsRepository = itemsRepository;
+            _addItemService = addItemService;
+            _removeItemService = removeItemService;
+            _editItemService = editItemService;
+            _getItemService = getItemService;
         }
 
 
@@ -29,7 +39,7 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(errors);
             }
 
-            var result = await _itemsRepository.AddAsync(toAdd);
+            var result = await _addItemService.AddAsync(toAdd);
 
             if (!result.IsSuccess)
             {
@@ -42,7 +52,7 @@ namespace custom_Peripherals.Controllers
         [HttpDelete("[action]")]
         public async Task<IActionResult> Remove(Guid itemId)
         {
-            var result = await _itemsRepository.RemoveByIdAsync(itemId);
+            var result = await _removeItemService.RemoveByIdAsync(itemId);
             if (result.IsSuccess)
             {
                 return Ok();
@@ -63,7 +73,7 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(errors);
             }
 
-            var result = await _itemsRepository.EditByIdAsync(newData);
+            var result = await _editItemService.EditByIdAsync(newData);
 
             if (!result.IsSuccess)
             {
@@ -76,7 +86,7 @@ namespace custom_Peripherals.Controllers
         [HttpGet("[action]")]
         public async Task<ActionResult<Item>> Get(Guid itemId)
         {
-            var result = await _itemsRepository.GetFromIdAsync(itemId);
+            var result = await _getItemService.GetFromIdAsync(itemId);
 
             if (!result.IsSuccess)
             {
