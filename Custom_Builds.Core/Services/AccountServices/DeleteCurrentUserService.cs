@@ -15,7 +15,7 @@ using System.Text;
 
 namespace Custom_Builds.Core.Services.AccountServices
 {
-    internal class DeleteCurrentUserService : IDeleteCurrentUserService
+    public class DeleteCurrentUserService : IDeleteCurrentUserService
     {
         private readonly IJWTService _jwtService;
         private readonly UserManager<ApplicationUser> _userManager;

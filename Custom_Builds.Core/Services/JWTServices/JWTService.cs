@@ -196,7 +196,7 @@ namespace Custom_Builds.Core.Services.JWTServices
                 return Result<AccessAndRefreshTokenDTO>.Failure(getaccessTokenResult.ErrorMessage ?? "Failed to get access token", getaccessTokenResult.StatusCode);
             }
 
-            var getRefreshTokenResult = _getCookieService.Get("AccessToken");
+            var getRefreshTokenResult = _getCookieService.Get("RefreshToken");
 
             if (!getRefreshTokenResult.IsSuccess)
             {

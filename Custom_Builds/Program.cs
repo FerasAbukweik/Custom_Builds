@@ -123,7 +123,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     tokens.Value!.RefreshToken, double.Parse(builder.Configuration["JWT:RefreshTokenLife"]!));
 
 
-                var principal = jwtService.GetPrincipal();
+                var principal = jwtService.GetPrincipal(validateExpireDate: false);
 
                 if (!principal.IsSuccess)
                 {
@@ -201,8 +201,8 @@ builder.Services.AddScoped<IGetCustomBuildService, GetCustomBuildService>();
 builder.Services.AddScoped<IAddCustomBuildService, AddCustomBuildService>();
 builder.Services.AddScoped<IEditCustomBuildService, EditCustomBuildService>();
 builder.Services.AddScoped<IRemoveCustomBuildService, RemoveCustomBuildService>();
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IDeleteCurrentUserService, IDeleteCurrentUserService>();
+builder.Services.AddHttpContextAccessor();  
+builder.Services.AddScoped<IDeleteCurrentUserService, DeleteCurrentUserService>();
 builder.Services.AddScoped<ILoginAccountService, LoginAccountService>();
 builder.Services.AddScoped<IRegisterAccountService, RegisterAccountService>();
 builder.Services.AddScoped<ILogoutAccountService, LogoutAccountService>();
@@ -211,7 +211,6 @@ builder.Services.AddScoped<IAddCookieService , AddCookieService>();
 builder.Services.AddScoped<IGetCookieService , GetCookieService>();
 builder.Services.AddScoped<IGenerateRefreshTokenService , GenerateRefreshTokenService>();
 builder.Services.AddScoped<IGetRefreshTokenService, GetRefreshTokenService>();
-
 
 builder.Services.AddCors(Options =>
 {

@@ -28,7 +28,8 @@ namespace Custom_Builds.Infrastructure.Repositories
 
         public async Task<Result<Guid>> AddAsync(AddRefreshTokenDTO tokenInfo)
         {
-            if(await GetFromRefreshTokenStringAsync(tokenInfo.RefreshTokenString) != null)
+            var getRefreshTokenResult = await GetFromRefreshTokenStringAsync(tokenInfo.RefreshTokenString);
+            if (getRefreshTokenResult.IsSuccess)
             {
                 return Result<Guid>.Failure("refresh token already exists");
             }

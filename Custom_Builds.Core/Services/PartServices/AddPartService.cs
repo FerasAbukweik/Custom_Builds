@@ -18,7 +18,7 @@ namespace Custom_Builds.Core.Services.PartServices
         {
             var result = await _partRepository.AddAsync(toAdd);
 
-            if (result.IsSuccess)
+            if (!result.IsSuccess)
             {
                 return Result<Guid>.Failure(result.ErrorMessage ?? "An error occurred while adding the part.", result.StatusCode);
             }
