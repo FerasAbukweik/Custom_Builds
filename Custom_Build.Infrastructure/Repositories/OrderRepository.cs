@@ -1,6 +1,7 @@
 using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
+using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.EntityFrameworkCore;
@@ -17,19 +18,23 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<Result> AddAsync(AddOrderDTO toAdd)
+        public async Task<Result<Guid>> AddAsync(AddOrderTO_DB toAdd)
         {
             Order newOrder = new Order()
             {
                 Id = Guid.NewGuid(),
                 UserId = toAdd.UserId,
-                TotalPrice = toAdd.TotalPrice
+                TotalPrice = toAdd.TotalPrice,
+                OrderStatus = OrderStateEnum.Pending,
+                OrderType = toAdd.OrderType,
+                ProductId = toAdd.ProductId,
+                CustomBuildId = toAdd.CustomBuildId
             };
 
             _dbContext.Orders.Add(newOrder);
             await _dbContext.SaveChangesAsync();
 
-            return Result.Success();
+            return Result<Guid>.Success(newOrder.Id);
         }
 
         public async Task<Result> EditByIdAsync(EditOrderDTO newData)

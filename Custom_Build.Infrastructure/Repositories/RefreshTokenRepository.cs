@@ -26,11 +26,11 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
 
 
-        public async Task<Result> AddAsync(AddRefreshTokenDTO tokenInfo)
+        public async Task<Result<Guid>> AddAsync(AddRefreshTokenDTO tokenInfo)
         {
             if(await GetFromRefreshTokenStringAsync(tokenInfo.RefreshTokenString) != null)
             {
-                return Result.Failure("refresh token already exists");
+                return Result<Guid>.Failure("refresh token already exists");
             }
 
             RefreshToken toAdd = new RefreshToken()
@@ -44,7 +44,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbcontext.RefreshTokens.Add(toAdd);
             await _dbcontext.SaveChangesAsync();
 
-            return Result.Success();
+            return Result<Guid>.Success(toAdd.Id);
         }
         public async Task<Result<RefreshToken>> GetFromRefreshTokenStringAsync(string refreshToken)
         {
@@ -63,7 +63,7 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             if(!refreshTokenResult.IsSuccess)
             {
-                return Result<ApplicationUser>.Failure(refreshTokenResult.ErrorMessage ?? "refresh token wasnt found" , statusCode: HttpStatusCode.NotFound);
+                return Result<ApplicationUser>.Failure(refreshTokenResult.ErrorMessage ?? "refresh token wasnt found", refreshTokenResult.StatusCode);
             }
 
             ApplicationUser? user = await _userManager.FindByIdAsync(refreshTokenResult.Value!.UserId.ToString());
@@ -92,7 +92,7 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             if(!refreshTokenResult.IsSuccess)
             {
-                return Result.Failure(refreshTokenResult.ErrorMessage ?? "refresh token wasnt found", statusCode: HttpStatusCode.NotFound);
+                return Result.Failure(refreshTokenResult.ErrorMessage ?? "refresh token wasnt found", refreshTokenResult.StatusCode);
             }
 
             _dbcontext.RefreshTokens.Remove(refreshTokenResult.Value!);

@@ -4,7 +4,8 @@ using Custom_Builds.Core.Domain.TokenEntities;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.extensionMethods;
-using Custom_Builds.Core.ServiceContracts;
+using Custom_Builds.Core.Models;
+using Custom_Builds.Core.ServiceContracts.IAccountServices;
 using Custom_Builds.Core.Utils;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.AspNetCore.Authorization;
@@ -21,27 +22,21 @@ namespace custom_Peripherals.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<ApplicationRole> _roleManager;
-        private readonly SignInManager<ApplicationUser> _signinManager;
-        private readonly IJWTService _jwtService;
-        private readonly IRevokeRefreshTokenService _revokeRefreshTokenService;
-        private readonly IConfiguration _configuration;
+        private readonly IRegisterAccountService _registerAccountService;
+        private readonly ILoginAccountService _loginAccountService;
+        private readonly IDeleteCurrentUserService _deleteCurrentUserService;
+        private readonly ILogoutAccountService _logoutAccountService;
 
         public AccountController(
-                UserManager<ApplicationUser> userManager,
-                RoleManager<ApplicationRole> roleManager,
-                SignInManager<ApplicationUser> signinManager,
-                IJWTService jwtService,
-                IRevokeRefreshTokenService revokeRefreshTokenService,
-                IConfiguration configuration)
+                IRegisterAccountService registerAccountService,
+                ILoginAccountService loginAccountService,
+                IDeleteCurrentUserService deleteCurrentUserService,
+                ILogoutAccountService logoutAccountService)
         {
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _signinManager = signinManager;
-            _jwtService = jwtService;
-            _revokeRefreshTokenService = revokeRefreshTokenService;
-            _configuration = configuration;
+            _registerAccountService = registerAccountService;
+            _loginAccountService = loginAccountService;
+            _deleteCurrentUserService = deleteCurrentUserService;
+            _logoutAccountService = logoutAccountService;
         }
 
 
@@ -55,54 +50,9 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(errors);
             }
 
+            Result result = await _registerAccountService.RegisterAsync(Response, registerInfo);
 
-            if (await _userManager.Users.AnyAsync(u => u.Email == registerInfo.Email))
-            {
-                return BadRequest("Email Already Used");
-            }
-
-
-
-            ApplicationUser newUser = new ApplicationUser()
-            {
-                UserName = registerInfo.UserName,
-                Email = registerInfo.Email,
-                PhoneNumber = registerInfo.PhoneNumber,
-            };
-            var result = await _userManager.CreateAsync(newUser, registerInfo.Password);
-
-            if (!result.Succeeded)
-            {
-                string errors = string.Join(" | ", result.Errors);
-                return BadRequest(errors);
-            }
-
-
-            // if role doesnt exist create new one
-            if(!(await _roleManager.Roles.AnyAsync(r => r.Name == registerInfo.role.ToString())))
-            {
-                ApplicationRole newRole = new ApplicationRole() { Name =  registerInfo.role.ToString() };
-                await _roleManager.CreateAsync(newRole);
-            }
-
-            // add user to his role
-            await _userManager.AddToRoleAsync(newUser, registerInfo.role.ToString());
-
-
-
-            // generate Tokens
-            string accessToken = await _jwtService.GenerateAccessTokenAsync(newUser);
-            string refreshToken = await _jwtService.GenerateRefreshTokenAsync(newUser);
-
-            // store Tokens in http only cookies
-            // use RefreshToken lifetime for AccessToken
-            // so we can require both expiered Date accessToken and valid refresh token for more security
-            CookiesUtils.AddToCookies(Response, "AccessToken", accessToken, Double.Parse(_configuration["JWT:RefreshTokenLife"]!));
-            CookiesUtils.AddToCookies(Response, "RefreshToken", refreshToken, Double.Parse(_configuration["JWT:RefreshTokenLife"]!));
-
-            await _signinManager.SignInAsync(newUser , isPersistent: false);
-
-            return Ok();
+            return result.ToActionResult();
         }
 
         [AllowAnonymous]
@@ -114,88 +64,26 @@ namespace custom_Peripherals.Controllers
                 string errors = ModelState.CollectErrors();
                 return BadRequest(errors);
             }
-            ApplicationUser? user = await _userManager.FindByEmailAsync(loginInfo.Email);
 
-            if(user == null)
-            {
-                return Problem("Wrong Email or Passowrd");
-            }
+            Result result = await _loginAccountService.LoginAsync(Response, loginInfo);
 
-
-            // check password
-            var result = await _signinManager.PasswordSignInAsync(user, loginInfo.Password , false , false);
-
-            if (!result.Succeeded)
-            {
-                return Problem("Wrong Email or Passowrd");
-            }
-
-            // generate Tokens
-            string accessToken = await _jwtService.GenerateAccessTokenAsync(user);
-            string refreshToken = await _jwtService.GenerateRefreshTokenAsync(user);
-
-            // use RefreshToken lifetime for AccessToken
-            // so we can require both expiered Date accessToken and valid refresh token for more security
-            CookiesUtils.AddToCookies(Response, "AccessToken", accessToken, Double.Parse(_configuration["JWT:RefreshTokenLife"]!));
-            CookiesUtils.AddToCookies(Response, "RefreshToken", refreshToken, Double.Parse(_configuration["JWT:RefreshTokenLife"]!));
-
-            await _signinManager.SignInAsync(user , false);
-            return Ok();
-
+            return result.ToActionResult();
         }
 
         [HttpDelete("[action]")]
         public async Task<IActionResult> DeleteCurrentUser()
         {
-            string? userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            Result result = await _deleteCurrentUserService.DeleteUserAsync(Response, User);
 
-            if(userId == null)
-            {
-                return NotFound();
-            }
-
-            ApplicationUser? user = await _userManager.FindByIdAsync(userId);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-
-            // remove User from IdentityUser table
-            // also removes all user refreshTokens because DeleteBehavior.cascade
-            var result = await _userManager.DeleteAsync(user);
-
-            if (!result.Succeeded)
-            {
-                string errors = string.Join(" | ", result.Errors);
-                return BadRequest(errors);
-            }
-
-            //remove Token Cookies from browser
-            await _signinManager.SignOutAsync();
-            CookiesUtils.DeleteCookie(Response, "AccessToken");
-            CookiesUtils.DeleteCookie(Response, "RefreshToken");
-
-            return Ok();
+            return result.ToActionResult();
         }
 
         [HttpDelete("[action]")]
         public async Task<IActionResult> Logout()
         {
-            await _signinManager.SignOutAsync();
+            Result result = await _logoutAccountService.LogoutAsync();
 
-            CookiesUtils.DeleteCookie(Response, "AccessToken");
-
-            string? refreshToken = CookiesUtils.GetFromCookies(Request, "RefreshToken");
-            CookiesUtils.DeleteCookie(Response, "RefreshToken");
-
-            if(refreshToken != null)
-            {
-                await _revokeRefreshTokenService.RemoveByRefreshTokenStringAsync(refreshToken);
-            }
-
-            return Ok();
+            return result.ToActionResult();
         }
     }
 }

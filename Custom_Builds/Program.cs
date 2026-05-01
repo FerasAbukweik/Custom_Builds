@@ -2,8 +2,34 @@ using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.Domain.RepositoryContracts;
 using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
-using Custom_Builds.Core.ServiceContracts;
-using Custom_Builds.Core.Services;
+using Custom_Builds.Core.ServiceContracts.CartItemServices;
+using Custom_Builds.Core.ServiceContracts.CookieServices;
+using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
+using Custom_Builds.Core.ServiceContracts.IAccountServices;
+using Custom_Builds.Core.ServiceContracts.ICartItemServices;
+using Custom_Builds.Core.ServiceContracts.ICookieServices;
+using Custom_Builds.Core.ServiceContracts.ICustomBuildServices;
+using Custom_Builds.Core.ServiceContracts.IJWTServices;
+using Custom_Builds.Core.ServiceContracts.IModificationServices;
+using Custom_Builds.Core.ServiceContracts.IOrderServices;
+using Custom_Builds.Core.ServiceContracts.IPartServices;
+using Custom_Builds.Core.ServiceContracts.IProductServices;
+using Custom_Builds.Core.ServiceContracts.IRefreshTokenServices;
+using Custom_Builds.Core.ServiceContracts.ISectionServices;
+using Custom_Builds.Core.ServiceContracts.ModificationServices;
+using Custom_Builds.Core.ServiceContracts.OrderServices;
+using Custom_Builds.Core.ServiceContracts.PartServices;
+using Custom_Builds.Core.Services.AccountServices;
+using Custom_Builds.Core.Services.CartItemServices;
+using Custom_Builds.Core.Services.CookiesServices;
+using Custom_Builds.Core.Services.CustomBuildServices;
+using Custom_Builds.Core.Services.JWTServices;
+using Custom_Builds.Core.Services.ModificationServices;
+using Custom_Builds.Core.Services.OrderServices;
+using Custom_Builds.Core.Services.PartServices;
+using Custom_Builds.Core.Services.ProductServices;
+using Custom_Builds.Core.Services.RefreshTokenServices;
+using Custom_Builds.Core.Services.SectionServices;
 using Custom_Builds.Core.Utils;
 using Custom_Builds.Infrastructure.DBcontext;
 using Custom_Builds.Infrastructure.Repositories;
@@ -82,6 +108,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 }
 
                 IJWTService jwtService = context.HttpContext.RequestServices.GetRequiredService<IJWTService>();
+                IAddCookieService addCookieService = context.HttpContext.RequestServices.GetRequiredService<IAddCookieService>();
 
                 var tokens = await jwtService.GenerateNewAccessAndRefreshTokensAsync(context.Request);
 
@@ -90,13 +117,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     return;
                 }
 
-                CookiesUtils.AddToCookies(context.Response, "AccessToken",
+                addCookieService.Add("AccessToken",
                     tokens.Value!.AccessToken, double.Parse(builder.Configuration["JWT:RefreshTokenLife"]!));
-                CookiesUtils.AddToCookies(context.Response, "RefreshToken",
+                addCookieService.Add("RefreshToken",
                     tokens.Value!.RefreshToken, double.Parse(builder.Configuration["JWT:RefreshTokenLife"]!));
 
 
-                var principal = jwtService.GetPrincipalFromAccessToken(tokens.Value.AccessToken);
+                var principal = jwtService.GetPrincipal();
 
                 if (!principal.IsSuccess)
                 {
@@ -138,32 +165,52 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
 //DI
 builder.Services.AddScoped<IJWTService, JWTService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IPartRepository, PartRepository>();
 builder.Services.AddScoped<ISectionRepository, SectionRepository>();
-builder.Services.AddScoped<IFieldRepository, FieldRepository>();
-builder.Services.AddScoped<IItemsRepository, ItemsRepository>();
-builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IModificationsRepository, ModificationsRepository>();
+builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICustomBuildRepository, CustomBuildRepository>();
+builder.Services.AddScoped<IGetPartService, GetPartService>();
+builder.Services.AddScoped<IAddPartService, AddPartService>();
+builder.Services.AddScoped<IEditPartService, EditPartService>();
+builder.Services.AddScoped<IRemovePartService, RemovePartService>();
 builder.Services.AddScoped<IGetSectionService, GetSectionService>();
 builder.Services.AddScoped<IAddSectionService, AddSectionService>();
 builder.Services.AddScoped<IEditSectionService, EditSectionService>();
 builder.Services.AddScoped<IRemoveSectionService, RemoveSectionService>();
-builder.Services.AddScoped<IGetFieldService, GetFieldService>();
-builder.Services.AddScoped<IAddFieldService, AddFieldService>();
-builder.Services.AddScoped<IEditFieldService, EditFieldService>();
-builder.Services.AddScoped<IRemoveFieldService, RemoveFieldService>();
-builder.Services.AddScoped<IGetItemService, GetItemService>();
-builder.Services.AddScoped<IAddItemService, AddItemService>();
-builder.Services.AddScoped<IEditItemService, EditItemService>();
-builder.Services.AddScoped<IRemoveItemService, RemoveItemService>();
-builder.Services.AddScoped<IGetCartService, GetCartService>();
-builder.Services.AddScoped<IAddCartService, AddCartService>();
-builder.Services.AddScoped<IEditCartService, EditCartService>();
-builder.Services.AddScoped<IRemoveCartService, RemoveCartService>();
+builder.Services.AddScoped<IGetModificationService, GetModificationService>();
+builder.Services.AddScoped<IAddModificationService, AddModificationService>();
+builder.Services.AddScoped<IEditModificationService, EditModificationService>();
+builder.Services.AddScoped<IRemoveModificationService, RemoveModificationService>();
+builder.Services.AddScoped<IGetCartItemService, GetCartItemService>();
+builder.Services.AddScoped<IAddCartItemService, AddCartItemService>();
+builder.Services.AddScoped<IEditCartItemService, EditCartItemService>();
+builder.Services.AddScoped<IRemoveCartItemService, RemoveCartItemService>();
 builder.Services.AddScoped<IGetOrderService, GetOrderService>();
 builder.Services.AddScoped<IAddOrderService, AddOrderService>();
 builder.Services.AddScoped<IEditOrderService, EditOrderService>();
 builder.Services.AddScoped<IRemoveOrderService, RemoveOrderService>();
-builder.Services.AddScoped<IRevokeRefreshTokenService, RevokeRefreshTokenService>();
+builder.Services.AddScoped<IRemoveRefreshTokenService, RemoveRefreshTokenService>();
+builder.Services.AddScoped<IGetProductService, GetProductService>();
+builder.Services.AddScoped<IAddProductService, AddProductService>();
+builder.Services.AddScoped<IEditProductService, EditProductService>();
+builder.Services.AddScoped<IRemoveProductService, RemoveProductService>();
+builder.Services.AddScoped<IGetCustomBuildService, GetCustomBuildService>();
+builder.Services.AddScoped<IAddCustomBuildService, AddCustomBuildService>();
+builder.Services.AddScoped<IEditCustomBuildService, EditCustomBuildService>();
+builder.Services.AddScoped<IRemoveCustomBuildService, RemoveCustomBuildService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IDeleteCurrentUserService, IDeleteCurrentUserService>();
+builder.Services.AddScoped<ILoginAccountService, LoginAccountService>();
+builder.Services.AddScoped<IRegisterAccountService, RegisterAccountService>();
+builder.Services.AddScoped<ILogoutAccountService, LogoutAccountService>();
+builder.Services.AddScoped<IDeleteCookieService, DeleteCookieService>();
+builder.Services.AddScoped<IAddCookieService , AddCookieService>();
+builder.Services.AddScoped<IGetCookieService , GetCookieService>();
+builder.Services.AddScoped<IGenerateRefreshTokenService , GenerateRefreshTokenService>();
+builder.Services.AddScoped<IGetRefreshTokenService, GetRefreshTokenService>();
 
 
 builder.Services.AddCors(Options =>

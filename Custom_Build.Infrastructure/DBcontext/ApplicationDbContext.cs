@@ -19,40 +19,71 @@ namespace Custom_Builds.Infrastructure.DBcontext
 
             builder.Entity<RefreshToken>()
                 .HasOne(rt => rt.User)
-                .WithMany()
+                .WithMany(u => u.refreshTokens)
                 .HasForeignKey(rt => rt.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Item>()
-                .HasOne(it => it.Field)
-                .WithMany(f => f.Items)
-                .HasForeignKey(it => it.FieldId)
+            builder.Entity<Modification>()
+                .HasOne(m => m.Section)
+                .WithMany(s => s.Modifications)
+                .HasForeignKey(m => m.SectionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Field>()
-                .HasOne(f => f.Section)
-                .WithMany(s => s.Fields)
-                .HasForeignKey(f => f.SectionId)
+            builder.Entity<Section>()
+                .HasOne(s => s.Part)
+                .WithMany(p => p.Sections)
+                .HasForeignKey(s => s.PartId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Cart>()
-                .HasOne(c => c.User)
-                .WithMany()
-                .HasForeignKey(c => c.UserId)
+            builder.Entity<CartItem>()
+                .HasOne(ci => ci.User)
+                .WithMany(u => u.CartItems)
+                .HasForeignKey(ci => ci.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CartItem>()
+                .HasOne(ci => ci.Product)
+                .WithMany(p => p.CartItems)
+                .HasForeignKey(ci => ci.ProductId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+             builder.Entity<CartItem>()
+                .HasOne(ci => ci.CustomBuild)
+                .WithMany(cb => cb.CartItems)
+                .HasForeignKey(ci => ci.CustomBuildId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.Entity<Order>()
                 .HasOne(o => o.User)
-                .WithMany()
+                .WithMany(u => u.Orders)
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Order>()
+                .HasOne(o => o.Product)
+                .WithMany(p => p.Orders)
+                .HasForeignKey(o => o.ProductId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<Order>()
+                .HasOne(o => o.CustomBuild)
+                .WithOne(cb => cb.Order)
+                .HasForeignKey<Order>(o => o.CustomBuildId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CustomBuild>()
+                .HasMany(cb => cb.Modifications)
+                .WithMany(m => m.CustomBuilds);
         }
 
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
-        public virtual DbSet<Item> Items { get; set; }
-        public virtual DbSet<Field> Fields { get; set; }
+        public virtual DbSet<Modification> Modifications { get; set; }
         public virtual DbSet<Section> Sections { get; set; }
-        public virtual DbSet<Cart> Carts { get; set; }
+        public virtual DbSet<Part> Parts { get; set; }
+        public virtual DbSet<CartItem> Cart { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
+        public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<CustomBuild> CustomBuilds { get; set; }
     }
 }

@@ -19,6 +19,6 @@ namespace Custom_Builds.Core.Domain.TokenEntities
 
         [Required(ErrorMessage = "{0} Is Requiered")]
         public required Guid UserId { get; set; }
-        public ApplicationUser? User { get; set; }
+        public virtual ApplicationUser? User { get; set; }
     }
 }

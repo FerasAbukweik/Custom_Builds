@@ -10,9 +10,8 @@ namespace Custom_Builds.Core.Domain.RepositryContracts
 {
     public interface IRefreshTokenRepository
     {
-        Task<Result> AddAsync(AddRefreshTokenDTO tokenInfo);
+        Task<Result<Guid>> AddAsync(AddRefreshTokenDTO tokenInfo);
         Task<Result<RefreshToken>> GetFromRefreshTokenStringAsync(string refreshToken);
-        Task<Result<ApplicationUser>> GetUserFromRefreshTokenStringAsync(string refreshTokenString);
         Task<Result<RefreshToken>> GetFromIdAsync(Guid refreshTokenId);
         Task<Result> RemoveByIdAsync(Guid tokenId);
         Task<Result> RemoveByRefreshTokenStringAsync(string refreshToken);

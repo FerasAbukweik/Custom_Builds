@@ -7,7 +7,7 @@ namespace Custom_Builds.Core.Domain.RepositryContracts
     public interface IOrderRepository
     {
         Task<Result<Order>> GetByIdAsync(Guid orderId);
-        Task<Result> AddAsync(AddOrderDTO toAdd);
+        Task<Result<Guid>> AddAsync(AddOrderTO_DB toAdd);
         Task<Result> EditByIdAsync(EditOrderDTO newData);
         Task<Result> RemoveByIdAsync(Guid orderId);
     }

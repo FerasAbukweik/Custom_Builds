@@ -1,0 +1,36 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Custom_Builds.Core.Domain.Entities
+{
+    public class Modification
+    {
+        [Key]
+        public Guid Id { get; set; }
+
+        [Required(ErrorMessage = "{0} Is Reqiered")]
+        public required string Name { get; set; }
+
+        [Column(TypeName = "varchar")]
+        public string? Value { get; set; }
+        public string? Description { get; set; }
+
+        [Column(TypeName = "varchar")]
+        public required string Type { get; set; }
+
+        [Column(TypeName = "varchar")]
+        public string? Icon { get; set; }
+
+        [Required(ErrorMessage = "{0} Is Reqiered")]
+        public required decimal Price { get; set; }
+
+
+
+        [Required(ErrorMessage = "{0} Is Requiered")]
+        public required Guid SectionId { get; set; }
+        public Section? Section { get; set; }
+        public List<CustomBuild> CustomBuilds { get; set; } = new List<CustomBuild>();
+    }
+}

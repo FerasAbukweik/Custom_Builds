@@ -1,7 +1,9 @@
 using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.extensionMethods;
-using Custom_Builds.Core.ServiceContracts;
+using Custom_Builds.Core.Models;
+using Custom_Builds.Core.ServiceContracts.IOrderServices;
+using Custom_Builds.Core.ServiceContracts.OrderServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace custom_Peripherals.Controllers
@@ -35,25 +37,30 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(ModelState.CollectErrors());
             }
 
-            var result = await _addOrderService.AddAsync(toAdd);
-            if (!result.IsSuccess)
+            Result result = await _addOrderService.AddAsync(toAdd);
+
+            return result.ToActionResult();
+        }
+
+        [HttpPost("[action]")]
+        public async Task<ActionResult<Guid>> AddCustomBuild(AddCustomBuildDTO toAdd)
+        {
+            if (!ModelState.IsValid)
             {
-                return result.ToActionResult();
+                return BadRequest(ModelState.CollectErrors());
             }
 
-            return Ok();
+            Result result = await _addOrderService.AddCustomBuildAsync(toAdd);
+
+            return result.ToActionResult();
         }
 
         [HttpDelete("[action]")]
         public async Task<IActionResult> Remove(Guid orderId)
         {
-            var result = await _removeOrderService.RemoveByIdAsync(orderId);
-            if (!result.IsSuccess)
-            {
-                return result.ToActionResult();
-            }
+            Result result = await _removeOrderService.RemoveByIdAsync(orderId);
 
-            return Ok();
+            return result.ToActionResult();
         }
 
         [HttpPut("[action]")]
@@ -64,25 +71,17 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(ModelState.CollectErrors());
             }
 
-            var result = await _editOrderService.EditByIdAsync(newData);
-            if (!result.IsSuccess)
-            {
-                return result.ToActionResult();
-            }
+            Result result = await _editOrderService.EditByIdAsync(newData);
 
-            return Ok();
+            return result.ToActionResult();
         }
 
         [HttpGet("[action]")]
         public async Task<ActionResult<Order>> Get(Guid orderId)
         {
             var result = await _getOrderService.GetByIdAsync(orderId);
-            if (!result.IsSuccess)
-            {
-                return result.ToActionResult();
-            }
 
-            return Ok(result.Value);
+            return result.ToActionResult();
         }
     }
 }

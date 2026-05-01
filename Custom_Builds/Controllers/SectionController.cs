@@ -1,7 +1,8 @@
 ﻿using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.extensionMethods;
-using Custom_Builds.Core.ServiceContracts;
+using Custom_Builds.Core.Models;
+using Custom_Builds.Core.ServiceContracts.ISectionServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,7 @@ namespace custom_Peripherals.Controllers
     [ApiController]
     public class SectionController : ControllerBase
     {
+
         private readonly IGetSectionService _getSectionService;
         private readonly IAddSectionService _addSectionService;
         private readonly IEditSectionService _editSectionService;
@@ -33,12 +35,7 @@ namespace custom_Peripherals.Controllers
         {
             var result = await _getSectionService.GetByIdAsync(sectionId);
 
-            if (!result.IsSuccess)
-            {
-                return result.ToActionResult();
-            }
-
-            return Ok(result.Value);
+            return result.ToActionResult();
         }
 
         [HttpPost("[action]")]
@@ -49,14 +46,9 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(ModelState.CollectErrors());
             }
 
-            var result = await _addSectionService.AddAsync(toAdd);
+            Result result = await _addSectionService.AddAsync(toAdd);
 
-            if (!result.IsSuccess)
-            {
-                return result.ToActionResult();
-            }
-
-            return Ok();
+            return result.ToActionResult();
         }
 
         [HttpPut("[action]")]
@@ -69,12 +61,7 @@ namespace custom_Peripherals.Controllers
 
             var result = await _editSectionService.EditByIdAsync(newData);
 
-            if (!result.IsSuccess)
-            {
-                return result.ToActionResult();
-            }
-
-            return Ok();
+            return result.ToActionResult();
         }
 
         [HttpDelete("[action]")]
@@ -82,12 +69,8 @@ namespace custom_Peripherals.Controllers
         {
             var result = await _removeSectionService.RemoveByIdAsync(sectionId);
 
-            if (!result.IsSuccess)
-            {
-                return result.ToActionResult();
-            }
-
-            return Ok();
+            return result.ToActionResult();
         }
     }
 }
+
