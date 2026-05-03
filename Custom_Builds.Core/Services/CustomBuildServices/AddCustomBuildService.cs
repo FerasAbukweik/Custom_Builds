@@ -1,10 +1,10 @@
-using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.Domain.Entities;
+using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
-using System.Net;
 using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
+using System.Net;
 
 namespace Custom_Builds.Core.Services.CustomBuildServices
 {
@@ -21,34 +21,27 @@ namespace Custom_Builds.Core.Services.CustomBuildServices
             _customBuildRepository = customBuildRepository;
         }
         
-        public async Task<Result<Guid>> AddByModificationsIdsAsync(List<Guid> modificationIds, CustomBuildTypeEnum customBuildType)
+        public async Task<Result<CustomBuildDTO>> AddByModificationsIdsAsync(AddCustomBuildDTO toAdd)
         {
-            List<Modification> modifications = new List<Modification>();
-            foreach (var modificationId in modificationIds)
-            {
-                var modificationResult = await _modificationsRepository.GetFromIdAsync(modificationId);
-                if (!modificationResult.IsSuccess || modificationResult.Value == null)
-                {
-                    return Result<Guid>.Failure(modificationResult.ErrorMessage ?? "modification wasnt found", modificationResult.StatusCode);
-                }
+            // get modifications by ids so we can add it to the custom build
+            var modificationResult = await _modificationsRepository.GetListFromIdsAsync(toAdd.ModificationIds);
+            if (!modificationResult.IsSuccess) return modificationResult.MapFailure<CustomBuildDTO>();
 
-                modifications.Add(modificationResult.Value);
-            }
-
+            // new customBuild
             CustomBuild customBuild = new CustomBuild
             {
                 Id = Guid.NewGuid(),
-                CustomBuildType = customBuildType,
-                Modifications = modifications
+                CustomBuildType = toAdd.CustomBuildType,
+                Modifications = modificationResult.Value!,
+                CreatorId = toAdd.CreatorId
+
             };
 
+            // adding the custom build
             var addCustomBuildResult = await _customBuildRepository.AddEntityAsync(customBuild);
-            if (!addCustomBuildResult.IsSuccess || addCustomBuildResult.Value == Guid.Empty)
-            {
-                return Result<Guid>.Failure(addCustomBuildResult.ErrorMessage ?? "failed to add custom build", addCustomBuildResult.StatusCode);
-            }
+            if (!addCustomBuildResult.IsSuccess) return addCustomBuildResult.MapFailure<CustomBuildDTO>();
 
-            return Result<Guid>.Success(addCustomBuildResult.Value, HttpStatusCode.Created);
+            return Result<CustomBuildDTO>.Success(addCustomBuildResult.Value!.toDTO(), HttpStatusCode.Created);
         }
     }
 }

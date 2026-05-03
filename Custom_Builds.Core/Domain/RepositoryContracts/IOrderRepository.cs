@@ -7,8 +7,10 @@ namespace Custom_Builds.Core.Domain.RepositryContracts
     public interface IOrderRepository
     {
         Task<Result<Order>> GetByIdAsync(Guid orderId);
-        Task<Result<Guid>> AddAsync(AddOrderTO_DB toAdd);
+        Task<Result<Order>> AddAsync(AddOrderTODB toAdd);
         Task<Result> EditByIdAsync(EditOrderDTO newData);
         Task<Result> RemoveByIdAsync(Guid orderId);
+        Task<Result<List<MiniOrderInfoDTO>>> GetOrdersByUserIdAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData);
+        Task<Result<List<MiniOrderInfoDTO>>> GetCompletedUserOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData);
     }
 }

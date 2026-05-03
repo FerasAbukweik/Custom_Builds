@@ -16,7 +16,10 @@ namespace Custom_Builds.Core.Services.SectionServices
 
         public async Task<Result> EditByIdAsync(EditSectionDTO newData)
         {
-            return await _sectionRepository.EditByIdAsync(newData);
+            var result = await _sectionRepository.EditByIdAsync(newData);
+            if (!result.IsSuccess) return result.MapFailure();
+
+            return Result.Success();
         }
     }
 }

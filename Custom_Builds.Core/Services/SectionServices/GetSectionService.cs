@@ -16,7 +16,10 @@ namespace Custom_Builds.Core.Services.SectionServices
 
         public async Task<Result<Section>> GetByIdAsync(Guid sectionId)
         {
-            return await _sectionRepository.GetByIdAsync(sectionId);
+            var result = await _sectionRepository.GetByIdAsync(sectionId);
+            if (!result.IsSuccess) return result.MapFailure<Section>();
+
+            return Result<Section>.Success(result.Value!);
         }
     }
 }

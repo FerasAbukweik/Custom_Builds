@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace Custom_Builds.Core.DTO
 {
     public class AccessAndRefreshTokenDTO

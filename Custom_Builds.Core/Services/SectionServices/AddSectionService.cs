@@ -16,7 +16,10 @@ namespace Custom_Builds.Core.Services.SectionServices
 
         public async Task<Result<Guid>> AddAsync(AddSectionDTO toAdd)
         {
-            return await _sectionRepository.AddAsync(toAdd);
+            var result = await _sectionRepository.AddAsync(toAdd);
+            if (!result.IsSuccess) return result.MapFailure<Guid>();
+
+            return Result<Guid>.Success(result.Value!.Id);
         }
     }
 }

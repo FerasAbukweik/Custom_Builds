@@ -4,10 +4,7 @@ using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
 
 namespace Custom_Builds.Infrastructure.Repositories
 {
@@ -21,7 +18,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
 
 
-        public async Task<Result<Guid>> AddAsync(AddSectionDTO toAdd)
+        public async Task<Result<Section>> AddAsync(AddSectionDTO toAdd)
         {
             Section newSection = new Section()
             {
@@ -33,7 +30,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbContext.Sections.Add(newSection);
             await _dbContext.SaveChangesAsync();
 
-            return Result<Guid>.Success(newSection.Id);
+            return Result<Section>.Success(newSection);
         }
         public async Task<Result> EditByIdAsync(EditSectionDTO newData)
         {

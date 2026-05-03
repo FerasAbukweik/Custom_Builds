@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Net;
+﻿using System.Net;
 using Custom_Builds.Core.Models;
+using Microsoft.AspNetCore.Mvc;
 
 public static class ResultExtensions
 {

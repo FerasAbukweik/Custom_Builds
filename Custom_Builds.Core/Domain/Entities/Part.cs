@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Custom_Builds.Core.DTO;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Net.Http.Headers;
 
 namespace Custom_Builds.Core.Domain.Entities
 {
@@ -20,5 +19,16 @@ namespace Custom_Builds.Core.Domain.Entities
 
 
         public List<Section> Sections= new List<Section>();
+
+
+        public PartDTO toDTO()
+        {
+            return new PartDTO()
+            {
+                 Id = this.Id,
+                 Icon = this.Icon,
+                 Name = this.Name
+            };
+        }
     }
 }

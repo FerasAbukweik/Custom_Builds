@@ -15,7 +15,10 @@ namespace Custom_Builds.Core.Services.RefreshTokenServices
 
         public async Task<Result> RemoveByRefreshTokenStringAsync(string refreshToken)
         {
-            return await _refreshTokenRepository.RemoveByRefreshTokenStringAsync(refreshToken);
+            var result = await _refreshTokenRepository.RemoveByRefreshTokenStringAsync(refreshToken);
+            if (!result.IsSuccess) return result.MapFailure();
+
+            return Result.Success();
         }
     }
 }

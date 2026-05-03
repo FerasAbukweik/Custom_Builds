@@ -14,9 +14,12 @@ namespace Custom_Builds.Core.Services.ModificationServices
             _modificationsRepository = modificationsRepository;
         }
 
-        public async Task<Result<Guid>> AddAsync(AddModificationDTO toAdd)
+        public async Task<Result<ModificationDTO>> AddAsync(AddModificationDTO toAdd)
         {
-            return await _modificationsRepository.AddAsync(toAdd);
+            var result = await _modificationsRepository.AddAsync(toAdd);
+            if(!result.IsSuccess) return result.MapFailure<ModificationDTO>();
+
+            return Result<ModificationDTO>.Success(result.Value!.toDTO());
         }
     }
 }

@@ -6,10 +6,7 @@ using Custom_Builds.Core.Models;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
 
 namespace Custom_Builds.Infrastructure.Repositories
 {
@@ -26,12 +23,12 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
 
 
-        public async Task<Result<Guid>> AddAsync(AddRefreshTokenDTO tokenInfo)
+        public async Task<Result<RefreshToken>> AddAsync(AddRefreshTokenDTO tokenInfo)
         {
             var getRefreshTokenResult = await GetFromRefreshTokenStringAsync(tokenInfo.RefreshTokenString);
             if (getRefreshTokenResult.IsSuccess)
             {
-                return Result<Guid>.Failure("refresh token already exists");
+                return Result<RefreshToken>.Failure("refresh token already exists");
             }
 
             RefreshToken toAdd = new RefreshToken()
@@ -45,7 +42,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbcontext.RefreshTokens.Add(toAdd);
             await _dbcontext.SaveChangesAsync();
 
-            return Result<Guid>.Success(toAdd.Id);
+            return Result<RefreshToken>.Success(toAdd);
         }
         public async Task<Result<RefreshToken>> GetFromRefreshTokenStringAsync(string refreshToken)
         {

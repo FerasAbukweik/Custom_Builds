@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-
-namespace Custom_Builds.Core.DTO
+﻿namespace Custom_Builds.Core.DTO
 {
     public class AddRefreshTokenDTO
     {

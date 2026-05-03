@@ -6,9 +6,9 @@ namespace Custom_Builds.Core.DTO
     public class AddCustomBuildDTO
     {
         [Required(ErrorMessage = "{0} is required.")]
-        public required Guid UserId { get; set; }
+        public required Guid CreatorId { get; set; }
 
-        public List<Guid> ModificationIds { get; set; } = new List<Guid>();
+        public required List<Guid> ModificationIds { get; set; }
 
         [Required(ErrorMessage = "{0} is requiered")]
         public CustomBuildTypeEnum CustomBuildType { get; set; }

@@ -1,11 +1,6 @@
 ﻿using Custom_Builds.Core.Constants;
 using Custom_Builds.Core.Enums;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Custom_Builds.Core.DTO
 {

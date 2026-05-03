@@ -1,6 +1,5 @@
 ﻿using Custom_Builds.Core.Domain.TokenEntities;
 using Custom_Builds.Core.Models;
-using System;
 
 namespace Custom_Builds.Core.ServiceContracts.IRefreshTokenServices
 {

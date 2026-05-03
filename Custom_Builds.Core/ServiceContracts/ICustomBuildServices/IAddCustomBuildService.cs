@@ -6,6 +6,6 @@ namespace Custom_Builds.Core.ServiceContracts.CustomBuildServices
 {
     public interface IAddCustomBuildService
     {
-        Task<Result<Guid>> AddByModificationsIdsAsync(List<Guid> modificationIds, CustomBuildTypeEnum customBuildType);
+        Task<Result<CustomBuildDTO>> AddByModificationsIdsAsync(AddCustomBuildDTO toAdd);
     }
 }

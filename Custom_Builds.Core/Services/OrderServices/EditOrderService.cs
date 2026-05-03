@@ -16,7 +16,9 @@ namespace Custom_Builds.Core.Services.OrderServices
 
         public async Task<Result> EditByIdAsync(EditOrderDTO newData)
         {
-            return await _orderRepository.EditByIdAsync(newData);
+            var result = await _orderRepository.EditByIdAsync(newData);
+
+            return result;
         }
     }
 }

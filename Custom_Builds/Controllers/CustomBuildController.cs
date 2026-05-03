@@ -25,7 +25,7 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(ModelState.CollectErrors());
             }
 
-            Result result = await _addCustomBuildService.AddByModificationsIdsAsync(toAdd.ModificationIds, toAdd.CustomBuildType);
+            Result result = await _addCustomBuildService.AddByModificationsIdsAsync(toAdd);
             
             return result.ToActionResult();
         }

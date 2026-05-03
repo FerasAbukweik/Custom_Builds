@@ -2,46 +2,39 @@
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.IAccountServices;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
-using Custom_Builds.Core.ServiceContracts.IJWTServices;
-using Custom_Builds.Core.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using System.Security.Claims;
-using System.Text;
 
 namespace Custom_Builds.Core.Services.AccountServices
 {
-    public class DeleteCurrentUserService : IDeleteCurrentUserService
+    public class DeleteUserService : IDeleteUserService
     {
-        private readonly IJWTService _jwtService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signinManager;
         private readonly IDeleteCookieService _deleteCookieService;
-        public DeleteCurrentUserService(IJWTService jwtService,
-                                        UserManager<ApplicationUser> userManager,
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public DeleteUserService(UserManager<ApplicationUser> userManager,
                                         SignInManager<ApplicationUser> signinManager,
-                                        IDeleteCookieService deleteCookieService)
+                                        IDeleteCookieService deleteCookieService,
+                                        IHttpContextAccessor httpContextAccessor)
         {
-            _jwtService = jwtService;
             _userManager = userManager;
             _signinManager = signinManager;
             _deleteCookieService = deleteCookieService;
+            _httpContextAccessor = httpContextAccessor;
         }
-        public async Task<Result> DeleteUserAsync(HttpResponse response , ClaimsPrincipal principal)
+        public async Task<Result> DeleteUserAsync(Guid userId)
         {
-            string? userId = principal.FindFirstValue(JwtRegisteredClaimNames.Sub);
-
-            if (userId == null)
+            // resposne so we can remove cookies from the browser
+            HttpResponse? response = _httpContextAccessor.HttpContext?.Response;
+            if(response == null)
             {
-                return Result.Failure("User wasnt found" , HttpStatusCode.NotFound);
+                return Result.Failure("Http Response is null", HttpStatusCode.InternalServerError);
             }
 
-            ApplicationUser? user = await _userManager.FindByIdAsync(userId);
-
+            // get user object so we can delete it using _userManager.DeleteAsync(user)
+            ApplicationUser? user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
             {
                 return Result.Failure("User wasnt found" , HttpStatusCode.NotFound);
@@ -54,22 +47,19 @@ namespace Custom_Builds.Core.Services.AccountServices
             if (!result.Succeeded)
             {
                 string errors = string.Join(" | ", result.Errors);
-                return Result.Failure(errors, HttpStatusCode.BadRequest);
+                return Result.Failure(errors);
             }
 
             //remove Token Cookies from browser
             await _signinManager.SignOutAsync();
-            Result delAccessResult = _deleteCookieService.Delete("AccessToken");
-            if (!delAccessResult.IsSuccess)
-            {
-                return Result.Failure(delAccessResult.ErrorMessage ?? "Failed To Delete Access Token From Cookies", delAccessResult.StatusCode);
-            }
 
+            // delete access token from cookies
+            Result delAccessResult = _deleteCookieService.Delete("AccessToken");
+            if (!delAccessResult.IsSuccess) return delAccessResult;
+
+            // delete refresh token from cookies
             Result delrefResult = _deleteCookieService.Delete("RefreshToken");
-            if (!delrefResult.IsSuccess)
-            {
-                return Result.Failure(delrefResult.ErrorMessage ?? "Failed To Delete Access Token From Cookies", delrefResult.StatusCode);
-            }
+            if (!delrefResult.IsSuccess) return delrefResult;
 
             return Result.Success();
         }

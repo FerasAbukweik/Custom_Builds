@@ -22,31 +22,68 @@ namespace Custom_Builds.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Field", b =>
+            modelBuilder.Entity("CustomBuildModification", b =>
+                {
+                    b.Property<Guid>("CustomBuildsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ModificationsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("CustomBuildsId", "ModificationsId");
+
+                    b.HasIndex("ModificationsId");
+
+                    b.ToTable("CustomBuildModification");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.CartItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SectionId")
+                    b.Property<Guid?>("CustomBuildId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("varchar");
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("orderType")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SectionId");
+                    b.HasIndex("CustomBuildId");
 
-                    b.ToTable("Fields");
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Cart");
                 });
 
-            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Item", b =>
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.CustomBuild", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CustomBuildType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CustomBuilds");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Modification", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,9 +91,6 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("FieldId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Icon")
                         .HasColumnType("varchar");
@@ -68,17 +102,59 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("SectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("varchar");
+
                     b.Property<string>("Value")
                         .HasColumnType("varchar");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FieldId");
+                    b.HasIndex("SectionId");
 
-                    b.ToTable("Items");
+                    b.ToTable("Modifications");
                 });
 
-            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Section", b =>
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Order", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CustomBuildId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OrderStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomBuildId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Part", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -93,6 +169,44 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.ToTable("Parts");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Product", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Section", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PartId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PartId");
 
                     b.ToTable("Sections");
                 });
@@ -317,10 +431,50 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Field", b =>
+            modelBuilder.Entity("CustomBuildModification", b =>
+                {
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.CustomBuild", null)
+                        .WithMany()
+                        .HasForeignKey("CustomBuildsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.Modification", null)
+                        .WithMany()
+                        .HasForeignKey("ModificationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.CartItem", b =>
+                {
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.CustomBuild", "CustomBuild")
+                        .WithMany("CartItems")
+                        .HasForeignKey("CustomBuildId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.Product", "Product")
+                        .WithMany("CartItems")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "User")
+                        .WithMany("CartItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CustomBuild");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Modification", b =>
                 {
                     b.HasOne("Custom_Builds.Core.Domain.Entities.Section", "Section")
-                        .WithMany("Fields")
+                        .WithMany("Modifications")
                         .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -328,21 +482,46 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Navigation("Section");
                 });
 
-            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Item", b =>
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Order", b =>
                 {
-                    b.HasOne("Custom_Builds.Core.Domain.Entities.Field", "Field")
-                        .WithMany("Items")
-                        .HasForeignKey("FieldId")
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.CustomBuild", "CustomBuild")
+                        .WithMany("orders")
+                        .HasForeignKey("CustomBuildId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.Product", "Product")
+                        .WithMany("Orders")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Field");
+                    b.Navigation("CustomBuild");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Section", b =>
+                {
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.Part", "Part")
+                        .WithMany("Sections")
+                        .HasForeignKey("PartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Part");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.TokenEntities.RefreshToken", b =>
                 {
                     b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("refreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -401,14 +580,37 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Field", b =>
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.CustomBuild", b =>
                 {
-                    b.Navigation("Items");
+                    b.Navigation("CartItems");
+
+                    b.Navigation("orders");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Part", b =>
+                {
+                    b.Navigation("Sections");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Product", b =>
+                {
+                    b.Navigation("CartItems");
+
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Section", b =>
                 {
-                    b.Navigation("Fields");
+                    b.Navigation("Modifications");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Identity.ApplicationUser", b =>
+                {
+                    b.Navigation("CartItems");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("refreshTokens");
                 });
 #pragma warning restore 612, 618
         }

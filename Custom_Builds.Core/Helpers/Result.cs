@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 
 namespace Custom_Builds.Core.Models
 {
@@ -16,6 +15,10 @@ namespace Custom_Builds.Core.Models
         {
             return new Result { IsSuccess = false, ErrorMessage = message, StatusCode = statusCode };
         }
+        public Result MapFailure()
+        {
+            return Result.Failure(ErrorMessage ?? "no error message", StatusCode);
+        }
     }
     public class Result<T> : Result
     {
@@ -28,8 +31,10 @@ namespace Custom_Builds.Core.Models
         {
             return new Result<T> { IsSuccess = false, ErrorMessage = message, StatusCode = statusCode };
         }
+
+        public Result<NewT> MapFailure<NewT>()
+        {
+            return Result<NewT>.Failure(ErrorMessage ?? "no error message", StatusCode);
+        }
     }
 }
-
-
-

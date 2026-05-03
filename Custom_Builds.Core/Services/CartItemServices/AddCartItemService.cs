@@ -1,4 +1,3 @@
-using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Enums;
@@ -7,7 +6,6 @@ using Custom_Builds.Core.ServiceContracts.CartItemServices;
 using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
 using Custom_Builds.Core.ServiceContracts.IModificationServices;
 using Custom_Builds.Core.ServiceContracts.IProductServices;
-using System.Net;
 
 namespace Custom_Builds.Core.Services.CartItemServices
 {
@@ -29,73 +27,53 @@ namespace Custom_Builds.Core.Services.CartItemServices
             _addCustomBuildService = customBuildService;
         }
 
-        public async Task<Result<Guid>> AddAsync(AddCartItemDTO toAdd)
+        public async Task<Result<CartItemDTO>> AddAsync(AddCartItemDTO toAdd)
         {
-            var getProductResult = await _getProductService.GetByIdAsync(toAdd.ProductId);
+            // get currProduct so we can access its price
+            var getProductResult = await _getProductService.GetByIdAsync(toAdd.ProductId!.Value);
+            if (!getProductResult.IsSuccess) return getProductResult.MapFailure<CartItemDTO>();
 
-            if (!getProductResult.IsSuccess)
-            {
-                return Result<Guid>.Failure(getProductResult.ErrorMessage ?? "Product not found", getProductResult.StatusCode);
-            }
-
-            decimal price = getProductResult.Value?.Price ?? -1m;
-
-            if(price == -1m)
-            {
-                return Result<Guid>.Failure("Product price not found", HttpStatusCode.InternalServerError);
-            }
-
+            // new item to add
             AddCartItemToDB_DTO newCartItem = new AddCartItemToDB_DTO()
             {
                 orderType = OrderTypeEnum.Product,
-                UserId = toAdd.UserId,
-                TotalPrice = price,
+                UserId = toAdd.UserId!.Value,
+                TotalPrice = getProductResult.Value!.Price,
                 ProductId = toAdd.ProductId,
                 CustomBuildId = null
             };
 
+            // adding item to the cart
             var addToCartResult = await _cartItemRepository.AddAsync(newCartItem);
+            if (!addToCartResult.IsSuccess) return addToCartResult.MapFailure<CartItemDTO>();
 
-            if (!addToCartResult.IsSuccess)
-            {
-                return Result<Guid>.Failure(addToCartResult.ErrorMessage ?? "Failed to add item to cart", addToCartResult.StatusCode);
-            }
-
-            return Result<Guid>.Success(addToCartResult.Value);
+            return Result<CartItemDTO>.Success(addToCartResult.Value!.toDTO());
         }
-        public async Task<Result<Guid>> AddCustomBuildAsync(AddCustomBuildDTO toAdd)
+        public async Task<Result<CartItemDTO>> AddCustomBuildAsync(AddCustomBuildDTO toAdd)
         {
-            var addCustomBuildResult = await _addCustomBuildService.AddByModificationsIdsAsync(toAdd.ModificationIds , toAdd.CustomBuildType);
+            // make new custom build based on List<Modification> in the customBuild table so we can link it with cart item
+            var addCustomBuildResult = await _addCustomBuildService.AddByModificationsIdsAsync(toAdd);
+            if (!addCustomBuildResult.IsSuccess) return addCustomBuildResult.MapFailure<CartItemDTO>();
 
-            if (!addCustomBuildResult.IsSuccess)
-            {
-                return Result<Guid>.Failure(addCustomBuildResult.ErrorMessage ?? "Cannt add custom build to DB", addCustomBuildResult.StatusCode);
-            }
-
+            // get sum of modifications prices
             var getPriceResult = await _getModificationsService.GetModificationsPriceAsync(toAdd.ModificationIds);
+            if (!getPriceResult.IsSuccess) return getPriceResult.MapFailure<CartItemDTO>();
 
-            if (!getPriceResult.IsSuccess)
-            {
-                return Result<Guid>.Failure(getPriceResult.ErrorMessage ?? "Failed to calculate price for custom build", getPriceResult.StatusCode);
-            }
-
+            // new cart item to add
             AddCartItemToDB_DTO newCartItem = new AddCartItemToDB_DTO()
             {
                 orderType = OrderTypeEnum.Custom,
-                UserId = toAdd.UserId,
+                UserId = toAdd.CreatorId,
                 TotalPrice = getPriceResult.Value,
                 ProductId = null,
-                CustomBuildId = addCustomBuildResult.Value
+                CustomBuildId = addCustomBuildResult.Value!.Id
             };
 
+            // adding item to the cart
             var addToCartResult = await _cartItemRepository.AddAsync(newCartItem);
+            if (!addToCartResult.IsSuccess) return addToCartResult.MapFailure<CartItemDTO>();
 
-            if (!addToCartResult.IsSuccess)
-            {
-                return Result<Guid>.Failure(addToCartResult.ErrorMessage ?? "Failed to add item to cart", addToCartResult.StatusCode);
-            }
-
-            return Result<Guid>.Success(addToCartResult.Value);
+            return Result<CartItemDTO>.Success(addToCartResult.Value!.toDTO());
         }
     }
 }

@@ -5,6 +5,6 @@ namespace Custom_Builds.Core.ServiceContracts.ModificationServices
 {
     public interface IAddModificationService
     {
-        Task<Result<Guid>> AddAsync(AddModificationDTO toAdd);
+        Task<Result<ModificationDTO>> AddAsync(AddModificationDTO toAdd);
     }
 }

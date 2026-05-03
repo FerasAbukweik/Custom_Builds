@@ -14,7 +14,10 @@ namespace Custom_Builds.Core.Services.CustomBuildServices
         }
         public async Task<Result<CustomBuild>> GetByIdAsync(Guid customBuildId)
         {
-            return await _customBuildRepository.GetByIdAsync(customBuildId);
+            var result =  await _customBuildRepository.GetByIdAsync(customBuildId);
+            if (!result.IsSuccess) return result.MapFailure<CustomBuild>();
+
+            return Result<CustomBuild>.Success(result.Value!);
         }
 
 

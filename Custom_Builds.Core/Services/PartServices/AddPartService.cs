@@ -14,17 +14,12 @@ namespace Custom_Builds.Core.Services.PartServices
             _partRepository = partRepository;
         }
 
-        public async Task<Result<Guid>> AddAsync(AddPartDTO toAdd)
+        public async Task<Result<PartDTO>> AddAsync(AddPartDTO toAdd)
         {
             var result = await _partRepository.AddAsync(toAdd);
+            if (!result.IsSuccess) return result.MapFailure<PartDTO>();
 
-            if (!result.IsSuccess)
-            {
-                return Result<Guid>.Failure(result.ErrorMessage ?? "An error occurred while adding the part.", result.StatusCode);
-            }
-
-            return Result<Guid>.Success(result.Value);
-
+            return Result<PartDTO>.Success(result.Value!.toDTO());
         }
     }
 }

@@ -8,6 +8,7 @@ using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
 using Custom_Builds.Core.ServiceContracts.IAccountServices;
 using Custom_Builds.Core.ServiceContracts.ICartItemServices;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
+using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Custom_Builds.Core.ServiceContracts.ICustomBuildServices;
 using Custom_Builds.Core.ServiceContracts.IJWTServices;
 using Custom_Builds.Core.ServiceContracts.IModificationServices;
@@ -22,6 +23,7 @@ using Custom_Builds.Core.ServiceContracts.PartServices;
 using Custom_Builds.Core.Services.AccountServices;
 using Custom_Builds.Core.Services.CartItemServices;
 using Custom_Builds.Core.Services.CookiesServices;
+using Custom_Builds.Core.Services.CurrUserServices;
 using Custom_Builds.Core.Services.CustomBuildServices;
 using Custom_Builds.Core.Services.JWTServices;
 using Custom_Builds.Core.Services.ModificationServices;
@@ -30,9 +32,10 @@ using Custom_Builds.Core.Services.PartServices;
 using Custom_Builds.Core.Services.ProductServices;
 using Custom_Builds.Core.Services.RefreshTokenServices;
 using Custom_Builds.Core.Services.SectionServices;
-using Custom_Builds.Core.Utils;
 using Custom_Builds.Infrastructure.DBcontext;
 using Custom_Builds.Infrastructure.Repositories;
+using custom_Peripherals.Hub;
+using custom_Peripherals.IHub;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -102,35 +105,30 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             // try remake new access and refresh Tokens
             OnAuthenticationFailed = async context =>
             {
-                if (!context.Request.Cookies.TryGetValue("AccessToken", out string? token))
-                {
-                    return;
-                }
+                if (context.Exception is not SecurityTokenExpiredException) return;
 
                 IJWTService jwtService = context.HttpContext.RequestServices.GetRequiredService<IJWTService>();
                 IAddCookieService addCookieService = context.HttpContext.RequestServices.GetRequiredService<IAddCookieService>();
 
-                var tokens = await jwtService.GenerateNewAccessAndRefreshTokensAsync(context.Request);
+                // get new access and refresh tokens after make sure old tokens are valid
+                var tokens = await jwtService.GenerateNewAccessAndRefreshTokensAsync();
 
-                if (!tokens.IsSuccess)
-                {
-                    return;
-                }
+                // if failed to generate new tokens stop
+                if (!tokens.IsSuccess) return;
 
+                // add new tokens to cookies
                 addCookieService.Add("AccessToken",
                     tokens.Value!.AccessToken, double.Parse(builder.Configuration["JWT:RefreshTokenLife"]!));
                 addCookieService.Add("RefreshToken",
                     tokens.Value!.RefreshToken, double.Parse(builder.Configuration["JWT:RefreshTokenLife"]!));
 
+                // get new principal so we can update the context with new principal and retry the request with new tokens
+                var principal = jwtService.GetPrincipal(tokens.Value!.AccessToken);
 
-                var principal = jwtService.GetPrincipal(validateExpireDate: false);
+                // if failed to get principal stop
+                if (!principal.IsSuccess) return;
 
-                if (!principal.IsSuccess)
-                {
-                    return;
-                }
-
-                // update the principal with new principal
+                // update context
                 context.Principal = principal.Value; 
                 context.Success();
             }
@@ -162,62 +160,99 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
 .AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, Guid>>();
 
 
-//DI
+// DI --------------------------------------------------------------------------
+
+// JWTServices 
 builder.Services.AddScoped<IJWTService, JWTService>();
+
+// RefreshTokensServices + Reposotory
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IRemoveRefreshTokenService, RemoveRefreshTokenService>();
+builder.Services.AddScoped<IGenerateRefreshTokenService, GenerateRefreshTokenService>();
+builder.Services.AddScoped<IGetRefreshTokenService, GetRefreshTokenService>();
+
+// Part Services + Reposotory
 builder.Services.AddScoped<IPartRepository, PartRepository>();
-builder.Services.AddScoped<ISectionRepository, SectionRepository>();
-builder.Services.AddScoped<IModificationsRepository, ModificationsRepository>();
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<ICustomBuildRepository, CustomBuildRepository>();
 builder.Services.AddScoped<IGetPartService, GetPartService>();
 builder.Services.AddScoped<IAddPartService, AddPartService>();
 builder.Services.AddScoped<IEditPartService, EditPartService>();
 builder.Services.AddScoped<IRemovePartService, RemovePartService>();
+
+// Section Services + Reposotory
+builder.Services.AddScoped<ISectionRepository, SectionRepository>();
 builder.Services.AddScoped<IGetSectionService, GetSectionService>();
 builder.Services.AddScoped<IAddSectionService, AddSectionService>();
 builder.Services.AddScoped<IEditSectionService, EditSectionService>();
 builder.Services.AddScoped<IRemoveSectionService, RemoveSectionService>();
+
+// Modification Services + Reposotory
+builder.Services.AddScoped<IModificationsRepository, ModificationsRepository>();
 builder.Services.AddScoped<IGetModificationService, GetModificationService>();
 builder.Services.AddScoped<IAddModificationService, AddModificationService>();
 builder.Services.AddScoped<IEditModificationService, EditModificationService>();
 builder.Services.AddScoped<IRemoveModificationService, RemoveModificationService>();
+
+// Cart Services + Reposotory
+builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 builder.Services.AddScoped<IGetCartItemService, GetCartItemService>();
 builder.Services.AddScoped<IAddCartItemService, AddCartItemService>();
 builder.Services.AddScoped<IEditCartItemService, EditCartItemService>();
 builder.Services.AddScoped<IRemoveCartItemService, RemoveCartItemService>();
+
+// Order Services + Reposotory
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IGetOrderService, GetOrderService>();
 builder.Services.AddScoped<IAddOrderService, AddOrderService>();
 builder.Services.AddScoped<IEditOrderService, EditOrderService>();
 builder.Services.AddScoped<IRemoveOrderService, RemoveOrderService>();
-builder.Services.AddScoped<IRemoveRefreshTokenService, RemoveRefreshTokenService>();
-builder.Services.AddScoped<IGetProductService, GetProductService>();
+
+// Product Services + Reposotory
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IAddProductService, AddProductService>();
+builder.Services.AddScoped<IGetProductService, GetProductService>();
 builder.Services.AddScoped<IEditProductService, EditProductService>();
 builder.Services.AddScoped<IRemoveProductService, RemoveProductService>();
+
+// CustomBuild Services + Repository
+builder.Services.AddScoped<ICustomBuildRepository, CustomBuildRepository>();
 builder.Services.AddScoped<IGetCustomBuildService, GetCustomBuildService>();
 builder.Services.AddScoped<IAddCustomBuildService, AddCustomBuildService>();
 builder.Services.AddScoped<IEditCustomBuildService, EditCustomBuildService>();
 builder.Services.AddScoped<IRemoveCustomBuildService, RemoveCustomBuildService>();
-builder.Services.AddHttpContextAccessor();  
-builder.Services.AddScoped<IDeleteCurrentUserService, DeleteCurrentUserService>();
+
+// Account Services
+builder.Services.AddScoped<IDeleteUserService, DeleteUserService>();
 builder.Services.AddScoped<ILoginAccountService, LoginAccountService>();
 builder.Services.AddScoped<IRegisterAccountService, RegisterAccountService>();
 builder.Services.AddScoped<ILogoutAccountService, LogoutAccountService>();
+
+// Cookie Services
 builder.Services.AddScoped<IDeleteCookieService, DeleteCookieService>();
 builder.Services.AddScoped<IAddCookieService , AddCookieService>();
 builder.Services.AddScoped<IGetCookieService , GetCookieService>();
-builder.Services.AddScoped<IGenerateRefreshTokenService , GenerateRefreshTokenService>();
-builder.Services.AddScoped<IGetRefreshTokenService, GetRefreshTokenService>();
 
+// Message services + repository
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+
+// Current User Services
+builder.Services.AddScoped<IGetCurrUserService, GetCurrUserService>();
+
+// so we can access http context in services
+builder.Services.AddHttpContextAccessor();
+
+// add signalR service
+builder.Services.AddSignalR();
+
+// DI --------------------------------------------------------------------------
+
+
+// add policy to allow external front end to access the APIs
 builder.Services.AddCors(Options =>
 {
     Options.AddPolicy("AllowExternalFrontEnd", policy => 
     {
         policy
-        .WithOrigins()
+        .WithOrigins() // add origins later
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials();
@@ -240,10 +275,11 @@ if (builder.Environment.IsDevelopment())
 
 app.UseGlobalExceptionMiddleware();
 app.UseStaticFiles();
-app.UseCors("AllowExternalFrontEnd");
 app.UseRouting();
+app.UseCors("AllowExternalFrontEnd");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();

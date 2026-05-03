@@ -5,7 +5,7 @@ namespace Custom_Builds.Core.ServiceContracts.CartItemServices
 {
     public interface IAddCartItemService
     {
-        Task<Result<Guid>> AddAsync(AddCartItemDTO toAdd);
-        Task<Result<Guid>> AddCustomBuildAsync(AddCustomBuildDTO toAdd);
+        Task<Result<CartItemDTO>> AddAsync(AddCartItemDTO toAdd);
+        Task<Result<CartItemDTO>> AddCustomBuildAsync(AddCustomBuildDTO toAdd);
     }
 }

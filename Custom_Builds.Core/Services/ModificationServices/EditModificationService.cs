@@ -16,7 +16,10 @@ namespace Custom_Builds.Core.Services.ModificationServices
 
         public async Task<Result> EditByIdAsync(EditModificationDTO newData)
         {
-            return await _modificationsRepository.EditByIdAsync(newData);
+            var result = await _modificationsRepository.EditByIdAsync(newData);
+            if(!result.IsSuccess) return result;
+
+            return Result.Success();
         }
     }
 }

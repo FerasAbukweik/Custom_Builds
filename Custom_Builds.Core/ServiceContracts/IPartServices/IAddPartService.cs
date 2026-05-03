@@ -5,6 +5,6 @@ namespace Custom_Builds.Core.ServiceContracts.PartServices
 {
     public interface IAddPartService
     {
-        Task<Result<Guid>> AddAsync(AddPartDTO toAdd);
+        Task<Result<PartDTO>> AddAsync(AddPartDTO toAdd);
     }
 }

@@ -13,27 +13,29 @@ namespace Custom_Builds.Infrastructure.Repositories
         private readonly ApplicationDbContext _dbContext;
         public CustomBuildRepository(ApplicationDbContext dbContext) => _dbContext = dbContext;
 
-        public async Task<Result<Guid>> AddAsync(AddCustomBuildDTO toAdd)
+
+        public async Task<Result<CustomBuild>> AddAsync(AddCustomBuildDTOToDB toAdd)
         {
             CustomBuild newCB = new CustomBuild
             {
                 Id = Guid.NewGuid(),
-                CustomBuildType = toAdd.CustomBuildType
+                CustomBuildType = toAdd.CustomBuildType,
+                Modifications = toAdd.Modifications,
+                CreatorId = toAdd.CreatorId
             };
 
             _dbContext.CustomBuilds.Add(newCB);
             await _dbContext.SaveChangesAsync();
 
-            return Result<Guid>.Success(newCB.Id);
+            return Result<CustomBuild>.Success(newCB);
         }
-
-        public async Task<Result<Guid>> AddEntityAsync(CustomBuild customBuild)
+        public async Task<Result<CustomBuild>> AddEntityAsync(CustomBuild toAdd)
         {
-            _dbContext.CustomBuilds.Add(customBuild);
+            _dbContext.CustomBuilds.Add(toAdd);
             await _dbContext.SaveChangesAsync();
-            return Result<Guid>.Success(customBuild.Id);
-        }
 
+            return Result<CustomBuild>.Success(toAdd);
+        }
         public async Task<Result> EditByIdAsync(EditCustomBuildDTO newData)
         {
             CustomBuild? toEdit = await _dbContext.CustomBuilds.FirstOrDefaultAsync(c => c.Id == newData.Id);
@@ -46,10 +48,11 @@ namespace Custom_Builds.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
             return Result.Success();
         }
-
         public async Task<Result<CustomBuild>> GetByIdAsync(Guid customBuildId)
         {
-            CustomBuild? customBuild = await _dbContext.CustomBuilds.FirstOrDefaultAsync(c => c.Id == customBuildId);
+            CustomBuild? customBuild = await _dbContext.CustomBuilds
+                .Include(c => c.Modifications)
+                .FirstOrDefaultAsync(c => c.Id == customBuildId);
             if (customBuild == null)
             {
                 return Result<CustomBuild>.Failure("custom build wasnt found", statusCode: HttpStatusCode.NotFound);
@@ -57,7 +60,6 @@ namespace Custom_Builds.Infrastructure.Repositories
             
             return Result<CustomBuild>.Success(customBuild);
         }
-
         public async Task<Result> RemoveByIdAsync(Guid customBuildId)
         {
             CustomBuild? toDel = await _dbContext.CustomBuilds.FirstOrDefaultAsync(c => c.Id == customBuildId);

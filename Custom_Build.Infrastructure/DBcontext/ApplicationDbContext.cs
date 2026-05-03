@@ -3,13 +3,10 @@ using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.Domain.TokenEntities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Net;
-
 
 namespace Custom_Builds.Infrastructure.DBcontext
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser , ApplicationRole , Guid>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
     {
         public ApplicationDbContext(DbContextOptions options) : base(options) { }
 
@@ -47,11 +44,11 @@ namespace Custom_Builds.Infrastructure.DBcontext
                 .HasForeignKey(ci => ci.ProductId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-             builder.Entity<CartItem>()
-                .HasOne(ci => ci.CustomBuild)
-                .WithMany(cb => cb.CartItems)
-                .HasForeignKey(ci => ci.CustomBuildId)
-                .OnDelete(DeleteBehavior.SetNull);
+            builder.Entity<CartItem>()
+               .HasOne(ci => ci.CustomBuild)
+               .WithMany(cb => cb.CartItems)
+               .HasForeignKey(ci => ci.CustomBuildId)
+               .OnDelete(DeleteBehavior.SetNull);
 
             builder.Entity<Order>()
                 .HasOne(o => o.User)
@@ -67,14 +64,32 @@ namespace Custom_Builds.Infrastructure.DBcontext
 
             builder.Entity<Order>()
                 .HasOne(o => o.CustomBuild)
-                .WithOne(cb => cb.Order)
-                .HasForeignKey<Order>(o => o.CustomBuildId)
-                .IsRequired(false)
+                .WithMany(cb => cb.orders)
+                .HasForeignKey(o => o.CustomBuildId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<CustomBuild>()
                 .HasMany(cb => cb.Modifications)
-                .WithMany(m => m.CustomBuilds);
+                .WithMany(m => m.CustomBuilds)
+                .UsingEntity(j => j.ToTable("CustomBuildModifications"));
+
+            builder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany(u => u.Messages)
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Message>()
+                .HasOne(m => m.Receiver)
+                .WithMany(u => u.Messages)
+                .HasForeignKey(m => m.ReceiverId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CustomBuild>()
+                .HasOne(cb => cb.Creator)
+                .WithMany(u => u.CustomBuilds)
+                .HasForeignKey(cb => cb.CreatorId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
 
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -85,5 +100,6 @@ namespace Custom_Builds.Infrastructure.DBcontext
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<CustomBuild> CustomBuilds { get; set; }
+        public virtual DbSet<Message> Messages { get; set; }
     }
 }

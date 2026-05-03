@@ -2,6 +2,7 @@ using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.extensionMethods;
 using Custom_Builds.Core.Models;
+using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Custom_Builds.Core.ServiceContracts.IOrderServices;
 using Custom_Builds.Core.ServiceContracts.OrderServices;
 using Microsoft.AspNetCore.Mvc;
@@ -16,17 +17,20 @@ namespace custom_Peripherals.Controllers
         private readonly IRemoveOrderService _removeOrderService;
         private readonly IEditOrderService _editOrderService;
         private readonly IGetOrderService _getOrderService;
+        private readonly IGetCurrUserService _getCurrUserService;
 
         public OrderController(
             IAddOrderService addOrderService,
             IRemoveOrderService removeOrderService,
             IEditOrderService editOrderService,
-            IGetOrderService getOrderService)
+            IGetOrderService getOrderService,
+            IGetCurrUserService getCurrUserService)
         {
             _addOrderService = addOrderService;
             _removeOrderService = removeOrderService;
             _editOrderService = editOrderService;
             _getOrderService = getOrderService;
+            _getCurrUserService = getCurrUserService;
         }
 
         [HttpPost("[action]")]
@@ -80,6 +84,50 @@ namespace custom_Peripherals.Controllers
         public async Task<ActionResult<Order>> Get(Guid orderId)
         {
             var result = await _getOrderService.GetByIdAsync(orderId);
+
+            return result.ToActionResult();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAll(LazyGetALlOrdersDTO lazyGetOrdersData)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState.CollectErrors());
+            }
+
+            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(lazyGetOrdersData.UserId);
+            if (!getTargetUserIdResult.IsSuccess)
+            {
+                // convert to Result so its guranteed we return ActionResult and not ActionResult<Data>
+                return ((Result)getTargetUserIdResult).ToActionResult();
+            }
+
+            lazyGetOrdersData.UserId = getTargetUserIdResult.Value!;
+
+            var result = await _getOrderService.GetUserOrdersAsync(lazyGetOrdersData);
+
+            return result.ToActionResult();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAllCompletedOrders(LazyGetALlOrdersDTO lazyGetOrdersData)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState.CollectErrors());
+            }
+
+            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(lazyGetOrdersData.UserId);
+            if (!getTargetUserIdResult.IsSuccess)
+            {
+                // convert to Result so its guranteed we return ActionResult and not ActionResult<Data>
+                return ((Result)getTargetUserIdResult).ToActionResult();
+            }
+
+            lazyGetOrdersData.UserId = getTargetUserIdResult.Value!;
+
+            var result = await _getOrderService.GetCompletedUserOrdersAsync(lazyGetOrdersData);
 
             return result.ToActionResult();
         }

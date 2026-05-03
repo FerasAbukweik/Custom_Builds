@@ -1,7 +1,7 @@
 ﻿using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.CookieServices;
 using Microsoft.AspNetCore.Http;
-using System;
+using System.Net;
 
 namespace Custom_Builds.Core.Services.CookiesServices
 {
@@ -17,8 +17,14 @@ namespace Custom_Builds.Core.Services.CookiesServices
 
         public Result Add(string key, string value, double lifeTime)
         {
-            HttpResponse response = _httpContextAccessor.HttpContext.Response;
+            // reposnce so we can send cookies to the browser
+            HttpResponse? response = _httpContextAccessor.HttpContext?.Response;
+            if(response == null)
+            {
+                return Result.Failure("HttpResponse is null" , HttpStatusCode.InternalServerError);
+            }
 
+            // cookie options
             CookieOptions cookieOptions = new CookieOptions()
             {
                 HttpOnly = true,
@@ -27,6 +33,7 @@ namespace Custom_Builds.Core.Services.CookiesServices
                 Expires = DateTime.UtcNow.AddMinutes(lifeTime),
             };
 
+            // add cookie to the response
             response.Cookies.Append(key, value, cookieOptions);
 
             return Result.Success();

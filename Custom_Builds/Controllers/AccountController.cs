@@ -6,7 +6,7 @@ using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.extensionMethods;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.IAccountServices;
-using Custom_Builds.Core.Utils;
+using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -24,19 +24,22 @@ namespace custom_Peripherals.Controllers
     {
         private readonly IRegisterAccountService _registerAccountService;
         private readonly ILoginAccountService _loginAccountService;
-        private readonly IDeleteCurrentUserService _deleteCurrentUserService;
+        private readonly IDeleteUserService _deleteCurrentUserService;
         private readonly ILogoutAccountService _logoutAccountService;
+        private readonly IGetCurrUserService _getCurrUserService;
 
         public AccountController(
                 IRegisterAccountService registerAccountService,
                 ILoginAccountService loginAccountService,
-                IDeleteCurrentUserService deleteCurrentUserService,
-                ILogoutAccountService logoutAccountService)
+                IDeleteUserService deleteCurrentUserService,
+                ILogoutAccountService logoutAccountService,
+                IGetCurrUserService currUserServices)
         {
             _registerAccountService = registerAccountService;
             _loginAccountService = loginAccountService;
             _deleteCurrentUserService = deleteCurrentUserService;
             _logoutAccountService = logoutAccountService;
+            _getCurrUserService = currUserServices;
         }
 
 
@@ -50,7 +53,7 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(errors);
             }
 
-            Result result = await _registerAccountService.RegisterAsync(Response, registerInfo);
+            Result result = await _registerAccountService.RegisterAsync(registerInfo);
 
             return result.ToActionResult();
         }
@@ -65,15 +68,24 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(errors);
             }
 
-            Result result = await _loginAccountService.LoginAsync(Response, loginInfo);
+            Result result = await _loginAccountService.LoginAsync(loginInfo);
 
             return result.ToActionResult();
         }
 
         [HttpDelete("[action]")]
-        public async Task<IActionResult> DeleteCurrentUser()
+        public async Task<IActionResult> DeleteUser(Guid? toDelUserID)
         {
-            Result result = await _deleteCurrentUserService.DeleteUserAsync(Response, User);
+            
+            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(toDelUserID);
+            if (!getTargetUserIdResult.IsSuccess)
+            {
+                // convert to Result so its guranteed we return ActionResult and not ActionResult<Data>
+                return ((Result)getTargetUserIdResult).ToActionResult();
+            }
+
+            // delete the user
+            Result result = await _deleteCurrentUserService.DeleteUserAsync(getTargetUserIdResult!.Value);
 
             return result.ToActionResult();
         }

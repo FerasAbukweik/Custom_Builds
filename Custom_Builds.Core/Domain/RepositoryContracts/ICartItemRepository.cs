@@ -7,8 +7,10 @@ namespace Custom_Builds.Core.Domain.RepositryContracts
     public interface ICartItemRepository
     {
         Task<Result<CartItem>> GetByIdAsync(Guid cartItemId);
-        Task<Result<Guid>> AddAsync(AddCartItemToDB_DTO toAdd);
+        Task<Result<CartItem>> AddAsync(AddCartItemToDB_DTO toAdd);
         Task<Result> EditByIdAsync(EditCartItemDTO newData);
         Task<Result> RemoveByIdAsync(Guid cartItemId);
+        Task<Result> RemoveAsync(CartItem toDel);
+        Task<Result<List<MiniCartItemDTO>>> GetAllCartItemsAsync(LazyGetCartItemsDTO getData);
     }
 }

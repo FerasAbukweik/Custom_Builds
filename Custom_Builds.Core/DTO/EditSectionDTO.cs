@@ -1,6 +1,4 @@
-﻿using Custom_Builds.Core.Domain.Entities;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Custom_Builds.Core.DTO
 {

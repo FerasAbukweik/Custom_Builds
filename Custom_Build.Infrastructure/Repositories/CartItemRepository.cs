@@ -17,16 +17,16 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<Result<Guid>> AddAsync(AddCartItemToDB_DTO toAdd)
+        public async Task<Result<CartItem>> AddAsync(AddCartItemToDB_DTO toAdd)
         {
             if(toAdd.CustomBuildId == null && toAdd.ProductId == null)
             {
-                return Result<Guid>.Failure($"either {nameof(toAdd.ProductId)} or {nameof(toAdd.CustomBuildId)} must be provided");
+                return Result<CartItem>.Failure($"either {nameof(toAdd.ProductId)} or {nameof(toAdd.CustomBuildId)} must be provided");
             }
 
             if (toAdd.CustomBuildId != null && toAdd.ProductId != null)
             {
-                return Result<Guid>.Failure($"both {nameof(toAdd.ProductId)} and {nameof(toAdd.CustomBuildId)} cant be provided at the same time");
+                return Result<CartItem>.Failure($"both {nameof(toAdd.ProductId)} and {nameof(toAdd.CustomBuildId)} cant be provided at the same time");
             }
 
             CartItem newCartItem = new CartItem()
@@ -42,7 +42,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbContext.Cart.Add(newCartItem);
             await _dbContext.SaveChangesAsync();
 
-            return Result<Guid>.Success(newCartItem.Id);
+            return Result<CartItem>.Success(newCartItem);
         }
         public async Task<Result> EditByIdAsync(EditCartItemDTO newData)
         {
@@ -83,6 +83,13 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<CartItem>.Success(cartItem);
         }
+        public async Task<Result> RemoveAsync(CartItem toDel)
+        {
+            _dbContext.Cart.Remove(toDel);
+            await _dbContext.SaveChangesAsync();
+
+            return Result.Success();
+        }
         public async Task<Result> RemoveByIdAsync(Guid cartItemId)
         {
             CartItem? toDel = await _dbContext.Cart.FirstOrDefaultAsync(c => c.Id == cartItemId);
@@ -98,5 +105,22 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result.Success();
         }
+        public async Task<Result<List<MiniCartItemDTO>>> GetAllCartItemsAsync(LazyGetCartItemsDTO getData)
+        {
+            List<MiniCartItemDTO> cartItems = await _dbContext.Cart.Where(c => c.UserId == getData.UserId)
+                .Skip(getData.Section * getData.ElementsPerSection)
+                .Take(getData.ElementsPerSection)
+                .Select(c => new MiniCartItemDTO()
+                {
+                    Id = c.Id,
+                    TotalPrice = c.TotalPrice,
+                    orderType = c.orderType,
+                    CustomBuildId = c.CustomBuildId,
+                    ProductId = c.ProductId
+                }).ToListAsync();
+
+            return Result<List<MiniCartItemDTO>>.Success(cartItems);
+        }
+        
     }
 }

@@ -5,6 +5,6 @@ namespace Custom_Builds.Core.ServiceContracts.IProductServices
 {
     public interface IAddProductService
     {
-        Task<Result<Guid>> AddAsync(AddProductDTO toAdd);
+        Task<Result<ProductDTO>> AddAsync(AddProductDTO toAdd);
     }
 }

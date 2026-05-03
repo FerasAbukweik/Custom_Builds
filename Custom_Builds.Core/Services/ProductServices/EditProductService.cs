@@ -8,7 +8,16 @@ namespace Custom_Builds.Core.Services.ProductServices
     public class EditProductService : IEditProductService
     {
         private readonly IProductRepository _productRepository;
-        public EditProductService(IProductRepository productRepository) => _productRepository = productRepository;
-        public Task<Result> EditByIdAsync(EditProductDTO newData) => _productRepository.EditByIdAsync(newData);
+        public EditProductService(IProductRepository productRepository)
+        {
+            _productRepository = productRepository;
+        }
+        public async Task<Result> EditByIdAsync(EditProductDTO newData)
+        {
+            var result = await _productRepository.EditByIdAsync(newData);
+            if (!result.IsSuccess) return result.MapFailure();
+
+            return Result.Success();
+        }
     }
 }

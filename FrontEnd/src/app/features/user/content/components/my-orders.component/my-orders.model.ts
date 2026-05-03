@@ -1,9 +1,7 @@
-export interface IOrder {
+export interface IOrderDTO {
   id: string;
   name: string;
-  category: string;
   image: string;
   status: string;
   deliveryDate: string;
-  progress: number;
 }

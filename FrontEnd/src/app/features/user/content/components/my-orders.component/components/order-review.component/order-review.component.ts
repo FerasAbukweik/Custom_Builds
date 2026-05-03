@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { IStep } from './order-review.model';
-import { IOrder } from '../../my-orders.model';
+import { IOrderDTO } from '../../my-orders.model';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
   },
 })
 export class OrderReviewComponent {
-  @Input({ required: true }) order!: IOrder;
+  @Input({ required: true }) order!: IOrderDTO;
   steps: IStep[] = [
     { id: 1, label: 'DESIGN CONFIRMED', date: 'Oct 10', status: 'completed', icon: 'fa-check' },
     { id: 2, label: 'IN ASSEMBLY', date: 'In Progress', status: 'current', icon: 'fa-tools' },

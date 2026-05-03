@@ -23,7 +23,7 @@ namespace Custom_Builds.Core.Services.RefreshTokenServices
         }
 
 
-        public async Task<Result<string>> GenerateRefreshTokenAsync(ApplicationUser user)
+        public async Task<Result<RefreshTokenDTO>> GenerateRefreshTokenAsync(ApplicationUser user)
         {
             byte[] bytes = new byte[64];
 
@@ -35,14 +35,15 @@ namespace Custom_Builds.Core.Services.RefreshTokenServices
             string refToken = Convert.ToBase64String(bytes);
 
             // store refresh token in the DB
-            await _refreshTokenRepositry.AddAsync(new AddRefreshTokenDTO()
+            var addResult = await _refreshTokenRepositry.AddAsync(new AddRefreshTokenDTO()
             {
                 ExpierDate = DateTime.UtcNow.AddDays(double.Parse(_configuration["JWT:RefreshTokenLife"]!)),
                 RefreshTokenString = refToken,
                 UserId = user.Id,
             });
+            if (!addResult.IsSuccess) return addResult.MapFailure<RefreshTokenDTO>();
 
-            return Result<string>.Success(refToken);
+            return Result<RefreshTokenDTO>.Success(addResult.Value!.toDTO());
         }
     }
 }

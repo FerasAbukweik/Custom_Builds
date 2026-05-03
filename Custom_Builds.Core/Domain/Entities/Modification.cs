@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Custom_Builds.Core.DTO;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -32,5 +31,21 @@ namespace Custom_Builds.Core.Domain.Entities
         public required Guid SectionId { get; set; }
         public Section? Section { get; set; }
         public List<CustomBuild> CustomBuilds { get; set; } = new List<CustomBuild>();
+
+
+        public ModificationDTO toDTO()
+        {
+            return new ModificationDTO()
+            {
+                Id = this.Id,
+                Description = this.Description,
+                Name = this.Name,
+                Price = this.Price,
+                SectionId = this.SectionId,
+                Type = this.Type,
+                Icon = this.Icon,
+                Value = this.Value
+            };
+        }
     }
 }

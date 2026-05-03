@@ -11,9 +11,12 @@ namespace Custom_Builds.Infrastructure.Repositories
     public class ProductRepository : IProductRepository
     {
         private readonly ApplicationDbContext _dbContext;
-        public ProductRepository(ApplicationDbContext dbContext) => _dbContext = dbContext;
+        public ProductRepository(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
 
-        public async Task<Result<Guid>> AddAsync(AddProductDTO toAdd)
+        public async Task<Result<Product>> AddAsync(AddProductDTO toAdd)
         {
             Product newProduct = new Product()
             {
@@ -23,9 +26,8 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbContext.Products.Add(newProduct);
             await _dbContext.SaveChangesAsync();
 
-            return Result<Guid>.Success(newProduct.Id);
+            return Result<Product>.Success(newProduct);
         }
-
         public async Task<Result> EditByIdAsync(EditProductDTO newData)
         {
             Product? toEdit = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == newData.Id);
@@ -35,7 +37,6 @@ namespace Custom_Builds.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
             return Result.Success();
         }
-
         public async Task<Result<Product>> GetByIdAsync(Guid productId)
         {
             Product? product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);
@@ -43,7 +44,6 @@ namespace Custom_Builds.Infrastructure.Repositories
                 ? Result<Product>.Failure("product wasnt found", statusCode: HttpStatusCode.NotFound)
                 : Result<Product>.Success(product);
         }
-
         public async Task<Result> RemoveByIdAsync(Guid productId)
         {
             Product? toDel = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);

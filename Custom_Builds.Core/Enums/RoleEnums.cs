@@ -1,7 +1,4 @@
-﻿using System;
-
-
-namespace Custom_Builds.Core.Enums
+﻿namespace Custom_Builds.Core.Enums
 {
     public enum RoleEnums 
     { 

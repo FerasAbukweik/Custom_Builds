@@ -7,7 +7,7 @@ namespace Custom_Builds.Core.Domain.RepositryContracts
     public interface IProductRepository
     {
         Task<Result<Product>> GetByIdAsync(Guid productId);
-        Task<Result<Guid>> AddAsync(AddProductDTO toAdd);
+        Task<Result<Product>> AddAsync(AddProductDTO toAdd);
         Task<Result> EditByIdAsync(EditProductDTO newData);
         Task<Result> RemoveByIdAsync(Guid productId);
     }

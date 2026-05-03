@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-
-namespace Custom_Builds.Core.DTO
+﻿namespace Custom_Builds.Core.DTO
 {
     public class EditPartDTO
     {

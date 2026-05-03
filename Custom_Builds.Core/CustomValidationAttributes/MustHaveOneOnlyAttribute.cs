@@ -1,5 +1,4 @@
-﻿using Custom_Builds.Core.Utils;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Custom_Builds.Core.CustomValidationAttributes
@@ -20,18 +19,20 @@ namespace Custom_Builds.Core.CustomValidationAttributes
             if (otherProperty == null && value == null)
             {
                 return new ValidationResult(
-                    ValidationAttributeUtils.GetErrorMessage(
+                    string.Format(
                         ErrorMessage ?? $"must at least have {validationContext.DisplayName} or {_otherPropertyName}" ,
-                        validationContext.DisplayName, _otherPropertyName)
+                        validationContext.DisplayName, _otherPropertyName
+                        )
                     );
             }
 
             if (otherProperty != null && value != null)
             {
                 return new ValidationResult(
-                    ValidationAttributeUtils.GetErrorMessage(
+                    string.Format(
                         ErrorMessage ?? $"cannot have both {validationContext.DisplayName} and {_otherPropertyName}",
-                        validationContext.DisplayName, _otherPropertyName)
+                        validationContext.DisplayName, _otherPropertyName
+                        )
                     );
             }
 

@@ -16,7 +16,10 @@ namespace Custom_Builds.Core.Services.PartServices
 
         public async Task<Result<Part>> GetByIdAsync(Guid partId)
         {
-            return await _partRepository.GetByIdAsync(partId);
+            var result = await _partRepository.GetByIdAsync(partId);
+            if (!result.IsSuccess) return result.MapFailure<Part>();
+
+            return Result<Part>.Success(result.Value!);
         }
     }
 }

@@ -17,18 +17,18 @@ namespace Custom_Builds.Core.Services.ModificationServices
 
         public async Task<Result<Modification>> GetFromIdAsync(Guid modificationId)
         {
-            return await _modificationsRepository.GetFromIdAsync(modificationId);
-        }
+            var result = await _modificationsRepository.GetFromIdAsync(modificationId);
+            if (!result.IsSuccess) return result.MapFailure<Modification>();
 
+            return Result<Modification>.Success(result.Value!);
+        }
         public async Task<Result<decimal>> GetModificationsPriceAsync(List<Guid> modificationIds)
         {
+            // get modifications based on the list of ids so we can sum their prices
             var modificationsResult = await _modificationsRepository.GetListFromIdsAsync(modificationIds);
-            if (!modificationsResult.IsSuccess)
-            {
-                return Result<decimal>.Failure(modificationsResult.ErrorMessage ?? "Failed to get modifications", modificationsResult.StatusCode);
-            }
+            if (!modificationsResult.IsSuccess) return modificationsResult.MapFailure<decimal>();
 
-            if (modificationsResult.Value == null || modificationsResult.Value.Count != modificationIds.Count)
+            if (modificationsResult.Value!.Count != modificationIds.Count)
             {
                 return Result<decimal>.Failure("One or more modifications were not found", HttpStatusCode.NotFound);
             }

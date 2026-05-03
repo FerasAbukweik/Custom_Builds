@@ -15,7 +15,9 @@ namespace Custom_Builds.Core.Services.ModificationServices
 
         public async Task<Result> RemoveByIdAsync(Guid modificationId)
         {
-            return await _modificationsRepository.RemoveByIdAsync(modificationId);
+            var result = await _modificationsRepository.RemoveByIdAsync(modificationId);
+
+            return result;
         }
     }
 }

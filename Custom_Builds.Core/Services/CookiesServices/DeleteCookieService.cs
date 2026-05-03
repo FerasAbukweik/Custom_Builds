@@ -1,8 +1,7 @@
 ﻿using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Reflection.Metadata.Ecma335;
+using System.Net;
 
 namespace Custom_Builds.Core.Services.CookiesServices
 {
@@ -18,16 +17,24 @@ namespace Custom_Builds.Core.Services.CookiesServices
 
         public Result Delete(string key)
         {
-            HttpResponse response = _httpContextAccessor.HttpContext.Response;
+            // response so we can send response to delete the cookie
+            HttpResponse? response = _httpContextAccessor.HttpContext?.Response;
+            if (response == null)
+            {
+                return Result.Failure("HttpResponse is null", HttpStatusCode.InternalServerError);
+            }
 
+            // cookie options
             CookieOptions cookieOptions = new CookieOptions()
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
+                // old date so browser will delete the cookie
                 Expires = DateTime.UtcNow.AddMinutes(-1),
             };
 
+            // add the outdated cookie to the response
             response.Cookies.Delete(key, cookieOptions);
 
 

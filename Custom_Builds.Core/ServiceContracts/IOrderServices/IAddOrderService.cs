@@ -5,7 +5,7 @@ namespace Custom_Builds.Core.ServiceContracts.OrderServices
 {
     public interface IAddOrderService
     {
-        Task<Result<Guid>> AddAsync(AddOrderDTO toAdd);
-        Task<Result<Guid>> AddCustomBuildAsync(AddCustomBuildDTO toAdd);
+        Task<Result<OrderDTO>> AddAsync(AddOrderDTO toAdd);
+        Task<Result<OrderDTO>> AddCustomBuildAsync(AddCustomBuildDTO toAdd);
     }
 }

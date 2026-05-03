@@ -7,8 +7,8 @@ namespace Custom_Builds.Core.Domain.RepositryContracts
     public interface ICustomBuildRepository
     {
         Task<Result<CustomBuild>> GetByIdAsync(Guid customBuildId);
-        Task<Result<Guid>> AddAsync(AddCustomBuildDTO toAdd);
-        Task<Result<Guid>> AddEntityAsync(CustomBuild customBuild);
+        Task<Result<CustomBuild>> AddAsync(AddCustomBuildDTOToDB toAdd);
+        Task<Result<CustomBuild>> AddEntityAsync(CustomBuild toAdd);
         Task<Result> EditByIdAsync(EditCustomBuildDTO newData);
         Task<Result> RemoveByIdAsync(Guid customBuildId);
     }

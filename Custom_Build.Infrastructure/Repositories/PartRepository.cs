@@ -18,7 +18,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<Result<Guid>> AddAsync(AddPartDTO toAdd)
+        public async Task<Result<Part>> AddAsync(AddPartDTO toAdd)
         {
             Part newPart = new Part()
             {
@@ -30,7 +30,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbContext.Parts.Add(newPart);
             await _dbContext.SaveChangesAsync();
 
-            return Result<Guid>.Success(newPart.Id);
+            return Result<Part>.Success(newPart);
         }
         public async Task<Result> EditByIdAsync(EditPartDTO newData)
         {

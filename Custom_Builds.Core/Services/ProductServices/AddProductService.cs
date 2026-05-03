@@ -12,9 +12,12 @@ namespace Custom_Builds.Core.Services.ProductServices
         {
             _productRepository = productRepository;
         }
-        public async Task<Result<Guid>> AddAsync(AddProductDTO toAdd)
+        public async Task<Result<ProductDTO>> AddAsync(AddProductDTO toAdd)
         {
-            return await _productRepository.AddAsync(toAdd);
+            var result = await _productRepository.AddAsync(toAdd);
+            if (!result.IsSuccess) return result.MapFailure<ProductDTO>();
+
+            return Result<ProductDTO>.Success(result.Value!.toDTO());
         }
     }
 }

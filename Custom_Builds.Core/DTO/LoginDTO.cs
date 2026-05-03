@@ -1,8 +1,5 @@
 ﻿using Custom_Builds.Core.Constants;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace Custom_Builds.Core.DTO
 {

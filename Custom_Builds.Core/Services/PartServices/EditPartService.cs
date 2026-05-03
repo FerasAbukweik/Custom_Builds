@@ -16,7 +16,10 @@ namespace Custom_Builds.Core.Services.PartServices
 
         public async Task<Result> EditByIdAsync(EditPartDTO newData)
         {
-            return await _partRepository.EditByIdAsync(newData);
+            var result = await _partRepository.EditByIdAsync(newData);
+            if (!result.IsSuccess) return result.MapFailure();
+
+            return Result.Success();
         }
     }
 }

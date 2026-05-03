@@ -1,9 +1,4 @@
-﻿using Custom_Builds.Core.CustomValidationAttributes;
-using Custom_Builds.Core.Domain.Entities;
-using Custom_Builds.Core.Domain.Identity;
-using Custom_Builds.Core.Enums;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using Custom_Builds.Core.Enums;
 
 namespace Custom_Builds.Core.DTO
 {

@@ -5,6 +5,8 @@ using Custom_Builds.Core.extensionMethods;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.CartItemServices;
 using Custom_Builds.Core.ServiceContracts.ICartItemServices;
+using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace custom_Peripherals.Controllers
@@ -17,17 +19,20 @@ namespace custom_Peripherals.Controllers
         private readonly IRemoveCartItemService _removeCartItemService;
         private readonly IEditCartItemService _editCartItemService;
         private readonly IGetCartItemService _getCartItemService;
+        private readonly IGetCurrUserService _getCurrUserService;
 
         public CartItemController(
             IAddCartItemService addCartItemService,
             IRemoveCartItemService removeCartItemService,
             IEditCartItemService editCartItemService,
-            IGetCartItemService getCartItemService)
+            IGetCartItemService getCartItemService,
+            IGetCurrUserService getCurrUserService)
         {
             _addCartItemService = addCartItemService;
             _removeCartItemService = removeCartItemService;
             _editCartItemService = editCartItemService;
             _getCartItemService = getCartItemService;
+            _getCurrUserService = getCurrUserService;
         }
 
         [HttpPost("[action]")]
@@ -38,8 +43,18 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(ModelState.CollectErrors());
             }
 
+            // get target userId
+            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(toAdd.UserId);
+            if (!getTargetUserIdResult.IsSuccess)
+            {
+                return ((Result)getTargetUserIdResult).ToActionResult();
+            }
+
+            // add target user id to the request
+            toAdd.UserId = getTargetUserIdResult.Value!;
 
 
+            // add item to target user cart
             Result result = await _addCartItemService.AddAsync(toAdd);
 
             return result.ToActionResult();
@@ -53,7 +68,15 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(ModelState.CollectErrors());
             }
 
+            // get target userId
+            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(toAdd.CreatorId);
+            if (!getTargetUserIdResult.IsSuccess)
+            {
+                return ((Result)getTargetUserIdResult).ToActionResult();
+            }
 
+            // add target user id to the request
+            toAdd.CreatorId = getTargetUserIdResult.Value!;
 
             Result result = await _addCartItemService.AddCustomBuildAsync(toAdd);
 
@@ -61,6 +84,7 @@ namespace custom_Peripherals.Controllers
         }
 
         [HttpDelete("[action]")]
+        [Authorize(Roles = nameof(RoleEnums.Admin))]
         public async Task<IActionResult> Remove(Guid cartItemId)
         {
             Result result = await _removeCartItemService.RemoveByIdAsync(cartItemId);
@@ -84,7 +108,28 @@ namespace custom_Peripherals.Controllers
         [HttpGet("[action]")]
         public async Task<ActionResult<CartItem>> GetItem(Guid cartItemId)
         {
-            var result = await _getCartItemService.GetItemByIdAsync(cartItemId);
+            var result = await _getCartItemService.GetByIdAsync(cartItemId);
+
+            return result.ToActionResult();
+        }
+        [HttpGet("[action]")]
+        public async Task<ActionResult<List<MiniCartItemDTO>>> GetCartItems(LazyGetCartItemsDTO getData)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState.CollectErrors());
+            }
+
+            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(getData.UserId);
+            if (!getTargetUserIdResult.IsSuccess)
+            {
+                // convert to Result so its guranteed we return ActionResult and not ActionResult<Data>
+                return ((Result)getTargetUserIdResult).ToActionResult();
+            }
+
+            getData.UserId = getTargetUserIdResult.Value!;
+            
+            var result = await _getCartItemService.GetAllCartItemsAsync(getData);
 
             return result.ToActionResult();
         }
