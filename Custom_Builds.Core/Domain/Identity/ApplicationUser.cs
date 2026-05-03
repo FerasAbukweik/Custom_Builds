@@ -9,7 +9,8 @@ namespace Custom_Builds.Core.Domain.Identity
         public List<CartItem> CartItems = new List<CartItem>();
         public List<Order> Orders = new List<Order>();
         public List<RefreshToken> refreshTokens = new List<RefreshToken>();
-        public List<Message> Messages = new List<Message>();
+        public List<Message> MessageReceivers = new List<Message>();
+        public List<Message> MessageSenders = new List<Message>();
         public List<CustomBuild> CustomBuilds = new List<CustomBuild>();
     }
 }

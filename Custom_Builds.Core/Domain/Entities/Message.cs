@@ -11,14 +11,6 @@ namespace Custom_Builds.Core.Domain.Entities
         [Key]
         public required Guid Id { get; set; }
         
-        [Required(ErrorMessage = "{0} Is Required")]
-        public required Guid SenderId { get; set; }
-        public ApplicationUser? Sender { get; set; }
-
-        [Required(ErrorMessage = "{0} Is Required")]
-        public required Guid ReceiverId { get; set; }
-        public ApplicationUser? Receiver { get; set; }
-
         [Required(ErrorMessage = "{0} Is required")]
         public required string Content { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -28,6 +20,14 @@ namespace Custom_Builds.Core.Domain.Entities
 
         [Required(ErrorMessage = "{0} Is reqired")]
         public string? FileName { get; set; }
+
+
+        // these are nullable so if the user gets deleted we can store null in them and still have the messages
+        // using DeleteBehavior.SetNull
+        public Guid? SenderId { get; set; }
+        public ApplicationUser? Sender { get; set; }
+        public Guid? ReceiverId { get; set; }
+        public ApplicationUser? Receiver { get; set; }
 
         public MessageDTO toDTO()
         {
@@ -39,6 +39,7 @@ namespace Custom_Builds.Core.Domain.Entities
                 FileName = this.FileName,
                 MessageType = this.MessageType,
                 SenderId = this.SenderId,
+                ReceiverId = this.ReceiverId,
             };
         }
     }

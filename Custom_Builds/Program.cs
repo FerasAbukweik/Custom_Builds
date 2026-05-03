@@ -283,3 +283,9 @@ app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
+
+
+
+
+
+// TODO : set User Messages to null before deleting the user because we cannt use deletebehavior.setnull

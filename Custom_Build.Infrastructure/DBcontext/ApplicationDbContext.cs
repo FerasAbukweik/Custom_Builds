@@ -75,15 +75,15 @@ namespace Custom_Builds.Infrastructure.DBcontext
 
             builder.Entity<Message>()
                 .HasOne(m => m.Sender)
-                .WithMany(u => u.Messages)
+                .WithMany(u => u.MessageSenders)
                 .HasForeignKey(m => m.SenderId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<Message>()
                 .HasOne(m => m.Receiver)
-                .WithMany(u => u.Messages)
+                .WithMany(u => u.MessageReceivers)
                 .HasForeignKey(m => m.ReceiverId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<CustomBuild>()
                 .HasOne(cb => cb.Creator)

@@ -16,7 +16,7 @@ namespace Custom_Builds.Core.Domain.Entities
         public List<CartItem> CartItems { get; set; } = new List<CartItem>();
 
         public List<Order> orders = new List<Order>();
-        public required Guid CreatorId { get; set; }
+        public Guid? CreatorId { get; set; }
         public ApplicationUser? Creator { get; set; }
 
         public CustomBuildDTO toDTO()
