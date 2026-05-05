@@ -4,6 +4,7 @@ using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Net;
 
 namespace Custom_Builds.Infrastructure.Repositories
@@ -18,19 +19,12 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
 
 
-        public async Task<Result<Section>> AddAsync(AddSectionDTO toAdd)
+        public async Task<Result<Section>> AddAsync(Section toAdd)
         {
-            Section newSection = new Section()
-            {
-                Id = Guid.NewGuid(),
-                PartId = toAdd.PartId,
-                Title = toAdd.Title,
-            };
-
-            _dbContext.Sections.Add(newSection);
+            _dbContext.Sections.Add(toAdd);
             await _dbContext.SaveChangesAsync();
 
-            return Result<Section>.Success(newSection);
+            return Result<Section>.Success(toAdd);
         }
         public async Task<Result> EditByIdAsync(EditSectionDTO newData)
         {
@@ -42,7 +36,6 @@ namespace Custom_Builds.Infrastructure.Repositories
             }
 
             toEdit.Title = newData.Title ?? toEdit.Title;
-            toEdit.PartId = newData.PartId ?? toEdit.PartId;
 
             await _dbContext.SaveChangesAsync();
 
@@ -73,6 +66,23 @@ namespace Custom_Builds.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
 
             return Result.Success();
+        }
+        public async Task<Result<List<Section>>> FilterAsync(Expression<Func<Section, bool>> extraChecks, Expression<Func<Section, object>>[]? includes = null)
+        {
+
+            var sectionQuery = _dbContext.Sections.AsQueryable();
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    sectionQuery = sectionQuery.Include(include);
+                }
+            }
+
+            List<Section> sections = await sectionQuery.Where(extraChecks).ToListAsync();
+
+            return Result<List<Section>>.Success(sections);
         }
     }
 }

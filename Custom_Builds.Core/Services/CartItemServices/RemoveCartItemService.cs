@@ -20,36 +20,23 @@ namespace Custom_Builds.Core.Services.CartItemServices
 
         public async Task<Result> RemoveByIdAsync(Guid cartItemId)
         {
-            // is current logged in user an admin ? 
-            var isAdminResult = _getCurrUserService.IsAdmin();
-            if (!isAdminResult.IsSuccess) return isAdminResult;
+            var getCurrUserId = _getCurrUserService.GetUserId();
+            if (!getCurrUserId.IsSuccess) return getCurrUserId;
 
-            // if not admin make sure that cart item is his
-            if (!isAdminResult.Value)
+            var getCartItemResult = await _cartItemRepository.GetByIdAsync(cartItemId);
+            if (!getCartItemResult.IsSuccess) return getCartItemResult;
+
+            if (getCartItemResult.Value!.Id == getCurrUserId.Value!)
             {
-                // get cart item so we can check its owner and delete it fast next time we need _cartItemRepository.Remove
-                var getCartItemResult = await _cartItemRepository.GetByIdAsync(cartItemId);
-                if (!getCartItemResult.IsSuccess) return getCartItemResult;
+                var removeCartItemResult = await _cartItemRepository.RemoveAsync(getCartItemResult.Value!);
+                if (!removeCartItemResult.IsSuccess) return removeCartItemResult;
 
-                // get current logged in user id so we can compare it with cart item owner id
-                var getUserIdResult = _getCurrUserService.GetUserId();
-                if (!getUserIdResult.IsSuccess) return getUserIdResult;
-
-                // check if user is not admin and not owner of the cart item return unauthorized
-                if (getCartItemResult.Value!.UserId != getUserIdResult.Value)
-                {
-                    return Result.Failure("You are not authorized to remove this cart item." , HttpStatusCode.Unauthorized);
-                }
-
-                // remove cart item if current user is owner of it
-                await _cartItemRepository.RemoveAsync(getCartItemResult.Value!);
                 return Result.Success();
             }
-
-            // if admin remove cart item directly without checking its owner
-            await _cartItemRepository.RemoveByIdAsync(cartItemId);
-
-            return Result.Success();
+            else
+            {
+                return Result.Failure("User Is Unauthorized", HttpStatusCode.Unauthorized);
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Net;
 
 namespace Custom_Builds.Infrastructure.Repositories
@@ -44,7 +45,7 @@ namespace Custom_Builds.Infrastructure.Repositories
                 return Result.Failure("custom build wasnt found", statusCode: HttpStatusCode.NotFound);
             }
 
-            toEdit.CustomBuildType = newData.CustomBuildType ?? toEdit.CustomBuildType;
+            toEdit.CustomBuildType = newData.NewCustomBuildType ?? toEdit.CustomBuildType;
             await _dbContext.SaveChangesAsync();
             return Result.Success();
         }
@@ -72,5 +73,23 @@ namespace Custom_Builds.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
             return Result.Success();
         }
+        public async Task<Result<List<CustomBuild>>> FilterAsync(Expression<Func<CustomBuild, bool>> extraChecks, Expression<Func<CustomBuild, object>>[]? includes = null)
+        {
+
+            var CustomBuildQuery = _dbContext.CustomBuilds.AsQueryable();
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    CustomBuildQuery = CustomBuildQuery.Include(include);
+                }
+            }
+
+            List<CustomBuild> customBuilds = await CustomBuildQuery.Where(extraChecks).ToListAsync();
+
+            return Result<List<CustomBuild>>.Success(customBuilds);
+        }
+
     }
 }

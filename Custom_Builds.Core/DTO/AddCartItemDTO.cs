@@ -1,21 +1,13 @@
-using Custom_Builds.Core.CustomValidationAttributes;
-using Custom_Builds.Core.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using Custom_Builds.Core.Enums;
 
 namespace Custom_Builds.Core.DTO
 {
     public class AddCartItemDTO
     {
-        [Required(ErrorMessage = "{0} is required.")]
+        public required decimal TotalPrice { get; set; }
         public required OrderTypeEnum orderType { get; set; }
-
-        [Required(ErrorMessage = "{0} is required.")]
-        public Guid? UserId { get; set; }
-
-
-        public Guid? ProductId { get; set; }
-
-        [MustHaveOneOnly(nameof(ProductId))]
+        public required Guid UserId { get; set; }
         public Guid? CustomBuildId { get; set; }
+        public Guid? ProductId { get; set; }
     }
 }

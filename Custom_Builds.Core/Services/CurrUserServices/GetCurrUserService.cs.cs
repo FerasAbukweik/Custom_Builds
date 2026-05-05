@@ -35,7 +35,10 @@ namespace Custom_Builds.Core.Services.CurrUserServices
             else
             {
                 // if value is supplied and its not admin , forbid the action
-                if (!_httpContextAccessor.HttpContext?.User.FindAll(ClaimTypes.Role).Any(r => r.Value == RoleEnums.Admin.ToString()) ?? false)
+                var isAdminRes = IsAdmin();
+                if (!isAdminRes.IsSuccess) return isAdminRes.MapFailure<Guid>();
+
+                if (!isAdminRes.Value)
                 {
                     return Result<Guid>.Failure("Only admin can delete other users");
                 }

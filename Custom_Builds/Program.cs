@@ -11,6 +11,7 @@ using Custom_Builds.Core.ServiceContracts.ICookieServices;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Custom_Builds.Core.ServiceContracts.ICustomBuildServices;
 using Custom_Builds.Core.ServiceContracts.IJWTServices;
+using Custom_Builds.Core.ServiceContracts.IMessageServices;
 using Custom_Builds.Core.ServiceContracts.IModificationServices;
 using Custom_Builds.Core.ServiceContracts.IOrderServices;
 using Custom_Builds.Core.ServiceContracts.IPartServices;
@@ -36,6 +37,7 @@ using Custom_Builds.Infrastructure.DBcontext;
 using Custom_Builds.Infrastructure.Repositories;
 using custom_Peripherals.Hub;
 using custom_Peripherals.IHub;
+using custom_Peripherals.MiddleWare;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -99,38 +101,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 }
 
                 return Task.CompletedTask;
-            },
-
-
-            // try remake new access and refresh Tokens
-            OnAuthenticationFailed = async context =>
-            {
-                if (context.Exception is not SecurityTokenExpiredException) return;
-
-                IJWTService jwtService = context.HttpContext.RequestServices.GetRequiredService<IJWTService>();
-                IAddCookieService addCookieService = context.HttpContext.RequestServices.GetRequiredService<IAddCookieService>();
-
-                // get new access and refresh tokens after make sure old tokens are valid
-                var tokens = await jwtService.GenerateNewAccessAndRefreshTokensAsync();
-
-                // if failed to generate new tokens stop
-                if (!tokens.IsSuccess) return;
-
-                // add new tokens to cookies
-                addCookieService.Add("AccessToken",
-                    tokens.Value!.AccessToken, double.Parse(builder.Configuration["JWT:RefreshTokenLife"]!));
-                addCookieService.Add("RefreshToken",
-                    tokens.Value!.RefreshToken, double.Parse(builder.Configuration["JWT:RefreshTokenLife"]!));
-
-                // get new principal so we can update the context with new principal and retry the request with new tokens
-                var principal = jwtService.GetPrincipal(tokens.Value!.AccessToken);
-
-                // if failed to get principal stop
-                if (!principal.IsSuccess) return;
-
-                // update context
-                context.Principal = principal.Value; 
-                context.Success();
             }
         };
     });
@@ -187,7 +157,6 @@ builder.Services.AddScoped<IRemoveSectionService, RemoveSectionService>();
 
 // Modification Services + Reposotory
 builder.Services.AddScoped<IModificationsRepository, ModificationsRepository>();
-builder.Services.AddScoped<IGetModificationService, GetModificationService>();
 builder.Services.AddScoped<IAddModificationService, AddModificationService>();
 builder.Services.AddScoped<IEditModificationService, EditModificationService>();
 builder.Services.AddScoped<IRemoveModificationService, RemoveModificationService>();
@@ -196,7 +165,6 @@ builder.Services.AddScoped<IRemoveModificationService, RemoveModificationService
 builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 builder.Services.AddScoped<IGetCartItemService, GetCartItemService>();
 builder.Services.AddScoped<IAddCartItemService, AddCartItemService>();
-builder.Services.AddScoped<IEditCartItemService, EditCartItemService>();
 builder.Services.AddScoped<IRemoveCartItemService, RemoveCartItemService>();
 
 // Order Services + Reposotory
@@ -233,6 +201,7 @@ builder.Services.AddScoped<IGetCookieService , GetCookieService>();
 
 // Message services + repository
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IAddMessageService, IAddMessageService>();
 
 // Current User Services
 builder.Services.AddScoped<IGetCurrUserService, GetCurrUserService>();
@@ -274,6 +243,7 @@ if (builder.Environment.IsDevelopment())
 
 
 app.UseGlobalExceptionMiddleware();
+app.UseAutoRefreshTokens();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowExternalFrontEnd");
@@ -288,4 +258,7 @@ app.Run();
 
 
 
-// TODO : set User Messages to null before deleting the user because we cannt use deletebehavior.setnull
+// TODO :
+// set User Messages to null before deleting the user because we cannt use deletebehavior.setnull
+// check on all HttpGet science they cannt accept data from body
+// make sure current user is the owner of product

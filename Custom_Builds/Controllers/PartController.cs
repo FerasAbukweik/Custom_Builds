@@ -1,9 +1,11 @@
 ﻿using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.DTO;
+using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.extensionMethods;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.IPartServices;
 using Custom_Builds.Core.ServiceContracts.PartServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,21 +32,12 @@ namespace custom_Peripherals.Controllers
             _removePartService = removePartService;
         }
 
-        [HttpGet("[action]")]
-        public async Task<ActionResult<Part>> Get(Guid partId)
-        {
-            var result = await _getPartService.GetByIdAsync(partId);
 
-            if (!result.IsSuccess)
-            {
-                return result.ToActionResult();
-            }
 
-            return Ok(result.Value);
-        }
-
+        // add part
+        [Authorize(Roles = nameof(RoleEnums.Admin))]
         [HttpPost("[action]")]
-        public async Task<IActionResult> Add(AddPartDTO toAdd)
+        public async Task<IActionResult> Add([FromBody] AddPartDTO toAdd)
         {
             if (!ModelState.IsValid)
             {
@@ -56,8 +49,10 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
+        // edit part
+        [Authorize(Roles = nameof(RoleEnums.Admin))]
         [HttpPut("[action]")]
-        public async Task<IActionResult> Edit(EditPartDTO newData)
+        public async Task<IActionResult> Edit([FromBody] EditPartDTO newData)
         {
             if (!ModelState.IsValid)
             {
@@ -69,10 +64,21 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
-        [HttpDelete("[action]")]
-        public async Task<IActionResult> Remove(Guid partId)
+        // remove part
+        [Authorize(Roles = nameof(RoleEnums.Admin))]
+        [HttpDelete("[action]/{partId}")]
+        public async Task<IActionResult> Remove([FromRoute]Guid partId)
         {
             Result result = await _removePartService.RemoveByIdAsync(partId);
+
+            return result.ToActionResult();
+        }
+
+        // allow normal users to use this
+        [HttpGet("[action]")]
+        public async Task<ActionResult<List<Part>>> GetAllParts()
+        {
+            var result = await _getPartService.GetAllPartsIncludingAllData();
 
             return result.ToActionResult();
         }

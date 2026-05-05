@@ -1,5 +1,6 @@
 ﻿using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.Domain.RepositryContracts;
+using Custom_Builds.Core.Domain.TokenEntities;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.IRefreshTokenServices;
@@ -35,12 +36,14 @@ namespace Custom_Builds.Core.Services.RefreshTokenServices
             string refToken = Convert.ToBase64String(bytes);
 
             // store refresh token in the DB
-            var addResult = await _refreshTokenRepositry.AddAsync(new AddRefreshTokenDTO()
+            var addResult = await _refreshTokenRepositry.AddAsync(new RefreshToken()
             {
-                ExpierDate = DateTime.UtcNow.AddDays(double.Parse(_configuration["JWT:RefreshTokenLife"]!)),
+                Id = Guid.NewGuid(),
+                ExpierDate = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["JWT:RefreshTokenLife"]!)),
                 RefreshTokenString = refToken,
-                UserId = user.Id,
+                UserId = user.Id,   
             });
+
             if (!addResult.IsSuccess) return addResult.MapFailure<RefreshTokenDTO>();
 
             return Result<RefreshTokenDTO>.Success(addResult.Value!.toDTO());

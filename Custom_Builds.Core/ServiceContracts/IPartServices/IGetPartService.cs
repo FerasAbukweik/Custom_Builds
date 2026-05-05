@@ -6,5 +6,6 @@ namespace Custom_Builds.Core.ServiceContracts.IPartServices
     public interface IGetPartService
     {
         Task<Result<Part>> GetByIdAsync(Guid partId);
+        Task<Result<List<Part>>> GetAllPartsIncludingAllData();
     }
 }

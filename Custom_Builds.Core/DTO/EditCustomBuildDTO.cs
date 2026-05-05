@@ -7,7 +7,7 @@ namespace Custom_Builds.Core.DTO
     {
         [Required]
         public required Guid Id { get; set; }
-        public string? SelectedModificationIds { get; set; }
-        public CustomBuildTypeEnum? CustomBuildType { get; set; }
+        public string? NewModifications { get; set; }
+        public CustomBuildTypeEnum? NewCustomBuildType { get; set; }
     }
 }

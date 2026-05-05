@@ -1,9 +1,11 @@
 using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.Domain.RepositryContracts;
+using Custom_Builds.Core.Domain.TokenEntities;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Net;
 
 namespace Custom_Builds.Infrastructure.Repositories
@@ -16,17 +18,12 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<Result<Product>> AddAsync(AddProductDTO toAdd)
+        public async Task<Result<Product>> AddAsync(Product toAdd)
         {
-            Product newProduct = new Product()
-            {
-                Id = Guid.NewGuid(), Name = toAdd.Name, Price = toAdd.Price
-            };
-
-            _dbContext.Products.Add(newProduct);
+            _dbContext.Products.Add(toAdd);
             await _dbContext.SaveChangesAsync();
 
-            return Result<Product>.Success(newProduct);
+            return Result<Product>.Success(toAdd);
         }
         public async Task<Result> EditByIdAsync(EditProductDTO newData)
         {
@@ -52,5 +49,23 @@ namespace Custom_Builds.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
             return Result.Success();
         }
+        public async Task<Result<List<Product>>> FilterAsync(Expression<Func<Product, bool>> extraChecks, Expression<Func<Product, object>>[]? includes = null)
+        {
+
+            var productQuery = _dbContext.Products.AsQueryable();
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    productQuery = productQuery.Include(include);
+                }
+            }
+
+            List<Product> products = await productQuery.Where(extraChecks).ToListAsync();
+
+            return Result<List<Product>>.Success(products);
+        }
+
     }
 }

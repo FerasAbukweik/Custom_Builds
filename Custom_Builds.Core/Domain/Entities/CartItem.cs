@@ -12,10 +12,6 @@ namespace Custom_Builds.Core.Domain.Entities
         public Guid Id { get; set; }
 
         [Required(ErrorMessage = "{0} is required.")]
-        [Range(typeof(decimal), "0", "100000000", ErrorMessage = "Invalid {0}. {0} should be between {1} and {2}.")]
-        public required decimal TotalPrice { get; set; }
-
-        [Required(ErrorMessage = "{0} is required.")]
         public required OrderTypeEnum orderType { get; set; }
 
         [Required(ErrorMessage = "{0} is required.")]
@@ -33,10 +29,22 @@ namespace Custom_Builds.Core.Domain.Entities
             return new CartItemDTO()
             {
                 Id = this.Id,
-                TotalPrice = this.TotalPrice,
                 CustomBuildId = this.CustomBuildId,
                 orderType = this.orderType,
-                ProductId = this.ProductId
+                ProductId = this.ProductId,
+                TotalPriced = this.Product!.Price
+            };
+        }
+
+        public CartItemDTO toDTO(decimal totalPrice)
+        {
+            return new CartItemDTO()
+            {
+                Id = this.Id,
+                CustomBuildId = this.CustomBuildId,
+                orderType = this.orderType,
+                ProductId = this.ProductId,
+                TotalPriced = totalPrice
             };
         }
     }

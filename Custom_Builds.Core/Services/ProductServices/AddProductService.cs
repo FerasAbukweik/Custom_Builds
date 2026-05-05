@@ -1,3 +1,4 @@
+using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
@@ -14,7 +15,16 @@ namespace Custom_Builds.Core.Services.ProductServices
         }
         public async Task<Result<ProductDTO>> AddAsync(AddProductDTO toAdd)
         {
-            var result = await _productRepository.AddAsync(toAdd);
+            // new product
+            Product newProduct = new Product()
+            {
+                Id = Guid.NewGuid(),
+                Name = toAdd.Name,
+                Price = toAdd.Price,
+            };
+
+            // add the new product
+            var result = await _productRepository.AddAsync(newProduct);
             if (!result.IsSuccess) return result.MapFailure<ProductDTO>();
 
             return Result<ProductDTO>.Success(result.Value!.toDTO());

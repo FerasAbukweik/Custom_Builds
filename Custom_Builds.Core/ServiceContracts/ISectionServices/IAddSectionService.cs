@@ -5,6 +5,6 @@ namespace Custom_Builds.Core.ServiceContracts.ISectionServices
 {
     public interface IAddSectionService
     {
-        Task<Result<Guid>> AddAsync(AddSectionDTO toAdd);
+        Task<Result<SectionDTO>> AddAsync(AddSectionDTO toAdd);
     }
 }

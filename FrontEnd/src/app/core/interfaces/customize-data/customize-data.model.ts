@@ -1,17 +1,17 @@
-interface ISectionItem {
+interface IModification {
   id: number;
   name: string;
   value?: string;
   desc?: string;
   icon?: string;
   price: Number;
+  type: string;
 }
 
 interface IField {
   id: number;
   title: string;
-  type: string;
-  items: ISectionItem[];
+  items: IModification[];
 }
 
 export interface ISection {

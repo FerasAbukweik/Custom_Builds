@@ -25,11 +25,7 @@ namespace Custom_Builds.Core.Domain.Entities
         [Required(ErrorMessage = "{0} Is Reqiered")]
         public required decimal Price { get; set; }
 
-
-
-        [Required(ErrorMessage = "{0} Is Requiered")]
-        public required Guid SectionId { get; set; }
-        public Section? Section { get; set; }
+        public List<Section> Sections { get; set; } = new List<Section>();
         public List<CustomBuild> CustomBuilds { get; set; } = new List<CustomBuild>();
 
 
@@ -41,7 +37,6 @@ namespace Custom_Builds.Core.Domain.Entities
                 Description = this.Description,
                 Name = this.Name,
                 Price = this.Price,
-                SectionId = this.SectionId,
                 Type = this.Type,
                 Icon = this.Icon,
                 Value = this.Value

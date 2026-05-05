@@ -53,7 +53,7 @@ namespace Custom_Builds.Core.Services.AccountServices
             ApplicationUser? user = await _userManager.FindByEmailAsync(loginInfo.Email);
             if (user == null)
             {
-                return Result.Failure("Wrong Email or Passowrd" , HttpStatusCode.NotFound);
+                return Result.Failure("Wrong Email or Passowrd" , HttpStatusCode.Unauthorized);
             }
 
 
@@ -61,7 +61,7 @@ namespace Custom_Builds.Core.Services.AccountServices
             var result = await _signinManager.PasswordSignInAsync(user, loginInfo.Password, false, false);
             if (!result.Succeeded)
             {
-                return Result.Failure("Wrong Email or Passowrd", HttpStatusCode.NotFound);
+                return Result.Failure("Wrong Email or Passowrd", HttpStatusCode.Unauthorized);
             }
 
             // generate Tokens

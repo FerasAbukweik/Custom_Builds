@@ -43,9 +43,10 @@ namespace custom_Peripherals.Controllers
         }
 
 
+        // register
         [AllowAnonymous]
         [HttpPost("[action]")]
-        public async Task<IActionResult> Register(RegisterDTO registerInfo)
+        public async Task<IActionResult> Register([FromBody]RegisterDTO registerInfo)
         {
             if (!ModelState.IsValid)
             {
@@ -58,9 +59,10 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
+        // login
         [AllowAnonymous]
         [HttpPost("[action]")]
-        public async Task<IActionResult> Login(LoginDTO loginInfo)
+        public async Task<IActionResult> Login([FromBody]LoginDTO loginInfo)
         {
             if (!ModelState.IsValid)
             {
@@ -73,8 +75,10 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
-        [HttpDelete("[action]")]
-        public async Task<IActionResult> DeleteUser(Guid? toDelUserID)
+
+        // delete user
+        [HttpDelete("[action]/{toDelUserID}")]
+        public async Task<IActionResult> DeleteUser([FromRoute]Guid? toDelUserID)
         {
             
             var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(toDelUserID);
@@ -90,6 +94,7 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
+        // logout
         [HttpDelete("[action]")]
         public async Task<IActionResult> Logout()
         {

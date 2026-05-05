@@ -5,6 +5,7 @@ using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Net;
 
 namespace Custom_Builds.Infrastructure.Repositories
@@ -18,7 +19,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<Result<Order>> AddAsync(AddOrderTODB toAdd)
+        public async Task<Result<Order>> AddAsync(Order toAdd)
         {
             Order newOrder = new Order()
             {
@@ -37,7 +38,6 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<Order>.Success(newOrder);
         }
-
         public async Task<Result> EditByIdAsync(EditOrderDTO newData)
         {
             Order? toEdit = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == newData.Id);
@@ -124,5 +124,23 @@ namespace Custom_Builds.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
             return Result.Success();
         }
+        public async Task<Result<List<Order>>> FilterAsync(Expression<Func<Order, bool>> extraChecks, Expression<Func<Order, object>>[]? includes = null)
+        {
+
+            var orderQuery = _dbContext.Orders.AsQueryable();
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    orderQuery = orderQuery.Include(include);
+                }
+            }
+
+            List<Order> orders = await orderQuery.Where(extraChecks).ToListAsync();
+
+            return Result<List<Order>>.Success(orders);
+        }
+
     }
 }

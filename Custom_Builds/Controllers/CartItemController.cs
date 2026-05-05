@@ -17,117 +17,68 @@ namespace custom_Peripherals.Controllers
     {
         private readonly IAddCartItemService _addCartItemService;
         private readonly IRemoveCartItemService _removeCartItemService;
-        private readonly IEditCartItemService _editCartItemService;
         private readonly IGetCartItemService _getCartItemService;
-        private readonly IGetCurrUserService _getCurrUserService;
 
         public CartItemController(
             IAddCartItemService addCartItemService,
             IRemoveCartItemService removeCartItemService,
-            IEditCartItemService editCartItemService,
-            IGetCartItemService getCartItemService,
-            IGetCurrUserService getCurrUserService)
+            IGetCartItemService getCartItemService)
         {
             _addCartItemService = addCartItemService;
             _removeCartItemService = removeCartItemService;
-            _editCartItemService = editCartItemService;
             _getCartItemService = getCartItemService;
-            _getCurrUserService = getCurrUserService;
         }
 
+
+
+        // add normal product
+        [Authorize(Roles = ($"{nameof(RoleEnums.User)}"))]
         [HttpPost("[action]")]
-        public async Task<IActionResult> Add(AddCartItemDTO toAdd)
+        public async Task<IActionResult> Add([FromBody] Guid productId)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState.CollectErrors());
-            }
-
-            // get target userId
-            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(toAdd.UserId);
-            if (!getTargetUserIdResult.IsSuccess)
-            {
-                return ((Result)getTargetUserIdResult).ToActionResult();
-            }
-
-            // add target user id to the request
-            toAdd.UserId = getTargetUserIdResult.Value!;
-
-
             // add item to target user cart
-            Result result = await _addCartItemService.AddAsync(toAdd);
+            Result result = await _addCartItemService.AddAsync(productId);
 
             return result.ToActionResult();
         }
 
+
+        // add custom build
+        [Authorize(Roles = ($"{nameof(RoleEnums.User)}"))]
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddCustomBuild(AddCustomBuildDTO toAdd)
+        public async Task<IActionResult> AddCustomBuild([FromBody] AddCustomBuildDTO toAdd)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState.CollectErrors());
             }
-
-            // get target userId
-            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(toAdd.CreatorId);
-            if (!getTargetUserIdResult.IsSuccess)
-            {
-                return ((Result)getTargetUserIdResult).ToActionResult();
-            }
-
-            // add target user id to the request
-            toAdd.CreatorId = getTargetUserIdResult.Value!;
 
             Result result = await _addCartItemService.AddCustomBuildAsync(toAdd);
 
             return result.ToActionResult();
         }
 
-        [HttpDelete("[action]")]
-        [Authorize(Roles = nameof(RoleEnums.Admin))]
-        public async Task<IActionResult> Remove(Guid cartItemId)
+
+        // remove cart item
+        [Authorize(Roles = ($"{nameof(RoleEnums.User)}"))]
+        [HttpDelete("[action]/{toDelCartItemId}")]
+        public async Task<IActionResult> Remove([FromRoute]Guid toDelCartItemId)
         {
-            Result result = await _removeCartItemService.RemoveByIdAsync(cartItemId);
+            Result result = await _removeCartItemService.RemoveByIdAsync(toDelCartItemId);
 
             return result.ToActionResult();
         }
 
-        [HttpPut("[action]")]
-        public async Task<IActionResult> Edit(EditCartItemDTO newData)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState.CollectErrors());
-            }
 
-            Result result = await _editCartItemService.EditByIdAsync(newData);
-
-            return result.ToActionResult();
-        }
-
+        // get cart items -- with lazy loading
+        [Authorize(Roles = ($"{nameof(RoleEnums.User)} , {nameof(RoleEnums.Admin)}"))]
         [HttpGet("[action]")]
-        public async Task<ActionResult<CartItem>> GetItem(Guid cartItemId)
-        {
-            var result = await _getCartItemService.GetByIdAsync(cartItemId);
-
-            return result.ToActionResult();
-        }
-        [HttpGet("[action]")]
-        public async Task<ActionResult<List<MiniCartItemDTO>>> GetCartItems(LazyGetCartItemsDTO getData)
+        public async Task<ActionResult<List<CartItemDTO>>> GetCartItems([FromQuery]LazyGetCartItemsDTO getData)
         {
             if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState.CollectErrors());
             }
-
-            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(getData.UserId);
-            if (!getTargetUserIdResult.IsSuccess)
-            {
-                // convert to Result so its guranteed we return ActionResult and not ActionResult<Data>
-                return ((Result)getTargetUserIdResult).ToActionResult();
-            }
-
-            getData.UserId = getTargetUserIdResult.Value!;
             
             var result = await _getCartItemService.GetAllCartItemsAsync(getData);
 

@@ -7,6 +7,5 @@ namespace Custom_Builds.Core.DTO
         [Required(ErrorMessage = "{0} Is requiered")]
         public required Guid Id { get; set; }
         public string? Title { get; set; }
-        public Guid? PartId { get; set; }
     }
 }

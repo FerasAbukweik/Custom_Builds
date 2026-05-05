@@ -4,6 +4,8 @@ using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using System.Linq.Expressions;
 using System.Net;
 
 namespace Custom_Builds.Infrastructure.Repositories
@@ -17,13 +19,34 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<Result<Modification>> AddAsync(AddModificationDTO toAdd)
+
+        public async Task<Result<Modification>> GetFromIdAsync(Guid modificationId, Expression<Func<Modification, object>>[]? includes)
+        {
+            var modificationQuery = _dbContext.Modifications.AsQueryable();
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    modificationQuery.Include(include);
+                }
+            }
+
+            Modification? modification = await modificationQuery.FirstOrDefaultAsync(m => m.Id == modificationId);
+
+            if (modification == null)
+            {
+                return Result<Modification>.Failure("modification wasnt found", statusCode: HttpStatusCode.NotFound);
+            }
+
+            return Result<Modification>.Success(modification);
+        }
+        public async Task<Result<Modification>> AddAsync(Modification toAdd)
         {
             Modification newModification = new Modification()
             {
                 Id = Guid.NewGuid(),
                 Description = toAdd.Description,
-                SectionId = toAdd.SectionId,
                 Icon = toAdd.Icon,
                 Name = toAdd.Name,
                 Price = toAdd.Price,
@@ -47,7 +70,6 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             toEdit.Price = newData.Price ?? toEdit.Price;
             toEdit.Icon = newData.Icon ?? toEdit.Icon;
-            toEdit.SectionId = newData.SectionId ?? toEdit.SectionId;
             toEdit.Description = newData.Description ?? toEdit.Description;
             toEdit.Name = newData.Name ?? toEdit.Name;
             toEdit.Type = newData.Type ?? toEdit.Type;
@@ -56,25 +78,6 @@ namespace Custom_Builds.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
 
             return Result.Success();
-        }
-        public async Task<Result<Modification>> GetFromIdAsync(Guid modificationId)
-        {
-            Modification? modification = await _dbContext.Modifications.FirstOrDefaultAsync(m => m.Id == modificationId);
-
-            if(modification == null)
-            {
-                return Result<Modification>.Failure("modification wasnt found" , statusCode: HttpStatusCode.NotFound);
-            }
-
-            return Result<Modification>.Success(modification);
-        }
-        public async Task<Result<List<Modification>>> GetListFromIdsAsync(List<Guid> modificationIds)
-        {
-            List<Modification> modifications = await _dbContext.Modifications
-                .Where(m => modificationIds.Contains(m.Id))
-                .ToListAsync();
-
-            return Result<List<Modification>>.Success(modifications);
         }
         public async Task<Result> RemoveByIdAsync(Guid modificationId)
         {
@@ -90,5 +93,13 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result.Success();
         }
+        public async Task<Result<List<Modification>>> FilterAsync(Expression<Func<Modification, bool>> extraChecks)
+        {
+
+            var modifications = await _dbContext.Modifications.Where(extraChecks).ToListAsync();
+
+            return Result<List<Modification>>.Success(modifications);
+        }
+
     }
 }

@@ -1,7 +1,10 @@
 ﻿using Custom_Builds.Core.Domain.Identity;
+using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.IAccountServices;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
+using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.Services.CurrUserServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System.Net;
@@ -14,33 +17,38 @@ namespace Custom_Builds.Core.Services.AccountServices
         private readonly SignInManager<ApplicationUser> _signinManager;
         private readonly IDeleteCookieService _deleteCookieService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IGetCurrUserService _getCurrUserService;
         public DeleteUserService(UserManager<ApplicationUser> userManager,
                                         SignInManager<ApplicationUser> signinManager,
                                         IDeleteCookieService deleteCookieService,
-                                        IHttpContextAccessor httpContextAccessor)
+                                        IHttpContextAccessor httpContextAccessor,
+                                        IGetCurrUserService getCurrUserService)
         {
             _userManager = userManager;
             _signinManager = signinManager;
             _deleteCookieService = deleteCookieService;
             _httpContextAccessor = httpContextAccessor;
+            _getCurrUserService = getCurrUserService;
         }
-        public async Task<Result> DeleteUserAsync(Guid userId)
+        public async Task<Result> DeleteUserAsync(Guid? id)
         {
-            // resposne so we can remove cookies from the browser
-            HttpResponse? response = _httpContextAccessor.HttpContext?.Response;
-            if(response == null)
-            {
-                return Result.Failure("Http Response is null", HttpStatusCode.InternalServerError);
-            }
+            // get target user id
+            var getTargetUserIdRes = _getCurrUserService.GetTargetUserId(id);
+            if (!getTargetUserIdRes.IsSuccess) return getTargetUserIdRes;
 
-            // get user object so we can delete it using _userManager.DeleteAsync(user)
-            ApplicationUser? user = await _userManager.FindByIdAsync(userId.ToString());
+            // get user object so we can delete it using _userManager.DeleteAsync(user) and check if its an admin
+            ApplicationUser? user = await _userManager.FindByIdAsync(getTargetUserIdRes.Value!.ToString());
             if (user == null)
             {
-                return Result.Failure("User wasnt found" , HttpStatusCode.NotFound);
+                return Result.Failure("User wasnt found", HttpStatusCode.NotFound);
             }
 
-
+            // if target user is admin stop
+            if(await _userManager.IsInRoleAsync(user , RoleEnums.Admin.ToString()))
+            {
+                return Result.Failure("Forbidden to delete an admin" , HttpStatusCode.Forbidden);
+            }
+            
             // remove User from IdentityUser table
             // also removes all user refreshTokens because DeleteBehavior.cascade
             var result = await _userManager.DeleteAsync(user);

@@ -5,6 +5,7 @@ using Custom_Builds.Core.Models;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq.Expressions;
 using System.Net;
 
 namespace Custom_Builds.Infrastructure.Repositories
@@ -18,19 +19,12 @@ namespace Custom_Builds.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<Result<Part>> AddAsync(AddPartDTO toAdd)
+        public async Task<Result<Part>> AddAsync(Part toAdd)
         {
-            Part newPart = new Part()
-            {
-                Id = Guid.NewGuid(),
-                Icon = toAdd.Icon,
-                Name = toAdd.Name
-            };
-
-            _dbContext.Parts.Add(newPart);
+            _dbContext.Parts.Add(toAdd);
             await _dbContext.SaveChangesAsync();
 
-            return Result<Part>.Success(newPart);
+            return Result<Part>.Success(toAdd);
         }
         public async Task<Result> EditByIdAsync(EditPartDTO newData)
         {
@@ -41,8 +35,8 @@ namespace Custom_Builds.Infrastructure.Repositories
                 return Result.Failure("part wasnt found" ,statusCode: HttpStatusCode.NotFound);
             }
 
-            toEdit.Name = newData.Name ?? toEdit.Name;
             toEdit.Icon = newData.Icon ?? toEdit.Icon;
+            toEdit.Name = newData.Name ?? toEdit.Name;
 
             await _dbContext.SaveChangesAsync();
 
@@ -73,5 +67,29 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result.Success();
         }
+        public async Task<Result<List<Part>>> FilterAsync(Expression<Func<Part, bool>> extraChecks, Expression<Func<Part, object>>[]? includes = null)
+        {
+
+            var partQuery = _dbContext.Parts.AsQueryable();
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    partQuery = partQuery.Include(include);
+                }
+            }
+
+            List<Part> parts = await partQuery.Where(extraChecks).ToListAsync();
+
+            return Result<List<Part>>.Success(parts);
+        }
+        public async Task<Result<List<Part>>> GetAllPartsIncludingAllData()
+        {
+            var allParts = await _dbContext.Parts.Include(p => p.Sections).ThenInclude(s => s.Modifications).ToListAsync();
+
+            return Result<List<Part>>.Success(allParts);
+        }
+
     }
 }

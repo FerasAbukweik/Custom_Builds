@@ -6,7 +6,7 @@ namespace Custom_Builds.Core.ServiceContracts.ICartItemServices
 {
     public interface IGetCartItemService
     {
-        Task<Result<CartItem>> GetByIdAsync(Guid cartItemId);
-        Task<Result<List<MiniCartItemDTO>>> GetAllCartItemsAsync(LazyGetCartItemsDTO getData);
+        Task<Result<CartItemDTO>> GetByIdAsync(Guid cartItemId);
+        Task<Result<List<CartItemDTO>>> GetAllCartItemsAsync(LazyGetCartItemsDTO getData);
     }
 }

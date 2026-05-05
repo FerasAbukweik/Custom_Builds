@@ -5,9 +5,8 @@ namespace Custom_Builds.Core.DTO
 {
     public class AddCustomBuildDTO
     {
-        [Required(ErrorMessage = "{0} is required.")]
-        public required Guid CreatorId { get; set; }
 
+        [Required(ErrorMessage = "{0} is requiered")]
         public required List<Guid> ModificationIds { get; set; }
 
         [Required(ErrorMessage = "{0} is requiered")]

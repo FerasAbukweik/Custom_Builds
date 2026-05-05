@@ -1,13 +1,17 @@
 ﻿using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.DTO;
+using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.extensionMethods;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ISectionServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace custom_Peripherals.Controllers
 {
+    // only admins allowed
+    [Authorize(Roles = nameof(RoleEnums.Admin))]
     [Route("api/[controller]")]
     [ApiController]
     public class SectionController : ControllerBase
@@ -30,16 +34,10 @@ namespace custom_Peripherals.Controllers
             _removeSectionService = removeSectionService;
         }
 
-        [HttpGet("[action]")]
-        public async Task<ActionResult<Section>> Get(Guid sectionId)
-        {
-            var result = await _getSectionService.GetByIdAsync(sectionId);
 
-            return result.ToActionResult();
-        }
-
+        // add section
         [HttpPost("[action]")]
-        public async Task<IActionResult> Add(AddSectionDTO toAdd)
+        public async Task<IActionResult> Add([FromBody] AddSectionDTO toAdd)
         {
             if (!ModelState.IsValid)
             {
@@ -51,8 +49,9 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
+        // edit section
         [HttpPut("[action]")]
-        public async Task<IActionResult> Edit(EditSectionDTO newData)
+        public async Task<IActionResult> Edit([FromBody] EditSectionDTO newData)
         {
             if (!ModelState.IsValid)
             {
@@ -64,8 +63,9 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
-        [HttpDelete("[action]")]
-        public async Task<IActionResult> Remove(Guid sectionId)
+        // remove section
+        [HttpDelete("[action]/{sectionId}")]
+        public async Task<IActionResult> Remove([FromRoute]Guid sectionId)
         {
             var result = await _removeSectionService.RemoveByIdAsync(sectionId);
 
@@ -73,4 +73,3 @@ namespace custom_Peripherals.Controllers
         }
     }
 }
-

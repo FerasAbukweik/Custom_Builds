@@ -6,6 +6,7 @@ using Custom_Builds.Core.Models;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Net;
 
 namespace Custom_Builds.Infrastructure.Repositories
@@ -23,26 +24,18 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
 
 
-        public async Task<Result<RefreshToken>> AddAsync(AddRefreshTokenDTO tokenInfo)
+        public async Task<Result<RefreshToken>> AddAsync(RefreshToken newRefToken)
         {
-            var getRefreshTokenResult = await GetFromRefreshTokenStringAsync(tokenInfo.RefreshTokenString);
+            var getRefreshTokenResult = await GetFromRefreshTokenStringAsync(newRefToken.RefreshTokenString);
             if (getRefreshTokenResult.IsSuccess)
             {
                 return Result<RefreshToken>.Failure("refresh token already exists");
             }
 
-            RefreshToken toAdd = new RefreshToken()
-            {
-                Id = Guid.NewGuid(),
-                ExpierDate = tokenInfo.ExpierDate,
-                RefreshTokenString = tokenInfo.RefreshTokenString,
-                UserId = tokenInfo.UserId,
-            };
-
-            _dbcontext.RefreshTokens.Add(toAdd);
+            _dbcontext.RefreshTokens.Add(newRefToken);
             await _dbcontext.SaveChangesAsync();
 
-            return Result<RefreshToken>.Success(toAdd);
+            return Result<RefreshToken>.Success(newRefToken);
         }
         public async Task<Result<RefreshToken>> GetFromRefreshTokenStringAsync(string refreshToken)
         {
@@ -113,5 +106,23 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result.Success();
         }
+        public async Task<Result<List<RefreshToken>>> FilterAsync(Expression<Func<RefreshToken, bool>> extraChecks, Expression<Func<RefreshToken, object>>[]? includes = null)
+        {
+
+            var refTokenQuery = _dbcontext.RefreshTokens.AsQueryable();
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    refTokenQuery = refTokenQuery.Include(include);
+                }
+            }
+
+            List<RefreshToken> refreshTokens = await refTokenQuery.Where(extraChecks).ToListAsync();
+
+            return Result<List<RefreshToken>>.Success(refreshTokens);
+        }
+
     }
 }

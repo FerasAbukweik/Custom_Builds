@@ -12,6 +12,5 @@ namespace Custom_Builds.Core.DTO
         public string? Type { get; set; }
         public string? Icon { get; set; }
         public decimal? Price { get; set; }
-        public Guid? SectionId { get; set; }
     }
 }

@@ -46,13 +46,13 @@ namespace custom_Peripherals.MiddleWare
             }
         }
     }
-}
 
 
-public static class ExtensionMethod
-{
-    public static IApplicationBuilder UseGlobalExceptionMiddleware(this IApplicationBuilder app)
+    public static class ExtensionMethod
     {
-        return app.UseMiddleware<GlobalExceptionMiddleWare>();
+        public static IApplicationBuilder UseGlobalExceptionMiddleware(this IApplicationBuilder app)
+        {
+            return app.UseMiddleware<GlobalExceptionMiddleWare>();
+        }
     }
 }

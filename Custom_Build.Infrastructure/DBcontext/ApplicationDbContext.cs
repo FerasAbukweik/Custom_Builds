@@ -21,16 +21,14 @@ namespace Custom_Builds.Infrastructure.DBcontext
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Modification>()
-                .HasOne(m => m.Section)
+                .HasMany(m => m.Sections)
                 .WithMany(s => s.Modifications)
-                .HasForeignKey(m => m.SectionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .UsingEntity(e => e.ToTable("Sections_Modifications_ManyToMany"));
 
             builder.Entity<Section>()
-                .HasOne(s => s.Part)
+                .HasMany(s => s.Parts)
                 .WithMany(p => p.Sections)
-                .HasForeignKey(s => s.PartId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .UsingEntity(e => e.ToTable("Section_Parts_ManyToMany"));
 
             builder.Entity<CartItem>()
                 .HasOne(ci => ci.User)
@@ -71,7 +69,7 @@ namespace Custom_Builds.Infrastructure.DBcontext
             builder.Entity<CustomBuild>()
                 .HasMany(cb => cb.Modifications)
                 .WithMany(m => m.CustomBuilds)
-                .UsingEntity(j => j.ToTable("CustomBuildModifications"));
+                .UsingEntity(e => e.ToTable("CustomBuilds_Modifications_ManyToMany"));
 
             builder.Entity<Message>()
                 .HasOne(m => m.Sender)
@@ -90,6 +88,10 @@ namespace Custom_Builds.Infrastructure.DBcontext
                 .WithMany(u => u.CustomBuilds)
                 .HasForeignKey(cb => cb.CreatorId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<RefreshToken>()
+                .HasIndex(rt => rt.RefreshTokenString)
+                .IsUnique(true);
         }
 
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }

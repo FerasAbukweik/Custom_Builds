@@ -1,10 +1,12 @@
 using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.DTO;
+using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.extensionMethods;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Custom_Builds.Core.ServiceContracts.IOrderServices;
 using Custom_Builds.Core.ServiceContracts.OrderServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace custom_Peripherals.Controllers
@@ -33,8 +35,10 @@ namespace custom_Peripherals.Controllers
             _getCurrUserService = getCurrUserService;
         }
 
+        // add cart item
+        [Authorize(Roles = nameof(RoleEnums.User))]
         [HttpPost("[action]")]
-        public async Task<IActionResult> Add(AddOrderDTO toAdd)
+        public async Task<IActionResult> Add([FromBody] AddOrderDTO toAdd)
         {
             if (!ModelState.IsValid)
             {
@@ -46,86 +50,39 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
-        [HttpPost("[action]")]
-        public async Task<ActionResult<Guid>> AddCustomBuild(AddCustomBuildDTO toAdd)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState.CollectErrors());
-            }
-
-            Result result = await _addOrderService.AddCustomBuildAsync(toAdd);
-
-            return result.ToActionResult();
-        }
-
-        [HttpDelete("[action]")]
-        public async Task<IActionResult> Remove(Guid orderId)
+        // remove cart item
+        [Authorize(Roles = nameof(RoleEnums.User))]
+        [HttpDelete("[action]/{orderId}")]
+        public async Task<IActionResult> Remove([FromRoute]Guid orderId)
         {
             Result result = await _removeOrderService.RemoveByIdAsync(orderId);
 
             return result.ToActionResult();
         }
 
-        [HttpPut("[action]")]
-        public async Task<IActionResult> Edit(EditOrderDTO newData)
+        // get all cart items -- with lazy loading
+        [HttpGet("[action]")]
+        public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAll([FromQuery]LazyGetALlOrdersDTO lazyGetOrdersData)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState.CollectErrors());
             }
-
-            Result result = await _editOrderService.EditByIdAsync(newData);
-
-            return result.ToActionResult();
-        }
-
-        [HttpGet("[action]")]
-        public async Task<ActionResult<Order>> Get(Guid orderId)
-        {
-            var result = await _getOrderService.GetByIdAsync(orderId);
-
-            return result.ToActionResult();
-        }
-
-        [HttpGet("[action]")]
-        public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAll(LazyGetALlOrdersDTO lazyGetOrdersData)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState.CollectErrors());
-            }
-
-            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(lazyGetOrdersData.UserId);
-            if (!getTargetUserIdResult.IsSuccess)
-            {
-                // convert to Result so its guranteed we return ActionResult and not ActionResult<Data>
-                return ((Result)getTargetUserIdResult).ToActionResult();
-            }
-
-            lazyGetOrdersData.UserId = getTargetUserIdResult.Value!;
 
             var result = await _getOrderService.GetUserOrdersAsync(lazyGetOrdersData);
 
             return result.ToActionResult();
         }
 
+        // get all cart completed items -- with lazy loading
         [HttpGet("[action]")]
-        public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAllCompletedOrders(LazyGetALlOrdersDTO lazyGetOrdersData)
+        public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAllCompletedOrders([FromQuery]LazyGetALlOrdersDTO lazyGetOrdersData)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState.CollectErrors());
             }
 
-            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(lazyGetOrdersData.UserId);
-            if (!getTargetUserIdResult.IsSuccess)
-            {
-                // convert to Result so its guranteed we return ActionResult and not ActionResult<Data>
-                return ((Result)getTargetUserIdResult).ToActionResult();
-            }
-
-            lazyGetOrdersData.UserId = getTargetUserIdResult.Value!;
 
             var result = await _getOrderService.GetCompletedUserOrdersAsync(lazyGetOrdersData);
 

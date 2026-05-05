@@ -1,8 +1,10 @@
+using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
+using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Custom_Builds.Core.ServiceContracts.IModificationServices;
 using Custom_Builds.Core.ServiceContracts.IProductServices;
 using Custom_Builds.Core.ServiceContracts.OrderServices;
@@ -15,17 +17,20 @@ namespace Custom_Builds.Core.Services.OrderServices
         private readonly IAddCustomBuildService _addCustomBuildService;
         private readonly IGetProductService _getProductService;
         private readonly IGetModificationService _getModificationsService;
+        private readonly IGetCurrUserService _getCurrUserService;
 
         public AddOrderService(
             IOrderRepository orderRepository,
             IAddCustomBuildService addCustomBuildService,
             IGetProductService getProductService,
-            IGetModificationService getModificationsService)
+            IGetModificationService getModificationsService,
+            IGetCurrUserService getCurrUserService)
         {
             _orderRepository = orderRepository;
             _addCustomBuildService = addCustomBuildService;
             _getProductService = getProductService;
             _getModificationsService = getModificationsService;
+            _getCurrUserService = getCurrUserService;
         }
 
         public async Task<Result<OrderDTO>> AddAsync(AddOrderDTO toAdd)
@@ -35,44 +40,19 @@ namespace Custom_Builds.Core.Services.OrderServices
             if (!getProductResult.IsSuccess) return getProductResult.MapFailure<OrderDTO>();
 
             // new cart item
-            AddOrderTODB newCartItem = new AddOrderTODB()
+            Order newCartItem = new Order()
             {
+                Id = Guid.NewGuid(),
                 OrderType = OrderTypeEnum.Product,
                 UserId = toAdd.UserId,
                 ProductId = toAdd.ProductId,
                 CustomBuildId = null,
                 TotalPrice = getProductResult.Value!.Price,
-                Title = getProductResult.Value!.Name
+                Title = getProductResult.Value!.Name,
+                CreatedAt = DateTime.UtcNow,
             };
 
             // add item to cart table
-            var addToCartResult = await _orderRepository.AddAsync(newCartItem);
-            if (!addToCartResult.IsSuccess) return addToCartResult.MapFailure<OrderDTO>();
-
-            return Result<OrderDTO>.Success(addToCartResult.Value!.toDTO());
-        }
-        public async Task<Result<OrderDTO>> AddCustomBuildAsync(AddCustomBuildDTO toAdd)
-        {
-            // add create new custom build so we can link it with cart item
-            var addCustomBuildResult = await _addCustomBuildService.AddByModificationsIdsAsync(toAdd);
-            if (!addCustomBuildResult.IsSuccess) return addCustomBuildResult.MapFailure<OrderDTO>();
-
-            // get modifications price
-            var getPriceResult = await _getModificationsService.GetModificationsPriceAsync(toAdd.ModificationIds);
-            if (!getPriceResult.IsSuccess) return getPriceResult.MapFailure<OrderDTO>();
-
-            // new cart item
-            AddOrderTODB newCartItem = new AddOrderTODB()
-            {
-                UserId = toAdd.CreatorId,
-                TotalPrice = getPriceResult.Value,
-                OrderType = OrderTypeEnum.Custom,
-                ProductId = null,
-                CustomBuildId = addCustomBuildResult.Value!.Id,
-                Title = "Custom Build - " + toAdd.CustomBuildType.ToString()
-            };
-
-            // add new item to cart
             var addToCartResult = await _orderRepository.AddAsync(newCartItem);
             if (!addToCartResult.IsSuccess) return addToCartResult.MapFailure<OrderDTO>();
 

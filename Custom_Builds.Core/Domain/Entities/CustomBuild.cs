@@ -12,12 +12,14 @@ namespace Custom_Builds.Core.Domain.Entities
 
         [Required(ErrorMessage = "{0} Is required")]
         public CustomBuildTypeEnum CustomBuildType { get; set; }
+        public Guid? CreatorId { get; set; }
+        public ApplicationUser? Creator { get; set; }
+
+
         public List<Modification> Modifications { get; set; } = new List<Modification>();
         public List<CartItem> CartItems { get; set; } = new List<CartItem>();
 
         public List<Order> orders = new List<Order>();
-        public Guid? CreatorId { get; set; }
-        public ApplicationUser? Creator { get; set; }
 
         public CustomBuildDTO toDTO()
         {
