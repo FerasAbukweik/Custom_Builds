@@ -17,18 +17,15 @@ namespace custom_Peripherals.Controllers
     public class SectionController : ControllerBase
     {
 
-        private readonly IGetSectionService _getSectionService;
         private readonly IAddSectionService _addSectionService;
         private readonly IEditSectionService _editSectionService;
         private readonly IRemoveSectionService _removeSectionService;
 
         public SectionController(
-            IGetSectionService getSectionService,
             IAddSectionService addSectionService,
             IEditSectionService editSectionService,
             IRemoveSectionService removeSectionService)
         {
-            _getSectionService = getSectionService;
             _addSectionService = addSectionService;
             _editSectionService = editSectionService;
             _removeSectionService = removeSectionService;
