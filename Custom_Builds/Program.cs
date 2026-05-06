@@ -27,6 +27,7 @@ using Custom_Builds.Core.Services.CookiesServices;
 using Custom_Builds.Core.Services.CurrUserServices;
 using Custom_Builds.Core.Services.CustomBuildServices;
 using Custom_Builds.Core.Services.JWTServices;
+using Custom_Builds.Core.Services.MessageServices;
 using Custom_Builds.Core.Services.ModificationServices;
 using Custom_Builds.Core.Services.OrderServices;
 using Custom_Builds.Core.Services.PartServices;
@@ -160,6 +161,7 @@ builder.Services.AddScoped<IModificationsRepository, ModificationsRepository>();
 builder.Services.AddScoped<IAddModificationService, AddModificationService>();
 builder.Services.AddScoped<IEditModificationService, EditModificationService>();
 builder.Services.AddScoped<IRemoveModificationService, RemoveModificationService>();
+builder.Services.AddScoped<IGetModificationService, GetModificationService>();
 
 // Cart Services + Reposotory
 builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
@@ -201,7 +203,9 @@ builder.Services.AddScoped<IGetCookieService , GetCookieService>();
 
 // Message services + repository
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
-builder.Services.AddScoped<IAddMessageService, IAddMessageService>();
+builder.Services.AddScoped<IAddMessageService, AddMessageService>();
+builder.Services.AddScoped<IDeleteMessageService, DeleteMessageService>();
+
 
 // Current User Services
 builder.Services.AddScoped<IGetCurrUserService, GetCurrUserService>();
@@ -253,12 +257,3 @@ app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
-
-
-
-
-
-// TODO :
-// set User Messages to null before deleting the user because we cannt use deletebehavior.setnull
-// check on all HttpGet science they cannt accept data from body
-// make sure current user is the owner of product

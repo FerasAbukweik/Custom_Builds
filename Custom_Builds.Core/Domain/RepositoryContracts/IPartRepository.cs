@@ -13,5 +13,6 @@ namespace Custom_Builds.Core.Domain.RepositoryContracts
         Task<Result> EditByIdAsync(EditPartDTO newData);
         Task<Result<List<Part>>> FilterAsync(Expression<Func<Part, bool>> extraChecks, Expression<Func<Part, object>>[]? includes = null);
         Task<Result<List<Part>>> GetAllPartsIncludingAllData();
+        Task<Result> LinkSectionAsync(Guid partId , Section section);
     }
 }

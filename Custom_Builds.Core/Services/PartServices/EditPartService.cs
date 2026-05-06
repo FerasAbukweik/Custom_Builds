@@ -25,5 +25,17 @@ namespace Custom_Builds.Core.Services.PartServices
 
             return result;
         }
+
+        public async Task<Result> LinkSectionAsync(LinkSectionDTO linkData)
+        {
+            // get section object so we can link it with the part
+            var getSectionToLink = await _sectionRepository.GetByIdAsync(linkData.SectionId);
+            if (!getSectionToLink.IsSuccess) return getSectionToLink;
+
+            // trying to add section to part
+            var linkResult = await _partRepository.LinkSectionAsync(linkData.PartId, getSectionToLink.Value!);
+
+            return linkResult;
+        }
     }
 }

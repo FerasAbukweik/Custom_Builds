@@ -6,5 +6,6 @@ namespace Custom_Builds.Core.ServiceContracts.ISectionServices
     public interface IEditSectionService
     {
         Task<Result> EditByIdAsync(EditSectionDTO newData);
+        Task<Result> LinkModification(LinkModificationDTO linkData);
     }
 }

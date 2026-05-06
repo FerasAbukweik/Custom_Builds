@@ -4,7 +4,9 @@ using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.IAccountServices;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.IMessageServices;
 using Custom_Builds.Core.Services.CurrUserServices;
+using Custom_Builds.Core.Services.MessageServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System.Net;
@@ -16,19 +18,19 @@ namespace Custom_Builds.Core.Services.AccountServices
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signinManager;
         private readonly IDeleteCookieService _deleteCookieService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IGetCurrUserService _getCurrUserService;
+        private readonly IDeleteMessageService _deleteMessageService;
         public DeleteUserService(UserManager<ApplicationUser> userManager,
                                         SignInManager<ApplicationUser> signinManager,
                                         IDeleteCookieService deleteCookieService,
-                                        IHttpContextAccessor httpContextAccessor,
-                                        IGetCurrUserService getCurrUserService)
+                                        IGetCurrUserService getCurrUserService,
+                                        IDeleteMessageService deleteMessageService)
         {
             _userManager = userManager;
             _signinManager = signinManager;
             _deleteCookieService = deleteCookieService;
-            _httpContextAccessor = httpContextAccessor;
             _getCurrUserService = getCurrUserService;
+            _deleteMessageService = deleteMessageService;
         }
         public async Task<Result> DeleteUserAsync(Guid? id)
         {
@@ -48,15 +50,6 @@ namespace Custom_Builds.Core.Services.AccountServices
             {
                 return Result.Failure("Forbidden to delete an admin" , HttpStatusCode.Forbidden);
             }
-            
-            // remove User from IdentityUser table
-            // also removes all user refreshTokens because DeleteBehavior.cascade
-            var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded)
-            {
-                string errors = string.Join(" | ", result.Errors);
-                return Result.Failure(errors);
-            }
 
             //remove Token Cookies from browser
             await _signinManager.SignOutAsync();
@@ -68,6 +61,19 @@ namespace Custom_Builds.Core.Services.AccountServices
             // delete refresh token from cookies
             Result delrefResult = _deleteCookieService.Delete("RefreshToken");
             if (!delrefResult.IsSuccess) return delrefResult;
+
+            // remove target user from messages manually
+            Result setMessagesToNullResult = await _deleteMessageService.SetUserMessagesToNull();
+            if (!setMessagesToNullResult.IsSuccess) return setMessagesToNullResult;
+
+            // remove User from IdentityUser table
+            // also removes all user refreshTokens because DeleteBehavior.cascade
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+            {
+                string errors = string.Join(" | ", result.Errors);
+                return Result.Failure(errors);
+            }
 
             return Result.Success();
         }

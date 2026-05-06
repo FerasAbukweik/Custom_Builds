@@ -71,5 +71,20 @@ namespace custom_Peripherals.Controllers
 
             return result.ToActionResult();
         }
+
+        // link midification with section
+        [HttpPut]
+        public async Task<IActionResult> LinkModification(LinkModificationDTO linkData)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState.CollectErrors());
+            }
+
+
+            Result result = await _editSectionService.LinkModification(linkData);
+
+            return result.ToActionResult();
+        }
     }
 }

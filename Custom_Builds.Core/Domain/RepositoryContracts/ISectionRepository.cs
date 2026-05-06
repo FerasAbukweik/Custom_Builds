@@ -12,5 +12,6 @@ namespace Custom_Builds.Core.Domain.RepositryContracts
         Task<Result> RemoveByIdAsync(Guid sectionId);
         Task<Result> EditByIdAsync(EditSectionDTO newData);
         Task<Result<List<Section>>> FilterAsync(Expression<Func<Section, bool>> extraChecks, Expression<Func<Section, object>>[]? includes = null);
+        Task<Result> AddModificationAsync(Guid sectionId , Modification modification);
     }
 }

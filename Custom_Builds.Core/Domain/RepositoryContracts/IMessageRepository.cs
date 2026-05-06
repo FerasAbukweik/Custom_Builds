@@ -9,6 +9,6 @@ namespace Custom_Builds.Core.Domain.RepositoryContracts
     {
         Task<Result<Message>> Add(Message message);
         Task<Result<List<Message>>> FilterAsync(Expression<Func<Message, bool>> extraChecks, Expression<Func<Message, object>>[]? includes = null);
-
+        Task<Result> UpdateRange(List<Message> newData);
     }
 }

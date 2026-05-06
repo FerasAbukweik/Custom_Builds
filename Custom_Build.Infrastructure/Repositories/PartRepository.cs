@@ -90,6 +90,19 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<List<Part>>.Success(allParts);
         }
+        public async Task<Result> LinkSectionAsync(Guid partId, Section section)
+        {
+            Part? targetPart = await _dbContext.Parts.Include(p => p.Sections).FirstOrDefaultAsync(p => p.Id == partId);
+            if(targetPart == null)
+            {
+                return Result.Failure("Part Want found" , HttpStatusCode.NotFound);
+            }
 
+            targetPart.Sections.Add(section);
+
+            await _dbContext.SaveChangesAsync();
+
+            return Result.Success();
+        }
     }
 }

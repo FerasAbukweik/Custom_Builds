@@ -84,5 +84,19 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<List<Section>>.Success(sections);
         }
+        public async Task<Result> AddModificationAsync(Guid sectionId , Modification modification)
+        {
+            Section? targetSection = await _dbContext.Sections.Include(s => s.Modifications).FirstOrDefaultAsync(s => s.Id == sectionId);
+            if(targetSection == null)
+            {
+                return Result.Failure("Section not found" , HttpStatusCode.NotFound);
+            }
+
+            targetSection.Modifications.Add(modification);
+
+            await _dbContext.SaveChangesAsync();
+
+            return Result.Success();
+        }
     }
 }

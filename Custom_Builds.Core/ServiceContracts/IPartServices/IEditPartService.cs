@@ -6,5 +6,6 @@ namespace Custom_Builds.Core.ServiceContracts.IPartServices
     public interface IEditPartService
     {
         Task<Result> EditByIdAsync(EditPartDTO newData);
+        Task<Result> LinkSectionAsync(LinkSectionDTO linkData);
     }
 }

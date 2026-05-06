@@ -41,6 +41,13 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<List<Message>>.Success(messages);
         }
+        public async Task<Result> UpdateRange(List<Message> newData)
+        {
+            _dbContext.Messages.UpdateRange(newData);
 
+            await _dbContext.SaveChangesAsync();
+
+            return Result.Success();
+        }
     }
 }
