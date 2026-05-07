@@ -1,12 +1,8 @@
 ﻿using Custom_Builds.Core.DTO;
-using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Custom_Builds.Core.ServiceContracts.IMessageServices;
-using Custom_Builds.Core.Services.MessageServices;
 using custom_Peripherals.IHub;
 using Microsoft.AspNetCore.SignalR;
-using System.Runtime.CompilerServices;
-using System.Security.Claims;
 
 namespace custom_Peripherals.Hub
 {

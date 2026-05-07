@@ -5,38 +5,33 @@ using Custom_Builds.Core.ServiceContracts.IMessageServices;
 
 namespace Custom_Builds.Core.Services.MessageServices
 {
-    public class DeleteMessageService : IDeleteMessageService
+    public class EditMessageService : IEditMessageService
     {
         private readonly IMessageRepository _messageRepository;
-        private readonly IGetCurrUserService _getCurrUserService;
 
-        public DeleteMessageService(IMessageRepository messageRepository,
-                                 IGetCurrUserService getCurrUserService)
+        public EditMessageService(IMessageRepository messageRepository)
         {
             _messageRepository = messageRepository;
-            _getCurrUserService = getCurrUserService;
         }
-        public async Task<Result> SetUserMessagesToNull()
-        {
-            // get curr loggedin user id
-            var getCurrUserIdResult = _getCurrUserService.GetUserId();
-            if (!getCurrUserIdResult.IsSuccess) return getCurrUserIdResult;
 
+
+        public async Task<Result> SetUserMessagesToNull(Guid userId)
+        {
             // get all related user messages
             var getCurrUserMessages = await _messageRepository.FilterAsync(m =>
-            (m.SenderId == getCurrUserIdResult.Value! ||
-            m.ReceiverId == getCurrUserIdResult.Value!));
+            (m.SenderId == userId ||
+            m.ReceiverId == userId));
             if (!getCurrUserMessages.IsSuccess) return getCurrUserMessages;
 
             // set curr user id to null in the messages
             for (int i = 0; i < getCurrUserMessages.Value!.Count(); i++)
             {
-                if (getCurrUserMessages.Value![i].SenderId == getCurrUserIdResult.Value!)
+                if (getCurrUserMessages.Value![i].SenderId == userId)
                 {
                     getCurrUserMessages.Value![i].SenderId = null;
                 }
 
-                if (getCurrUserMessages.Value![i].ReceiverId == getCurrUserIdResult.Value!)
+                if (getCurrUserMessages.Value![i].ReceiverId == userId)
                 {
                     getCurrUserMessages.Value![i].ReceiverId = null;
                 }

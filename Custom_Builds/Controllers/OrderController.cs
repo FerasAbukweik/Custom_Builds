@@ -17,22 +17,16 @@ namespace custom_Peripherals.Controllers
     {
         private readonly IAddOrderService _addOrderService;
         private readonly IRemoveOrderService _removeOrderService;
-        private readonly IEditOrderService _editOrderService;
         private readonly IGetOrderService _getOrderService;
-        private readonly IGetCurrUserService _getCurrUserService;
 
         public OrderController(
             IAddOrderService addOrderService,
             IRemoveOrderService removeOrderService,
-            IEditOrderService editOrderService,
-            IGetOrderService getOrderService,
-            IGetCurrUserService getCurrUserService)
+            IGetOrderService getOrderService)
         {
             _addOrderService = addOrderService;
             _removeOrderService = removeOrderService;
-            _editOrderService = editOrderService;
             _getOrderService = getOrderService;
-            _getCurrUserService = getCurrUserService;
         }
 
         // add cart item

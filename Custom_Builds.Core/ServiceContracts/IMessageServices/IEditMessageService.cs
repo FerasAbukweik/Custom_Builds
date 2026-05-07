@@ -2,8 +2,8 @@
 
 namespace Custom_Builds.Core.ServiceContracts.IMessageServices
 {
-    public interface IDeleteMessageService
+    public interface IEditMessageService
     {
-        Task<Result> SetUserMessagesToNull();
+        Task<Result> SetUserMessagesToNull(Guid userId);
     }
 }

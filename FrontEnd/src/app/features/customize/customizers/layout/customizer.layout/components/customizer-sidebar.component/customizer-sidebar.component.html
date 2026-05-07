@@ -42,13 +42,13 @@
                   ? 'border-secondary bg-white/5 ring-1 ring-secondary/30'
                   : 'border-dark-blue-gray hover:border-soft-gray/30 bg-transparent'
               } ${
-                section.type === 'card'
+                item.type === 'card'
                   ? 'p-3 items-center justify-between'
                   : 'flex-col items-center p-2'
               }`
             "
           >
-            @if (section.type === 'color') {
+            @if (item.type === 'color') {
               <div class="flex items-center gap-3 w-full">
                 <div
                   class="w-10 h-10 rounded border border-white/10"
@@ -64,7 +64,7 @@
               </div>
             }
 
-            @if (section.type === 'image') {
+            @if (item.type === 'image') {
               <div
                 class="w-full aspect-square rounded bg-cover bg-center mb-2"
                 [style.backgroundImage]="'url(' + item.value + ')'"
@@ -74,7 +74,7 @@
               </span>
             }
 
-            @if (section.type === 'card') {
+            @if (item.type === 'card') {
               <div class="flex items-center gap-3">
                 <div
                   class="p-2 bg-deep-blue rounded text-white w-9 h-9 flex items-center justify-center"

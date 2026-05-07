@@ -71,7 +71,7 @@ namespace custom_Peripherals.Controllers
 
         // link midification with section
         [HttpPut]
-        public async Task<IActionResult> LinkModification(LinkModificationDTO linkData)
+        public async Task<IActionResult> LinkModification([FromBody]LinkModificationDTO linkData)
         {
             if (!ModelState.IsValid)
             {

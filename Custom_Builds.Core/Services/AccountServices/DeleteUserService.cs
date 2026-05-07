@@ -19,18 +19,18 @@ namespace Custom_Builds.Core.Services.AccountServices
         private readonly SignInManager<ApplicationUser> _signinManager;
         private readonly IDeleteCookieService _deleteCookieService;
         private readonly IGetCurrUserService _getCurrUserService;
-        private readonly IDeleteMessageService _deleteMessageService;
+        private readonly IEditMessageService _editMessageService;
         public DeleteUserService(UserManager<ApplicationUser> userManager,
                                         SignInManager<ApplicationUser> signinManager,
                                         IDeleteCookieService deleteCookieService,
                                         IGetCurrUserService getCurrUserService,
-                                        IDeleteMessageService deleteMessageService)
+                                        IEditMessageService deleteMessageService)
         {
             _userManager = userManager;
             _signinManager = signinManager;
             _deleteCookieService = deleteCookieService;
             _getCurrUserService = getCurrUserService;
-            _deleteMessageService = deleteMessageService;
+            _editMessageService = deleteMessageService;
         }
         public async Task<Result> DeleteUserAsync(Guid? id)
         {
@@ -63,7 +63,7 @@ namespace Custom_Builds.Core.Services.AccountServices
             if (!delrefResult.IsSuccess) return delrefResult;
 
             // remove target user from messages manually
-            Result setMessagesToNullResult = await _deleteMessageService.SetUserMessagesToNull();
+            Result setMessagesToNullResult = await _editMessageService.SetUserMessagesToNull(getTargetUserIdRes.Value!);
             if (!setMessagesToNullResult.IsSuccess) return setMessagesToNullResult;
 
             // remove User from IdentityUser table

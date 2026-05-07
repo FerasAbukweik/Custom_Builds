@@ -34,6 +34,7 @@ using Custom_Builds.Core.Services.PartServices;
 using Custom_Builds.Core.Services.ProductServices;
 using Custom_Builds.Core.Services.RefreshTokenServices;
 using Custom_Builds.Core.Services.SectionServices;
+using Custom_Builds.Infrastructure.BackgroundServices;
 using Custom_Builds.Infrastructure.DBcontext;
 using Custom_Builds.Infrastructure.Repositories;
 using custom_Peripherals.Hub;
@@ -204,7 +205,7 @@ builder.Services.AddScoped<IGetCookieService , GetCookieService>();
 // Message services + repository
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IAddMessageService, AddMessageService>();
-builder.Services.AddScoped<IDeleteMessageService, DeleteMessageService>();
+builder.Services.AddScoped<IEditMessageService, EditMessageService>();
 
 
 // Current User Services
@@ -217,6 +218,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 
 // DI --------------------------------------------------------------------------
+
+// Background Services
+builder.Services.AddHostedService<RemoveExpiredRefreshTokens>();
 
 
 // add policy to allow external front end to access the APIs
@@ -257,3 +261,5 @@ app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
+
+// ToDo:

@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Custom_Builds.Core.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 public static class ResultExtensions
@@ -9,10 +10,7 @@ public static class ResultExtensions
         return result.StatusCode switch
         {
             HttpStatusCode.OK => new OkResult(),
-            HttpStatusCode.BadRequest => new BadRequestObjectResult(result.ErrorMessage),
-            HttpStatusCode.NotFound => new NotFoundObjectResult(result.ErrorMessage),
-            HttpStatusCode.Unauthorized => new ObjectResult(result.ErrorMessage) { StatusCode = (int)HttpStatusCode.Unauthorized },
-            _ => new StatusCodeResult((int)result.StatusCode)
+            _ => new ObjectResult(result.ErrorMessage) { StatusCode = (int)result.StatusCode }
         };
     }
 

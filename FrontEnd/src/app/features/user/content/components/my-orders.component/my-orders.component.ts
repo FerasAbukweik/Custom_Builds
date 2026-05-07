@@ -16,6 +16,8 @@ export class MyOrdersComponent {
       image: 'assets/images/keyboard-image.png',
       status: 'In Assembly',
       deliveryDate: 'Oct 24, 2023',
+      progress: 75,
+      orderType: "Controller"
     },
     {
       id: 'CP-9901',
@@ -23,6 +25,8 @@ export class MyOrdersComponent {
       image: 'assets/images/keyboard-image.png',
       status: 'Design Confirmed',
       deliveryDate: 'Nov 02, 2023',
+      progress: 25,
+      orderType: "Controller"
     },
   ];
 }

@@ -4,4 +4,6 @@ export interface IOrderDTO {
   image: string;
   status: string;
   deliveryDate: string;
+  progress: number;
+  orderType : string
 }
