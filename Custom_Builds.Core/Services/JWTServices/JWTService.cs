@@ -4,6 +4,7 @@ using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
 using Custom_Builds.Core.ServiceContracts.IJWTServices;
 using Custom_Builds.Core.ServiceContracts.IRefreshTokenServices;
+using Custom_Builds.Core.Services.CookiesServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -63,7 +64,7 @@ namespace Custom_Builds.Core.Services.JWTServices
                     _configuration["JWT:Issuer"],
                     _configuration["JWT:Audience"],
                     claims,
-                    expires: DateTime.UtcNow.AddMinutes(_configuration.GetValue<double>("JWT:AccessTokenLife"))),
+                    expires: DateTime.UtcNow.AddMinutes(_configuration.GetValue<double>("JWT:AccessTokenLife")),
                     signingCredentials: creds
                 );
 
@@ -103,7 +104,7 @@ namespace Custom_Builds.Core.Services.JWTServices
             }
 
             // get user id from principal
-            string? userId = getPrincipalResult.Value!.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            string? userId = getPrincipalResult.Value!.FindFirstValue(ClaimTypes.NameIdentifier);
             if(userId == null)
             {
                 return Result<AccessAndRefreshTokenDTO>.Failure("Bad currUser Id");
@@ -157,24 +158,39 @@ namespace Custom_Builds.Core.Services.JWTServices
                 ValidateLifetime = validateExpireDate,
             };
 
-            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-
-            // get access token principal
-            ClaimsPrincipal principal = jwtSecurityTokenHandler.ValidateToken(accessToken, tokenParams, out SecurityToken validToken);
-
-
-            // check if token is valid
-            if (validToken is not JwtSecurityToken jwtSecurityToken ||
-                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
-                                                   StringComparison.InvariantCultureIgnoreCase))
+            try
             {
-                return Result<ClaimsPrincipal>.Failure("Invalid Access Token");
+                JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+
+                // get access token principal
+                ClaimsPrincipal principal = jwtSecurityTokenHandler.ValidateToken(accessToken, tokenParams, out SecurityToken validToken);
+
+
+                // check if token is valid
+                if (validToken is not JwtSecurityToken jwtSecurityToken ||
+                    !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                                                       StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return Result<ClaimsPrincipal>.Failure("Bad Access Token");
+                }
+
+                return Result<ClaimsPrincipal>.Success(principal);
+            }
+            catch (Exception ex)
+            {
+                return Result<ClaimsPrincipal>.Failure("Bad Access Token");
+            }
+        }
+        public Result IsValidJWTSecurityToken(string? accessToken = null , bool validateExpireDate = true)
+        {
+            if(accessToken == null)
+            {
+                var getAccessTokesRes = _getCookieService.Get("AccessToken");
+                if (!getAccessTokesRes.IsSuccess) return Result.Failure("No access token");
+
+                accessToken = getAccessTokesRes.Value!;
             }
 
-            return Result<ClaimsPrincipal>.Success(principal);
-        }
-        public Result IsValidJWTSecurityToken(string accessToken , bool validateExpireDate = true)
-        {
             TokenValidationParameters tokenParams = new TokenValidationParameters()
             {
                 ValidateAudience = true,
@@ -187,18 +203,27 @@ namespace Custom_Builds.Core.Services.JWTServices
                 ValidateLifetime = validateExpireDate,
             };
 
-            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
 
-            jwtSecurityTokenHandler.ValidateToken(accessToken, tokenParams, out SecurityToken validToken);
+            try
+            {
+                JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
 
-            if (validToken is not JwtSecurityToken jwtSecurityToken ||
-                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
-                                                   StringComparison.InvariantCultureIgnoreCase))
+                jwtSecurityTokenHandler.ValidateToken(accessToken, tokenParams, out SecurityToken validToken);
+
+                if (validToken is not JwtSecurityToken jwtSecurityToken ||
+                    !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                                                       StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return Result.Failure("Bad Access Token");
+                }
+
+                return Result.Success();
+            }
+            catch (Exception ex)
             {
                 return Result.Failure("Bad Access Token");
             }
-
-            return Result.Success();
+            
         }
         public async Task<Result> AreRefreshTokenAndAccessTokenValidAsync(string accessToken , string refreshToken , bool validateAccessTokenExpireDate = true)
         {
@@ -240,7 +265,7 @@ namespace Custom_Builds.Core.Services.JWTServices
             if (!getPrincipalResult.IsSuccess) return getPrincipalResult;
 
             // get user id from principal
-            if (!Guid.TryParse(getPrincipalResult.Value!.FindFirstValue(JwtRegisteredClaimNames.Sub) , out Guid claimsUserId))
+            if (!Guid.TryParse(getPrincipalResult.Value!.FindFirstValue(ClaimTypes.NameIdentifier) , out Guid claimsUserId))
             {
                 return Result.Failure("Invalid Token");
             }
@@ -248,7 +273,7 @@ namespace Custom_Builds.Core.Services.JWTServices
 
             // check if access token and refresh token belong to the same user
             // User is virtual so we can access it via lazy loading without .including
-            if (refTokenResult.Value!.User?.Id != claimsUserId)
+            if (refTokenResult.Value!.UserId != claimsUserId)
             {
                 return Result.Failure("Invalid Token", HttpStatusCode.Unauthorized);
             }

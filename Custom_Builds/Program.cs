@@ -254,7 +254,7 @@ app.UseGlobalExceptionMiddleware();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowExternalFrontEnd");
-app.UseAutoRefreshTokens();
+app.UseAutoRegenerateTokens();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
