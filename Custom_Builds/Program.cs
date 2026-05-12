@@ -1,7 +1,6 @@
 using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.Domain.RepositoryContracts;
 using Custom_Builds.Core.Domain.RepositryContracts;
-using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.ServiceContracts.CartItemServices;
 using Custom_Builds.Core.ServiceContracts.CookieServices;
 using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
@@ -38,16 +37,13 @@ using Custom_Builds.Infrastructure.BackgroundServices;
 using Custom_Builds.Infrastructure.DBcontext;
 using Custom_Builds.Infrastructure.Repositories;
 using custom_Peripherals.Hub;
-using custom_Peripherals.IHub;
 using custom_Peripherals.MiddleWare;
-using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
@@ -105,7 +101,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 return Task.CompletedTask;
             }
         };
-    });
+    })
+    .AddCookie("Identity.Application");
 
 // adding database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -114,7 +111,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 
 // add identity services and store users,roles in DB
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
     // user password attributes
     options.Password.RequiredLength = 8;
     options.Password.RequireLowercase = true;
@@ -122,6 +120,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
     options.Password.RequireDigit = true;
     options.Password.RequiredUniqueChars = 1;
 })
+.AddRoles<ApplicationRole>()
 // decide who is the DB
 .AddEntityFrameworkStores<ApplicationDbContext>()
 // generate identity token based on Identity information
@@ -129,7 +128,8 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
 // decide who is user and where to store it
 .AddUserStore<UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>>()
 // decide who is role and where to store it
-.AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, Guid>>();
+.AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, Guid>>()
+.AddSignInManager<SignInManager<ApplicationUser>>();
 
 
 // DI --------------------------------------------------------------------------
@@ -229,7 +229,7 @@ builder.Services.AddCors(Options =>
     Options.AddPolicy("AllowExternalFrontEnd", policy => 
     {
         policy
-        .WithOrigins() // add origins later
+        .WithOrigins(["http://localhost:4200"])
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials();
@@ -251,10 +251,10 @@ if (builder.Environment.IsDevelopment())
 
 
 app.UseGlobalExceptionMiddleware();
-app.UseAutoRefreshTokens();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowExternalFrontEnd");
+app.UseAutoRefreshTokens();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

@@ -33,15 +33,15 @@
       <div
         class="absolute top-1/2 -translate-y-1/2 h-[calc(100%-0.75rem)] transition-all duration-300 bg-primary rounded-xl -z-1 shadow-sm"
         [ngClass]="{
-          'left-1.5 w-[calc(50%-0.375rem-0.25rem)]': currPage === 'signin',
-          'left-[calc(50%+0.125rem)] w-[calc(50%-0.5rem)]': currPage === 'createAccount',
+          'left-1.5 w-[calc(50%-0.375rem-0.25rem)]': currPage() === 'signin',
+          'left-[calc(50%+0.125rem)] w-[calc(50%-0.5rem)]': currPage() === 'createAccount',
         }"
       ></div>
       <button
         type="button"
         class="flex-1 py-3 cursor-pointer text-lg font-bold transition-colors z-10 text-soft-gray"
         [ngClass]="{
-          'text-white': currPage === 'signin',
+          'text-white': currPage() === 'signin',
         }"
         (click)="changePage('signin')"
       >
@@ -51,7 +51,7 @@
         type="button"
         class="flex-1 py-3 cursor-pointer text-lg font-bold transition-colors z-10 text-soft-gray"
         [ngClass]="{
-          'text-white': currPage === 'createAccount',
+          'text-white': currPage() === 'createAccount',
         }"
         (click)="changePage('createAccount')"
       >
@@ -60,7 +60,7 @@
     </div>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="w-full h-full flex flex-col gap-4">
-      @if (currPage === 'createAccount') {
+      @if (currPage() === 'createAccount') {
         <div class="flex flex-col gap-2">
           <label class="text-off-white text-sm font-medium ml-1">Name</label>
           <div class="relative w-full">
@@ -74,7 +74,7 @@
               placeholder="Your Name"
               class="w-full bg-deep-blue h-14 rounded-xl pl-12 pr-4 text-white border-2 border-white/5 outline-none focus:border-secondary/50 transition-all placeholder:text-dark-gray/50"
               [ngClass]="{ 'border-error/50!': isError('userName') }"
-              formControlName="userName"
+              [formControl]="form.controls.userName"
             />
           </div>
         </div>
@@ -93,12 +93,12 @@
             placeholder="name@example.com"
             class="w-full bg-deep-blue h-14 rounded-xl pl-12 pr-4 text-white border-2 border-white/5 outline-none focus:border-secondary/50 transition-all placeholder:text-dark-gray/50"
             [ngClass]="{ 'border-error/50!': isError('email') }"
-            formControlName="email"
+            [formControl]="form.controls.email"
           />
         </div>
       </div>
 
-      @if (currPage === 'createAccount') {
+      @if (currPage() === 'createAccount') {
         <div class="flex flex-col gap-2">
           <label class="text-off-white text-sm font-medium ml-1">Phone Number</label>
           <div class="relative w-full">
@@ -112,7 +112,7 @@
               placeholder="07XXXXXXXX"
               class="w-full bg-deep-blue h-14 rounded-xl pl-12 pr-4 text-white border-2 border-white/5 outline-none focus:border-secondary/50 transition-all placeholder:text-dark-gray/50"
               [ngClass]="{ 'border-error/50!': isError('phoneNumber') }"
-              formControlName="phoneNumber"
+              [formControl]="form.controls.phoneNumber"
             />
           </div>
         </div>
@@ -136,7 +136,7 @@
             placeholder="••••••••••••"
             class="w-full bg-deep-blue h-14 rounded-xl pl-12 pr-12 text-white border-2 border-white/5 outline-none focus:border-secondary/50 transition-all placeholder:text-dark-gray/50"
             [ngClass]="{ 'border-error/50!': isError('password') }"
-            formControlName="password"
+            [formControl]="form.controls.password"
           />
           <button
             type="button"
@@ -152,7 +152,7 @@
       </div>
 
       <div class="min-h-[20px]">
-        @for (error of allErrors; track $index) {
+        @for (error of getAllErrors(); track $index) {
           <div
             class="text-error text-xs font-medium animate-in fade-in slide-in-from-left-1 flex items-center gap-1"
           >
@@ -165,7 +165,7 @@
         type="submit"
         class="w-full h-14 bg-secondary hover:bg-secondary/80 active:scale-[0.98] transition-all rounded-xl text-white font-bold text-lg shadow-lg shadow-secondary/10 mt-2 cursor-pointer"
       >
-        {{ currPage === 'signin' ? 'Sign In' : 'Create Account' }}
+        {{ currPage() === 'signin' ? 'Sign In' : 'Create Account' }}
       </button>
     </form>
     <div class="relative py-4 w-full mt-4">

@@ -3,10 +3,10 @@ import { FormControl } from "@angular/forms";
 export type PageTypes = 'signin' | 'createAccount';
 
 export interface IFormGroupType {
-  email: FormControl<string | null>;
-  password: FormControl<string | null>;
-  phoneNumber: FormControl<string | null>;
-  userName: FormControl<string | null>;
+  email: FormControl<string>;
+  password: FormControl<string>;
+  phoneNumber: FormControl<string>;
+  userName: FormControl<string>;
 }
 
 export interface IFooterExtraPages {

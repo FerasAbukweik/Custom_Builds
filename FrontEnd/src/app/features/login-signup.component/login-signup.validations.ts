@@ -3,7 +3,6 @@ import { regexPatterns } from '../../core/constants/regex';
 import { PageTypes } from './login-signup.model';
 import { inject } from '@angular/core';
 import { LoginSignupService } from './login-signup.service';
-import { customError } from './login-signup.constants';
 
 const validation = {
   userName: (s: string) => (!s ? 'Username is required' : ''),
@@ -19,9 +18,9 @@ const validation = {
 const customValidationFn = (type: keyof typeof validation, skipOn?: PageTypes): ValidatorFn => {
   const loginSignupService = inject(LoginSignupService);
 
-  return (control: AbstractControl): ValidationErrors | null => {
+  return (control: AbstractControl) => {
     if (skipOn) {
-      const currPage = loginSignupService.currPage();
+      const currPage = loginSignupService.getCurrPage();
 
       if (currPage === skipOn) return null;
     }
@@ -29,7 +28,7 @@ const customValidationFn = (type: keyof typeof validation, skipOn?: PageTypes): 
     const error = validation[type](control.value);
 
     if (error) {
-      return { [customError]: error };
+      return { [error]: true };
     }
     return null;
   };

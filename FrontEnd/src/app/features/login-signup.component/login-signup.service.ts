@@ -5,9 +5,11 @@ import { PageTypes } from './login-signup.model';
 export class LoginSignupService {
   private _currPage = signal<PageTypes>('signin');
 
-  currPage = this._currPage.asReadonly();
+  get getCurrPage() {
+    return this._currPage.asReadonly();
+  }
 
   changePage(newPage: PageTypes) {
-    this._currPage.set(newPage)
+    this._currPage.set(newPage);
   }
 }

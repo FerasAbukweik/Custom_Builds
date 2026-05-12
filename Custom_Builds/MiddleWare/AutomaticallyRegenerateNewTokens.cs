@@ -5,23 +5,17 @@ namespace custom_Peripherals.MiddleWare
 {
     public class RefreshTokenMiddleware
     {
-        private readonly IJWTService _jwtService;
-        private readonly IAddCookieService _addCookieService;
         private readonly IConfiguration _configuration;
         private readonly RequestDelegate _next;
 
-        public RefreshTokenMiddleware(IJWTService jwtService,
-                                      IAddCookieService addCookieService,
-                                      IConfiguration configuration,
+        public RefreshTokenMiddleware(IConfiguration configuration,
                                       RequestDelegate next)
         {
-            _jwtService = jwtService;
-            _addCookieService = addCookieService;
             _configuration = configuration;
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context , IJWTService _jwtService , IAddCookieService _addCookieService)
         {
             await _next(context);
 

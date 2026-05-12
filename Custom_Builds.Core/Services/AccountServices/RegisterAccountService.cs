@@ -116,7 +116,7 @@ namespace Custom_Builds.Core.Services.AccountServices
             if (!addRefreshTokenResult.IsSuccess) return addRefreshTokenResult;
 
             // add identity tokens to cookies
-            await _signinManager.SignInAsync(newUser, isPersistent: true);
+            await _signinManager.SignInAsync(newUser, false);
 
             return Result.Success();
         }

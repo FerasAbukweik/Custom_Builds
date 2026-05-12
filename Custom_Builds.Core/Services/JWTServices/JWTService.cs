@@ -63,7 +63,7 @@ namespace Custom_Builds.Core.Services.JWTServices
                     _configuration["JWT:Issuer"],
                     _configuration["JWT:Audience"],
                     claims,
-                    expires: DateTime.UtcNow.AddMinutes(double.Parse(_configuration["JWT:AccessTokenLife"]!)),
+                    expires: DateTime.UtcNow.AddMinutes(_configuration.GetValue<double>("JWT:AccessTokenLife"))),
                     signingCredentials: creds
                 );
 

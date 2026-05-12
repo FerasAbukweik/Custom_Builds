@@ -12,7 +12,7 @@ namespace Custom_Builds.Core.Domain.TokenEntities
         public required Guid Id { get; set; }
 
         [Required(ErrorMessage = "{0} Is Requiered")]
-        [Column(TypeName = "varchar")]
+        [Column(TypeName = "varchar(1000)")]
         public required string RefreshTokenString { get; set; }
 
         [Required(ErrorMessage = "{0} Is Requiered")]

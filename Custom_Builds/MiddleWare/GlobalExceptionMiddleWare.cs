@@ -38,7 +38,7 @@ namespace custom_Peripherals.MiddleWare
 
                 var response = new
                 {
-                    ErrorMessage = "Unexpected Error",
+                    ErrorMessage = ex.Message + "|" + ex.InnerException?.Message ?? "no inner ex",
                     statusCode
                 };
 

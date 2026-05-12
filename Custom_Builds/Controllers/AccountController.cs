@@ -102,5 +102,11 @@ namespace custom_Peripherals.Controllers
 
             return result.ToActionResult();
         }
+
+        [HttpGet("[action]")]
+        public IActionResult CheckToken()
+        {
+            return Ok();
+        }
     }
 }
