@@ -6,5 +6,6 @@ namespace Custom_Builds.Core.ServiceContracts.ICustomBuildServices
     public interface IGetCustomBuildService
     {
         Task<Result<CustomBuild>> GetByIdAsync(Guid customBuildId);
+        Task<Result<decimal>> GetTotalPriceAsync(Guid customBuildId);
     }
 }

@@ -10,7 +10,7 @@ namespace Custom_Builds.Core.ServiceContracts.IJWTServices
         Task<Result<string>> GenerateAccessTokenAsync(ApplicationUser user);
         Task<Result<AccessAndRefreshTokenDTO>> GenerateNewAccessAndRefreshTokensAsync();
         Result IsValidJWTSecurityToken(string? accessToken = null, bool validateExpireDate = true);
-        Result<ClaimsPrincipal> GetPrincipal(string accessToken , bool validateExpireDate = true);
-        Task<Result> AreRefreshTokenAndAccessTokenValidAsync(string accessToken , string refreshToken , bool validateExpireDate = true);
+        Result<ClaimsPrincipal> GetPrincipal(string? accessToken = null , bool validateExpireDate = true);
+        Task<Result> AreRefreshTokenAndAccessTokenValidAsync(string? accessToken = null , string? refreshToken = null , bool validateExpireDate = true);
     }
 }

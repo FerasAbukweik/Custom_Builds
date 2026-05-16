@@ -7,6 +7,6 @@ namespace Custom_Builds.Core.DTO
     {
         public required Guid Id { get; set; }
         public required string Title { get; set; }
-        public required List<Modification> Modifications { get; set; }
+        public required List<ModificationDTO> Modifications { get; set; }
     }
 }

@@ -1,21 +1,22 @@
 interface IModification {
-  id: number;
+  id: string;
   name: string;
   value?: string;
   desc?: string;
   icon?: string;
-  price: Number;
+  price: number;
   type: string;
 }
 
-interface IField {
-  id: number;
+interface ISection {
+  id: string;
   title: string;
-  items: IModification[];
+  modifications: IModification[];
 }
 
-export interface ISection {
-  id: number;
+export interface IPart {
+  id: string;
   icon: string;
-  fields: IField[];
+  name: string;
+  sections: ISection[];
 }

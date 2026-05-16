@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IOption } from './select-customizer.model';
-import { TopNavComponent } from '../../../shared/components/top-nav.component/top-nav.component';
+import { TopNavComponent } from '../../../layouts/top-nav.component/top-nav.component';
 import { ControllerCustomizerComponent } from './components/controller-customizer.component/controller-customizer.component';
 
 @Component({

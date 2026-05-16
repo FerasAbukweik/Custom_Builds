@@ -24,15 +24,37 @@ namespace Custom_Builds.Core.Domain.Entities
         public Guid? ProductId { get; set; }
         public Product? Product { get; set; }
 
+        [Required(ErrorMessage = "{0} is required.")]
+        public required int Quantity { get; set; }
+
         public CartItemDTO toDTO()
         {
             return new CartItemDTO()
             {
                 Id = this.Id,
-                CustomBuildId = this.CustomBuildId,
                 orderType = this.orderType,
+                CustomBuildId = this.CustomBuildId,
                 ProductId = this.ProductId,
-                TotalPriced = this.Product!.Price
+                TotalPrice = this.orderType switch
+                {
+                    OrderTypeEnum.Product => this.Product?.Price ?? -1,
+                    OrderTypeEnum.Custom => throw new Exception("Custom Build Price Must Be Passed to the toDTO() fun"),
+                    _ => throw new Exception("unknown order type")
+                },
+                image = this.orderType switch
+                {
+                    OrderTypeEnum.Product => this.Product?.Name ?? "missing product",
+                    OrderTypeEnum.Custom => "Custom Build image",
+                    _ => throw new Exception("unknown order type")
+                },
+                Quantity = this.Quantity,
+                Title = this.orderType switch
+                {
+                    OrderTypeEnum.Product => this.Product?.Name ?? "missing product",
+                    OrderTypeEnum.Custom => "Custom Build",
+                    _ => throw new Exception("unknown order type")
+                },
+                Specs = ["normal product"]
             };
         }
 
@@ -41,10 +63,24 @@ namespace Custom_Builds.Core.Domain.Entities
             return new CartItemDTO()
             {
                 Id = this.Id,
-                CustomBuildId = this.CustomBuildId,
                 orderType = this.orderType,
+                CustomBuildId = this.CustomBuildId,
                 ProductId = this.ProductId,
-                TotalPriced = totalPrice
+                TotalPrice = totalPrice,
+                image = this.orderType switch
+                {
+                    OrderTypeEnum.Product => this.Product?.Name ?? "missing product",
+                    OrderTypeEnum.Custom => "Custom Build image",
+                    _ => throw new Exception("unknown order type")
+                },
+                Title = this.orderType switch
+                {
+                    OrderTypeEnum.Product => this.Product?.Name ?? "missing product",
+                    OrderTypeEnum.Custom => "Custom Build",
+                    _ => throw new Exception("unknown order type")
+                },
+                Quantity = this.Quantity,
+                Specs = ["Custom Build"]
             };
         }
     }

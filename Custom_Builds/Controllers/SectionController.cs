@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace custom_Peripherals.Controllers
 {
     // only admins allowed
-    [Authorize(Roles = nameof(RoleEnums.Admin))]
+    //[Authorize(Roles = nameof(RoleEnums.Admin))]
     [Route("api/[controller]")]
     [ApiController]
     public class SectionController : ControllerBase

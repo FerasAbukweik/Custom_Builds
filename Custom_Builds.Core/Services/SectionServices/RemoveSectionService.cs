@@ -16,7 +16,7 @@ namespace Custom_Builds.Core.Services.SectionServices
         public async Task<Result> RemoveByIdAsync(Guid sectionId)
         {
             var result = await _sectionRepository.RemoveByIdAsync(sectionId);
-            if (!result.IsSuccess) return result.MapFailure();
+            if (!result.IsSuccess) return result;
 
             return Result.Success();
         }

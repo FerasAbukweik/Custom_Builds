@@ -22,7 +22,7 @@ namespace Custom_Builds.Core.Services.PartServices
 
             return Result<Part>.Success(result.Value!);
         }
-        public async Task<Result<List<Part>>> GetAllPartsIncludingAllData()
+        public async Task<Result<List<PartDTO>>> GetAllPartsIncludingAllData()
         {
             return await _partRepository.GetAllPartsIncludingAllData();
         }

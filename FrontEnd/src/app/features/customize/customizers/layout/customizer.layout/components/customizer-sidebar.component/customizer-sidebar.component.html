@@ -1,19 +1,19 @@
 <div class="border-b border-dark-blue-gray bg-deep-blue/30 px-2 pt-4">
   <div class="flex overflow-x-auto gap-2 px-2">
-    @for (tab of customizeData | keyvalue; track tab.key) {
+    @for (part of customizeData(); track part.id) {
       <button
-        (click)="setActiveTab(tab.key)"
+        (click)="setActivePartId(part.id)"
         [class]="
           `flex-1 flex flex-col items-center justify-center w-20 pb-3 pt-2 border-b-2 transition-all ${
-            activeTab() === tab.key
+            activePartId() === part.id
               ? 'border-secondary text-white'
               : 'border-transparent text-dark-gray'
           }`
         "
       >
-        <i [class]="tab.value.icon"></i>
+        <i [class]="part.icon"></i>
         <span class="text-[10px] font-bold uppercase tracking-widest">
-          {{ tab.key }}
+          {{ part.name }}
         </span>
       </button>
     }
@@ -21,7 +21,7 @@
 </div>
 
 <div class="flex-1 p-6 space-y-8 overflow-y-scroll">
-  @for (section of currentTabContent().fields; track section.id) {
+  @for (section of currentPartSections(); track section.id) {
     <section>
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-white text-xs font-bold uppercase tracking-widest">
@@ -33,57 +33,57 @@
       </div>
 
       <div class="flex flex-wrap gap-3">
-        @for (item of section.items; track item.id) {
+        @for (modification of section.modifications; track modification.id) {
           <button
-            (click)="customizerService.toggleProduct(section.id, item.id)"
+            (click)="customizerService.selectModification(section.id, modification.id)"
             [class]="
               `flex-1 min-w-40 max-w-60 max-[381px]:max-w-none! relative flex transition-all rounded-lg border-2 ${
-                selectedProduct[section.id] === item.id
+                selectedProduct()[section.id] === modification.id
                   ? 'border-secondary bg-white/5 ring-1 ring-secondary/30'
                   : 'border-dark-blue-gray hover:border-soft-gray/30 bg-transparent'
               } ${
-                item.type === 'card'
+                modification.type === 'card'
                   ? 'p-3 items-center justify-between'
                   : 'flex-col items-center p-2'
               }`
             "
           >
-            @if (item.type === 'color') {
+            @if (modification.type === 'color') {
               <div class="flex items-center gap-3 w-full">
                 <div
                   class="w-10 h-10 rounded border border-white/10"
-                  [style.backgroundColor]="item.value"
+                  [style.backgroundColor]="modification.value"
                 ></div>
                 <span
                   class="text-xs font-bold"
-                  [class.text-white]="selectedProduct[section.id] === item.id"
-                  [class.text-soft-gray]="selectedProduct[section.id] !== item.id"
+                  [class.text-white]="selectedProduct()[section.id] === modification.id"
+                  [class.text-soft-gray]="selectedProduct()[section.id] !== modification.id"
                 >
-                  {{ item.name }}
+                  {{ modification.name }}
                 </span>
               </div>
             }
 
-            @if (item.type === 'image') {
+            @if (modification.type === 'image') {
               <div
                 class="w-full aspect-square rounded bg-cover bg-center mb-2"
-                [style.backgroundImage]="'url(' + item.value + ')'"
+                [style.backgroundImage]="'url(' + modification.value + ')'"
               ></div>
               <span class="text-[10px] font-bold uppercase text-dark-gray">
-                {{ item.name }}
+                {{ modification.name }}
               </span>
             }
 
-            @if (item.type === 'card') {
+            @if (modification.type === 'card') {
               <div class="flex items-center gap-3">
                 <div
                   class="p-2 bg-deep-blue rounded text-white w-9 h-9 flex items-center justify-center"
                 >
-                  <i [class]="item.icon + ' text-lg'"></i>
+                  <i [class]="modification.icon + ' text-lg'"></i>
                 </div>
                 <div class="text-left">
-                  <p class="text-xs font-bold text-white">{{ item.name }}</p>
-                  <p class="text-[10px] text-soft-gray">{{ item.desc }}</p>
+                  <p class="text-xs font-bold text-white">{{ modification.name }}</p>
+                  <p class="text-[10px] text-soft-gray">{{ modification.desc }}</p>
                 </div>
               </div>
             }
@@ -102,6 +102,7 @@
     </div>
     <button
       class="whitespace-nowrap bg-secondary text-white px-8 py-3 rounded-lg font-bold text-sm hover:bg-blue-600 transition-all uppercase tracking-wider cursor-pointer max-[335px]:px-4 max-[335px]:text-xs"
+      (click)="addToCart()"
     >
       Add to Cart
     </button>

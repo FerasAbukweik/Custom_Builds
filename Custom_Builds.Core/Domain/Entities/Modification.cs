@@ -12,14 +12,14 @@ namespace Custom_Builds.Core.Domain.Entities
         [Required(ErrorMessage = "{0} Is Reqiered")]
         public required string Name { get; set; }
 
-        [Column(TypeName = "varchar")]
+        [Column(TypeName = "varchar(max)")]
         public string? Value { get; set; }
         public string? Description { get; set; }
 
-        [Column(TypeName = "varchar")]
+        [Column(TypeName = "varchar(max)")]
         public required string Type { get; set; }
 
-        [Column(TypeName = "varchar")]
+        [Column(TypeName = "varchar(max)")]
         public string? Icon { get; set; }
 
         [Required(ErrorMessage = "{0} Is Reqiered")]

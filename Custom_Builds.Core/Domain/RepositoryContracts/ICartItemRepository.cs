@@ -12,6 +12,7 @@ namespace Custom_Builds.Core.Domain.RepositryContracts
         Task<Result> RemoveByIdAsync(Guid cartItemId);
         Task<Result> RemoveAsync(CartItem toDel);
         Task<Result<List<CartItem>>> GetAllCartItemsAsync(LazyGetCartItemsDTO getData);
-        Task<Result<List<CartItem>>> FilterAsync(Expression<Func<CartItem, bool>> extraChecks, Expression<Func<CartItem, object>>[]? includes = null);
+        Task<Result<List<CartItem>>> FilterAsync(Expression<Func<CartItem, bool>> extraChecks, Expression<Func<CartItem, object?>>[]? includes = null);
+        Task<Result> UpdateRange(List<CartItem> newItems);
     }
 }

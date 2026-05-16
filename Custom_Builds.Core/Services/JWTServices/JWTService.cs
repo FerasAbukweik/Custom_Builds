@@ -91,17 +91,11 @@ namespace Custom_Builds.Core.Services.JWTServices
 
             // check if tokens are valid
             var checkTokensResult = await AreRefreshTokenAndAccessTokenValidAsync(getAccessTokenResult.Value!, getRefreshTokenResult.Value!, validateAccessTokenExpireDate: false);
-            if (!checkTokensResult.IsSuccess)
-            {
-                return Result<AccessAndRefreshTokenDTO>.Failure(checkTokensResult.ErrorMessage ?? "Invalid Tokens", checkTokensResult.StatusCode);
-            }
+            if (!checkTokensResult.IsSuccess) return checkTokensResult.MapFailure<AccessAndRefreshTokenDTO>();
 
             // get access token principal
             var getPrincipalResult = GetPrincipal(getAccessTokenResult.Value! , validateExpireDate: false);
-            if (!getPrincipalResult.IsSuccess)
-            {
-                return Result<AccessAndRefreshTokenDTO>.Failure(getPrincipalResult.ErrorMessage ?? "Some thing went wrong while trying to get Principal", getPrincipalResult.StatusCode);
-            }
+            if (!getPrincipalResult.IsSuccess) return getPrincipalResult.MapFailure<AccessAndRefreshTokenDTO>();
 
             // get user id from principal
             string? userId = getPrincipalResult.Value!.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -144,8 +138,16 @@ namespace Custom_Builds.Core.Services.JWTServices
 
             return Result<AccessAndRefreshTokenDTO>.Success(tokens);
         }
-        public Result<ClaimsPrincipal> GetPrincipal(string accessToken , bool validateExpireDate = true)
+        public Result<ClaimsPrincipal> GetPrincipal(string? accessToken = null , bool validateExpireDate = true)
         {
+            if (accessToken == null)
+            {
+                var getAccessTokesRes = _getCookieService.Get("AccessToken");
+                if (!getAccessTokesRes.IsSuccess) return Result<ClaimsPrincipal>.Failure("No access token");
+
+                accessToken = getAccessTokesRes.Value!;
+            }
+
             TokenValidationParameters tokenParams = new TokenValidationParameters()
             {
                 ValidateAudience = true,
@@ -225,8 +227,24 @@ namespace Custom_Builds.Core.Services.JWTServices
             }
             
         }
-        public async Task<Result> AreRefreshTokenAndAccessTokenValidAsync(string accessToken , string refreshToken , bool validateAccessTokenExpireDate = true)
+        public async Task<Result> AreRefreshTokenAndAccessTokenValidAsync(string? accessToken = null , string? refreshToken = null , bool validateAccessTokenExpireDate = true)
         {
+            if (accessToken == null)
+            {
+                var getAccessTokesRes = _getCookieService.Get("AccessToken");
+                if (!getAccessTokesRes.IsSuccess) return Result.Failure("No access token");
+
+                accessToken = getAccessTokesRes.Value!;
+            }
+
+            if (refreshToken == null)
+            {
+                var getRefreshTokenRes = _getCookieService.Get("RefreshToken");
+                if (!getRefreshTokenRes.IsSuccess) return Result.Failure("No refresh token");
+
+                refreshToken = getRefreshTokenRes.Value!;
+            }
+
             // check access token if its valid
             var isValidAccessTokenResult = IsValidJWTSecurityToken(accessToken, validateAccessTokenExpireDate);
             if (!isValidAccessTokenResult.IsSuccess) return isValidAccessTokenResult;
@@ -236,24 +254,24 @@ namespace Custom_Builds.Core.Services.JWTServices
             var refTokenResult = await _getRefreshTokenService.GetFromRefreshTokenString(refreshToken);
 
             // this to collect possible errors
-            Result result = new Result();
+            Result result = Result.Success();
             result.ErrorMessage = "";
-            result.StatusCode = HttpStatusCode.BadRequest;
-            result.IsSuccess = true;
-
 
             // collect possible errors
             if (!refTokenResult.IsSuccess)
             {
-                result.ErrorMessage += "No Refresh Token Was Found | ";
+                result.ErrorMessage += "No Refresh Token Was Found";
                 result.StatusCode = HttpStatusCode.Unauthorized;
                 result.IsSuccess = false;
             }
-            if (refTokenResult.IsSuccess && refTokenResult.Value!.ExpierDate <= DateTime.UtcNow)
+            else if (refTokenResult.Value!.ExpierDate <= DateTime.UtcNow)
             {
+                if (result.ErrorMessage != "") result.ErrorMessage += " | ";
                 result.ErrorMessage += "Expiered Refresh Token";
+                result.StatusCode = HttpStatusCode.Unauthorized;
                 result.IsSuccess = false;
             }
+
             if (!result.IsSuccess)
             {
                 return result;

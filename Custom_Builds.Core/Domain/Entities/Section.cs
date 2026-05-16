@@ -23,7 +23,7 @@ namespace Custom_Builds.Core.Domain.Entities
             {
                 Id = this.Id,
                 Title = this.Title,
-                Modifications = this.Modifications
+                Modifications = this.Modifications.Select(m => m.toDTO()).ToList()
             };
         }
     }

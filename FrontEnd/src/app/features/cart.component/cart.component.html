@@ -18,14 +18,14 @@
     <section
       class="flex flex-col gap-7 flex-1 overflow-y-auto min-[1169px]:max-h-[calc(100vh-300px)]"
     >
-      @for (item of cartItems; track $index) {
+      @for (item of cartItems(); track $index) {
         <div
           class="group flex h-fit flex-wrap gap-6 bg-dark-deep-blue p-6 rounded-xl border border-dark-gray/50 min-w-170 max-[760px]:min-w-75 justify-center"
         >
           <div class="rounded-lg overflow-hidden max-[565px]:w-full">
             <img
-              src="assets/images/keyboard-image.png"
-              alt="Product image"
+              [src]="item.image"
+              [alt]="item.title"
               class="h-48 w-full object-cover group-hover:scale-110 duration-700 ease-out transition-transform"
             />
           </div>
@@ -35,7 +35,7 @@
               <div class="flex flex-col gap-2">
                 <div class="flex justify-between gap-2 flex-wrap">
                   <h3 class="text-[1.25rem] text-white font-bold">
-                    Apex-Pro Custom Mechanical Keyboard
+                    {{ item.title }}
                   </h3>
                   <span>
                     <i
@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="flex gap-2 flex-wrap text-xs font-bold text-slate-400">
-                  @for (spec of specs; track $index) {
+                  @for (spec of item.specs; track $index) {
                     <span class="px-2 py-1 bg-slate-800 rounded-sm">
                       {{ spec }}
                     </span>
@@ -55,13 +55,13 @@
 
               <div class="flex justify-between gap-3 flex-wrap">
                 <div class="flex justify-between p-1 w-30 bg-slate-800 rounded-md text-white">
-                  <span class="px-3 py-1 rounded-sm hover:bg-white/10 cursor-pointer">-</span>
-                  <span class="self-center">1</span>
-                  <span class="px-3 py-1 rounded-sm hover:bg-white/10 cursor-pointer text-secondary"
+                  <span class="px-3 py-1 rounded-sm hover:bg-white/10 cursor-pointer" (click)="updateQuantity(item.id , -1)">-</span>
+                  <span class="self-center">{{ item.quantity }}</span>
+                  <span class="px-3 py-1 rounded-sm hover:bg-white/10 cursor-pointer text-secondary" (click)="updateQuantity(item.id , 1)"
                     >+</span
                   >
                 </div>
-                <span class="text-secondary text-2xl font-bold">$249.00</span>
+                <span class="text-secondary text-2xl font-bold">{{ item.totalPrice | currency }}</span>
               </div>
             </div>
           </div>

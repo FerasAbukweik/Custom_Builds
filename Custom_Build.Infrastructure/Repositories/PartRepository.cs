@@ -84,11 +84,32 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<List<Part>>.Success(parts);
         }
-        public async Task<Result<List<Part>>> GetAllPartsIncludingAllData()
+        public async Task<Result<List<PartDTO>>> GetAllPartsIncludingAllData()
         {
-            var allParts = await _dbContext.Parts.Include(p => p.Sections).ThenInclude(s => s.Modifications).ToListAsync();
+            var allParts = await _dbContext.Parts
+                .Select(p => new PartDTO
+                {
+                    Id = p.Id,
+                    Icon = p.Icon,
+                    Name = p.Name,
+                    Sections = p.Sections.Select(s => new SectionDTO
+                    {
+                        Id = s.Id,
+                        Title = s.Title,
+                        Modifications = s.Modifications.Select(m => new ModificationDTO
+                        {
+                            Id = m.Id,
+                            Name = m.Name,
+                            Price = m.Price,
+                            Type = m.Type,
+                            Description = m.Description,
+                            Icon = m.Icon,
+                            Value = m.Value,
+                        }).ToList()
+                    }).ToList()
+                }).ToListAsync();
 
-            return Result<List<Part>>.Success(allParts);
+            return Result<List<PartDTO>>.Success(allParts);
         }
         public async Task<Result> LinkSectionAsync(Guid partId, Section section)
         {

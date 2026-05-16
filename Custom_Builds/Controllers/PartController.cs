@@ -35,7 +35,7 @@ namespace custom_Peripherals.Controllers
 
 
         // add part
-        [Authorize(Roles = nameof(RoleEnums.Admin))]
+        //[Authorize(Roles = nameof(RoleEnums.Admin))]
         [HttpPost("[action]")]
         public async Task<IActionResult> Add([FromBody] AddPartDTO toAdd)
         {
@@ -76,7 +76,7 @@ namespace custom_Peripherals.Controllers
 
         // allow normal users to use this
         [HttpGet("[action]")]
-        public async Task<ActionResult<List<Part>>> GetAllParts()
+        public async Task<ActionResult<List<PartDTO>>> GetAllParts()
         {
             var result = await _getPartService.GetAllPartsIncludingAllData();
 

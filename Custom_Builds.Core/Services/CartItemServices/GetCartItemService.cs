@@ -1,10 +1,14 @@
 using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
+using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICartItemServices;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICustomBuildServices;
+using Custom_Builds.Core.ServiceContracts.IModificationServices;
 using Custom_Builds.Core.ServiceContracts.IProductServices;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Custom_Builds.Core.Services.CartItemServices
 {
@@ -12,15 +16,15 @@ namespace Custom_Builds.Core.Services.CartItemServices
     {
         private readonly ICartItemRepository _cartItemRepository;
         private readonly IGetCurrUserService _getCurrUserService;
-        private readonly IGetProductService _getProductService;
+        private readonly IGetCustomBuildService _getCustomBuildService;
 
         public GetCartItemService(ICartItemRepository cartItemRepository,
                                   IGetCurrUserService getCurrUserService,
-                                  IGetProductService getProductService)
+                                  IGetCustomBuildService getCustomBuildService)
         {
             _cartItemRepository = cartItemRepository;
             _getCurrUserService = getCurrUserService;
-            _getProductService = getProductService;
+            _getCustomBuildService = getCustomBuildService;
         }
 
         public async Task<Result<List<CartItemDTO>>> GetAllCartItemsAsync(LazyGetCartItemsDTO getData)
@@ -33,10 +37,24 @@ namespace Custom_Builds.Core.Services.CartItemServices
             getData.UserId = getTargetUserIdResult.Value!;
 
             // get target user cart items -- with include product so we can access product price  
-            var result = await _cartItemRepository.FilterAsync(ci => ci.UserId == getData.UserId, [ci => ci.Product!]);
+            var result = await _cartItemRepository.FilterAsync(ci => ci.UserId == getData.UserId,[ci => ci.Product]);
             if (!result.IsSuccess) return result.MapFailure<List<CartItemDTO>>();
 
-            List<CartItemDTO> newCartItems = result.Value!.Select(c => c.toDTO()).ToList();
+
+            List<CartItemDTO> newCartItems = new List<CartItemDTO>();
+
+            foreach (var item in result.Value!)
+            {
+                if (item.orderType == OrderTypeEnum.Product) newCartItems.Add(item.toDTO());
+
+                else if (item.orderType == OrderTypeEnum.Custom)
+                {
+                    var getModificationsPriceRes = await _getCustomBuildService.GetTotalPriceAsync(item.CustomBuildId!.Value);
+                    if (!getModificationsPriceRes.IsSuccess) throw new Exception(getModificationsPriceRes.ErrorMessage);
+
+                    newCartItems.Add(item.toDTO(getModificationsPriceRes.Value!));
+                }
+            }
 
             return Result<List<CartItemDTO>>.Success(newCartItems);
         }

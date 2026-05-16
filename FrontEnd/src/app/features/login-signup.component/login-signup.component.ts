@@ -1,5 +1,5 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { LogoComponent } from '../../shared/components/logo.component/logo.component';
+import { LogoComponent } from '../../layouts/logo.component/logo.component';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { IFooterExtraPages, IFormGroupType, PageTypes } from './login-signup.model';
@@ -40,7 +40,6 @@ export class LoginSignupComponent {
   currPage = this.loginSignupService.getCurrPage;
   isShowPassword = signal(false);
 
-
   // define form for both login and signup pages
   form: FormGroup<IFormGroupType> = new FormGroup<IFormGroupType>({
     email: new FormControl('', {
@@ -76,20 +75,20 @@ export class LoginSignupComponent {
     // check all controls
     for (const [key, control] of Object.entries(this.form.controls)) {
       // if no error skip
-      if(!this.isError(key as keyof IFormGroupType)) continue;
+      if (!this.isError(key as keyof IFormGroupType)) continue;
 
       // get new errors
       const newErrors = Object.keys(control.errors ?? {});
-      
+
       // add new errors to the errors array
-      errors = [...errors , ...newErrors];
+      errors = [...errors, ...newErrors];
     }
 
     // add server error if exists
-    if(this.form.errors?.["server"]) {
-      errors = [...errors, this.form.errors["server"]];
+    if (this.form.errors?.['server']) {
+      errors = [...errors, this.form.errors['server']];
     }
-    
+
     return errors;
   }
 
@@ -111,43 +110,43 @@ export class LoginSignupComponent {
 
     // login
     if (this.currPage() === 'signin') {
-      const loginData : ILoginDTO = {
+      const loginData: ILoginDTO = {
         Email: this.form.value.email!,
         Password: this.form.value.password!,
-      }
+      };
 
       const sub = this.accountServices.login(loginData).subscribe({
         next: () => {
           this.router.navigate(['/']);
         },
         error: (err) => {
-          this.form.setErrors({ server: err?.error ?? "Unknown server error" });
-        }
-      })
+          this.form.setErrors({ server: err?.error ?? 'Unknown server error' });
+        },
+      });
 
       this.destroyRef.onDestroy(() => sub.unsubscribe());
     }
-    
+
     // signup
     else {
-      const signupData : IRegisterDTO = {
+      const signupData: IRegisterDTO = {
         Email: this.form.value.email!,
         Password: this.form.value.password!,
         PhoneNumber: this.form.value.phoneNumber!,
         UserName: this.form.value.userName!,
         Role: RoleEnums.User,
-      }
+      };
 
       const sub = this.accountServices.register(signupData).subscribe({
         next: () => {
           this.router.navigate(['/']);
         },
         error: (err) => {
-          this.form.setErrors({ server: err?.error ?? "Unknown server error" });
-        }
-      })
+          this.form.setErrors({ server: err?.error ?? 'Unknown server error' });
+        },
+      });
 
-      this.destroyRef.onDestroy(()=> sub.unsubscribe());
+      this.destroyRef.onDestroy(() => sub.unsubscribe());
     }
   }
 }

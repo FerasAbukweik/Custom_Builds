@@ -7,11 +7,12 @@ export const loginSignupGuard : CanMatchFn = () => {
     const accountServices = inject(AccountServices);
     const router = inject(Router);
     
-    return accountServices.checkToken().pipe(
+    accountServices.checkToken().pipe(
         map(() => {
-            router.navigateByUrl('/');
+            router.navigate(['/']);
             return false;
-        }),
-        catchError(() => of(true))
-    );
+        })
+    ).subscribe();
+
+    return true;
 }

@@ -8,5 +8,6 @@ namespace Custom_Builds.Core.DTO
         public Guid Id { get; set; }
         public required string Icon { get; set; }
         public required string Name { get; set; }
+        public required List<SectionDTO> Sections { get; set; }
     }
 }

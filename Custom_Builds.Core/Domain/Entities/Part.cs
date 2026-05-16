@@ -10,7 +10,7 @@ namespace Custom_Builds.Core.Domain.Entities
         public Guid Id { get; set; }
 
         [Required(ErrorMessage = "{0} Is Requiered")]
-        [Column(TypeName = "varchar")]
+        [Column(TypeName = "varchar(max)")]
         public required string Icon { get; set; }
 
         [Required(ErrorMessage = "{0} Is Requiered")]
@@ -25,9 +25,10 @@ namespace Custom_Builds.Core.Domain.Entities
         {
             return new PartDTO()
             {
-                 Id = this.Id,
-                 Icon = this.Icon,
-                 Name = this.Name
+                Id = this.Id,
+                Icon = this.Icon,
+                Name = this.Name,
+                Sections = this.Sections.Select(s => s.toDTO()).ToList()
             };
         }
     }

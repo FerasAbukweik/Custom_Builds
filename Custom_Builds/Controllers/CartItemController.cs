@@ -8,6 +8,7 @@ using Custom_Builds.Core.ServiceContracts.ICartItemServices;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Immutable;
 
 namespace custom_Peripherals.Controllers
 {
@@ -18,15 +19,18 @@ namespace custom_Peripherals.Controllers
         private readonly IAddCartItemService _addCartItemService;
         private readonly IRemoveCartItemService _removeCartItemService;
         private readonly IGetCartItemService _getCartItemService;
+        private readonly IUpdateCartItemService _updateCartItemService;
 
         public CartItemController(
             IAddCartItemService addCartItemService,
             IRemoveCartItemService removeCartItemService,
-            IGetCartItemService getCartItemService)
+            IGetCartItemService getCartItemService,
+            IUpdateCartItemService updateCartItemService)
         {
             _addCartItemService = addCartItemService;
             _removeCartItemService = removeCartItemService;
             _getCartItemService = getCartItemService;
+            _updateCartItemService = updateCartItemService;
         }
 
 
@@ -84,5 +88,22 @@ namespace custom_Peripherals.Controllers
 
             return result.ToActionResult();
         }
+
+
+        // update quantities
+        [Authorize(Roles = ($"{nameof(RoleEnums.User)}"))]
+        [HttpPut("[action]")]
+        public async Task<IActionResult> updateQuantity(UpdateQuantitiesDTO newQtys)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState.CollectErrors());
+            }
+
+            var updateResult = await _updateCartItemService.UpdateQuantitesAsync(newQtys);
+
+            return updateResult.ToActionResult();
+        }
+
     }
 }

@@ -16,7 +16,7 @@ namespace Custom_Builds.Core.Services.OrderServices
         public async Task<Result> RemoveByIdAsync(Guid orderId)
         {
             var result = await _orderRepository.RemoveByIdAsync(orderId);
-            if (!result.IsSuccess) return result.MapFailure();
+            if (!result.IsSuccess) return result;
 
             return Result.Success();
         }

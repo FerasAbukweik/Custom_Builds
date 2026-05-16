@@ -43,21 +43,10 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<Result<Modification>> AddAsync(Modification toAdd)
         {
-            Modification newModification = new Modification()
-            {
-                Id = Guid.NewGuid(),
-                Description = toAdd.Description,
-                Icon = toAdd.Icon,
-                Name = toAdd.Name,
-                Price = toAdd.Price,
-                Type = toAdd.Type,
-                Value = toAdd.Value,
-            };
-
-            _dbContext.Modifications.Add(newModification);
+            _dbContext.Modifications.Add(toAdd);
             await _dbContext.SaveChangesAsync();
 
-            return Result<Modification>.Success(newModification);
+            return Result<Modification>.Success(toAdd);
         }
         public async Task<Result> EditByIdAsync(EditModificationDTO newData)
         {

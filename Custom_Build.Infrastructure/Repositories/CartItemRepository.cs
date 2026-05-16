@@ -36,7 +36,8 @@ namespace Custom_Builds.Infrastructure.Repositories
                 UserId = toAdd.UserId,
                 orderType = toAdd.orderType,
                 CustomBuildId = toAdd.CustomBuildId,
-                ProductId = toAdd.ProductId
+                ProductId = toAdd.ProductId,
+                Quantity = 1,
             };
 
             _dbContext.Cart.Add(newCartItem);
@@ -86,7 +87,7 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<List<CartItem>>.Success(cartItems);
         }
-        public async Task<Result<List<CartItem>>> FilterAsync(Expression<Func<CartItem, bool>> extraChecks, Expression<Func<CartItem, object>>[]? includes = null)
+        public async Task<Result<List<CartItem>>> FilterAsync(Expression<Func<CartItem, bool>> extraChecks, Expression<Func<CartItem, object?>>[]? includes = null)
         {
             var CartItemQuery = _dbContext.Cart.AsQueryable();
 
@@ -101,6 +102,14 @@ namespace Custom_Builds.Infrastructure.Repositories
             List<CartItem> cartItems = await CartItemQuery.Where(extraChecks).ToListAsync();
 
             return Result<List<CartItem>>.Success(cartItems);
+        }
+        public async Task<Result> UpdateRange(List<CartItem> newItems)
+        {
+            _dbContext.Cart.UpdateRange(newItems);
+
+            await _dbContext.SaveChangesAsync();
+
+            return Result.Success();
         }
     }
 }

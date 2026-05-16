@@ -15,7 +15,7 @@ namespace Custom_Builds.Core.Services.ProductServices
         public async Task<Result> RemoveByIdAsync(Guid productId)
         {
             var result = await _productRepository.RemoveByIdAsync(productId);
-            if (!result.IsSuccess) return result.MapFailure();
+            if (!result.IsSuccess) return result;
 
             return Result.Success();
         }

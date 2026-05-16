@@ -169,6 +169,7 @@ builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 builder.Services.AddScoped<IGetCartItemService, GetCartItemService>();
 builder.Services.AddScoped<IAddCartItemService, AddCartItemService>();
 builder.Services.AddScoped<IRemoveCartItemService, RemoveCartItemService>();
+builder.Services.AddScoped<IUpdateCartItemService, UpdateCartItemService>();
 
 // Order Services + Reposotory
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();

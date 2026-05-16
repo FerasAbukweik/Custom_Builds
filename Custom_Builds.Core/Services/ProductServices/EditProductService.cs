@@ -15,7 +15,7 @@ namespace Custom_Builds.Core.Services.ProductServices
         public async Task<Result> EditByIdAsync(EditProductDTO newData)
         {
             var result = await _productRepository.EditByIdAsync(newData);
-            if (!result.IsSuccess) return result.MapFailure();
+            if (!result.IsSuccess) return result;
 
             return Result.Success();
         }

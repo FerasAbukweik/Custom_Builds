@@ -16,7 +16,7 @@ namespace Custom_Builds.Core.Services.PartServices
         public async Task<Result> RemoveByIdAsync(Guid partId)
         {
             var result = await _partRepository.RemoveByIdAsync(partId);
-            if (!result.IsSuccess) return result.MapFailure();
+            if (!result.IsSuccess) return result;
 
             return Result.Success();
         }

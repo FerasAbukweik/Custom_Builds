@@ -50,7 +50,7 @@ namespace Custom_Builds.Core.Services.CurrUserServices
         public Result<Guid> GetUserId()
         {
             // get current user id from claim
-            string? userIdString = _httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            string? userIdString = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             // if no user id claim found, return failure result
             if (userIdString == null)

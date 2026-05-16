@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace custom_Peripherals.Controllers
 {
     // only admin allowed
-    [Authorize(Roles = nameof(RoleEnums.Admin))]
+    //[Authorize(Roles = nameof(RoleEnums.Admin))]
     [Route("api/[controller]")]
     [ApiController]
     public class ModificationsController : ControllerBase
