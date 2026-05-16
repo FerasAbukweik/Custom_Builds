@@ -84,7 +84,7 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(ModelState.CollectErrors());
             }
             
-            var result = await _getCartItemService.GetAllCartItemsAsync(getData);
+            var result = await _getCartItemService.LazyGetAllCartItemsAsync(getData);
 
             return result.ToActionResult();
         }

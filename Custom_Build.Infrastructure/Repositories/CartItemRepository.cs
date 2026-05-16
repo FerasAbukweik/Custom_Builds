@@ -111,5 +111,21 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result.Success();
         }
+        public async Task<Result<List<CartItem>>> LazyGetCartItems(LazyGetCartItemsDTO reqData)
+        {
+            var items = await _dbContext.Cart
+                .Include(ci => ci.Product)
+                .Where(ci => ci.UserId == reqData.UserId)
+                .Skip(reqData.Section * reqData.ElementsPerSection)
+                .Take(reqData.ElementsPerSection)
+                .ToListAsync();
+
+            if(items.Count <= 0)
+            {
+                return Result<List<CartItem>>.Failure("no items where found");
+            }
+
+            return Result<List<CartItem>>.Success(items);
+        }
     }
 }

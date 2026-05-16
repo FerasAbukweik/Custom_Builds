@@ -93,6 +93,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             // get access token from cookies
             OnMessageReceived = context =>
             {
+                // Authorization only supplied when generating new tokens via UseAutoRegenerateTokens middleware
+                if (context.Request.Headers.ContainsKey("Authorization"))
+                {
+                    return Task.CompletedTask;
+                }
+
                 if(context.Request.Cookies.TryGetValue("AccessToken" , out string? token))
                 {
                     context.Token = token;

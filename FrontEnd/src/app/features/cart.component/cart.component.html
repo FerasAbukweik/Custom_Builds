@@ -18,10 +18,14 @@
     <section
       class="flex flex-col gap-7 flex-1 overflow-y-auto min-[1169px]:max-h-[calc(100vh-300px)]"
     >
-      @for (item of cartItems(); track $index) {
+
+      @for (item of cartItems(); track $index ; let isLast = $last) {
         <div
           class="group flex h-fit flex-wrap gap-6 bg-dark-deep-blue p-6 rounded-xl border border-dark-gray/50 min-w-170 max-[760px]:min-w-75 justify-center"
         >
+        @if(isLast){
+          <span (appIsVisable)="lazyGetCartItems()"></span>
+        }
           <div class="rounded-lg overflow-hidden max-[565px]:w-full">
             <img
               [src]="item.image"
@@ -67,11 +71,17 @@
             </div>
           </div>
         </div>
+
+        @if(isLast && isLoading()){
+          <app-loading class="w-full flex justify-center"/>
+        }
       }
       @empty {
-        <div class="text-white w-fit h-fit p-5 mx-auto text-2xl font-bold">
+        @if (!isLoading()) {
+          <div class="text-white w-fit h-fit p-5 mx-auto text-2xl font-bold">
           Your cart is empty
         </div>
+        }
       }
     </section>
 

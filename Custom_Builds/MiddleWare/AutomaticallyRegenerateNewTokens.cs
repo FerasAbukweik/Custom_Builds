@@ -1,4 +1,5 @@
-﻿using Custom_Builds.Core.ServiceContracts.CookieServices;
+﻿using Azure.Core;
+using Custom_Builds.Core.ServiceContracts.CookieServices;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
 using Custom_Builds.Core.ServiceContracts.IJWTServices;
 
@@ -39,6 +40,9 @@ namespace custom_Peripherals.MiddleWare
             var refreshTokenLife = _configuration.GetValue<double>("JWT:RefreshTokenLife");
             addCookieService.Add("AccessToken", tokens.Value!.AccessToken, refreshTokenLife);
             addCookieService.Add("RefreshToken", tokens.Value!.RefreshToken, refreshTokenLife);
+
+            // add token to the request to pass authentication on current request
+            context.Request.Headers["Authorization"] = $"Bearer {tokens.Value!.AccessToken}";
 
             await _next(context);
         }

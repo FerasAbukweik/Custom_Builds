@@ -6,9 +6,6 @@ using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICartItemServices;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Custom_Builds.Core.ServiceContracts.ICustomBuildServices;
-using Custom_Builds.Core.ServiceContracts.IModificationServices;
-using Custom_Builds.Core.ServiceContracts.IProductServices;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Custom_Builds.Core.Services.CartItemServices
 {
@@ -27,7 +24,7 @@ namespace Custom_Builds.Core.Services.CartItemServices
             _getCustomBuildService = getCustomBuildService;
         }
 
-        public async Task<Result<List<CartItemDTO>>> GetAllCartItemsAsync(LazyGetCartItemsDTO getData)
+        public async Task<Result<List<CartItemDTO>>> LazyGetAllCartItemsAsync(LazyGetCartItemsDTO getData)
         {
             // get target userId to insure
             var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(getData.UserId);
@@ -37,7 +34,7 @@ namespace Custom_Builds.Core.Services.CartItemServices
             getData.UserId = getTargetUserIdResult.Value!;
 
             // get target user cart items -- with include product so we can access product price  
-            var result = await _cartItemRepository.FilterAsync(ci => ci.UserId == getData.UserId,[ci => ci.Product]);
+            var result = await _cartItemRepository.LazyGetCartItems(getData);
             if (!result.IsSuccess) return result.MapFailure<List<CartItemDTO>>();
 
 
@@ -45,14 +42,22 @@ namespace Custom_Builds.Core.Services.CartItemServices
 
             foreach (var item in result.Value!)
             {
+                // if its a normal product just take its price
                 if (item.orderType == OrderTypeEnum.Product) newCartItems.Add(item.toDTO());
+                
 
+                // if it is custom build sum its modifications prices
                 else if (item.orderType == OrderTypeEnum.Custom)
                 {
                     var getModificationsPriceRes = await _getCustomBuildService.GetTotalPriceAsync(item.CustomBuildId!.Value);
                     if (!getModificationsPriceRes.IsSuccess) throw new Exception(getModificationsPriceRes.ErrorMessage);
 
                     newCartItems.Add(item.toDTO(getModificationsPriceRes.Value!));
+                }
+
+                else
+                {
+                    throw new Exception("unhandled order type at GetAllCartItemsAsync");
                 }
             }
 

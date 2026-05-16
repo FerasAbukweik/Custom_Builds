@@ -9,10 +9,12 @@ import { ILazyGetCartItemsDTO } from '../../core/DTO/lazy-get-cart-items-dto';
 import { catchError, debounceTime, firstValueFrom, map, of, switchMap, tap } from 'rxjs';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { INewQuantities } from './cart.model';
+import { IsVisableDirective } from '../../shared/directives/is-visable.directive';
+import { LoadingComponent } from "../../shared/components/loading/loading.component/loading.component";
 
 @Component({
   selector: 'app-cart',
-  imports: [CurrencyPipe, TopNavComponent, RouterLink , CurrencyPipe],
+  imports: [CurrencyPipe, TopNavComponent, RouterLink, CurrencyPipe, IsVisableDirective, LoadingComponent],
   templateUrl: './cart.component.html',
 })
 export class CartComponent implements OnInit {
@@ -23,6 +25,7 @@ export class CartComponent implements OnInit {
   // signals
   cartItems = signal<ICartItemDTO[]>([]);
   newQuantities = signal<INewQuantities>({});
+  isLoading = signal<boolean>(true);
 
   // observables
   // use observable for debounce time
@@ -33,21 +36,36 @@ export class CartComponent implements OnInit {
     Section: 0,
     ElementsPerSection: 10,
   };
+  private isMoreDataAvailable : boolean = true;
+
+  // getters
+
+  get TotalPrice(){
+    let totalPrice = 0;
+
+    this.cartItems().forEach(item => {
+      totalPrice += item.totalPrice * item.quantity;
+  });
+
+  return totalPrice;
+}
+
+get ItemsCount(){
+  let itemsCount = 0;
+
+  this.cartItems().forEach(item => {
+    itemsCount += item.quantity;
+  });
+
+  return itemsCount;
+}
+
+
+
 
   ngOnInit(): void {
     // get inital cart items
-    this.cartItemService.GetCartItems(this.requestData)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (res) => {
-        this.cartItems.update(curr => ([...curr, ...res]));
-
-        this.requestData.Section++;
-      },
-      error: (err) => {
-        console.log(err);
-      },
-    });
+    this.lazyGetCartItems(true);
 
     // we need this for later if something goes wrong and we need to restore the previous state
     let prevItems : ICartItemDTO[] = [];
@@ -56,6 +74,7 @@ export class CartComponent implements OnInit {
     this.newQuantities$.pipe(
       tap((val) => {
 
+      // only the first time we need backup so we dont loose data
       if(prevItems.length === 0) prevItems = this.cartItems();
 
       // update quantity immediately for better user experience
@@ -78,6 +97,31 @@ export class CartComponent implements OnInit {
     });
   }
 
+  lazyGetCartItems(skipIsLoading : boolean = false){
+    if(!this.isMoreDataAvailable || (!skipIsLoading && this.isLoading())) return;
+    if(!skipIsLoading) this.isLoading.set(true);
+
+    this.cartItemService.GetCartItems(this.requestData)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: (res) => {
+        this.cartItems.update(curr => ([...curr, ...res]));
+
+        this.requestData.Section++;
+        
+        this.isMoreDataAvailable = res.length > 0;
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        // toDo: show error message
+        if(err.error === "no items where found"){
+          this.isMoreDataAvailable = false;
+        }
+
+        this.isLoading.set(false);
+      },
+    });
+  }
 
   async updateItemsQuantity(newQuantities: INewQuantities): Promise<boolean> {
   try
@@ -126,26 +170,5 @@ export class CartComponent implements OnInit {
     }
       
     this.newQuantities.update(curr => ({...curr, [id]: newVal}));
-  }
-
-
-  get TotalPrice(){
-    let totalPrice = 0;
-
-    this.cartItems().forEach(item => {
-      totalPrice += item.totalPrice * item.quantity;
-    });
-
-    return totalPrice;
-  }
-
-
-  get ItemsCount(){
-    let itemsCount = 0;
-    this.cartItems().forEach(item => {
-      itemsCount += item.quantity;
-    });
-
-    return itemsCount;
   }
 }
