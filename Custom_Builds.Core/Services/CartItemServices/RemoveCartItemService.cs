@@ -26,7 +26,7 @@ namespace Custom_Builds.Core.Services.CartItemServices
             var getCartItemResult = await _cartItemRepository.GetByIdAsync(cartItemId);
             if (!getCartItemResult.IsSuccess) return getCartItemResult;
 
-            if (getCartItemResult.Value!.Id == getCurrUserId.Value!)
+            if (getCartItemResult.Value!.UserId == getCurrUserId.Value!)
             {
                 var removeCartItemResult = await _cartItemRepository.RemoveAsync(getCartItemResult.Value!);
                 if (!removeCartItemResult.IsSuccess) return removeCartItemResult;

@@ -40,6 +40,7 @@
                   <span>
                     <i
                       class="fa-regular fa-trash-can hover:text-error text-xl text-off-white/50 cursor-pointer transition-colors"
+                      (click)="Remove(item.id)"
                     ></i>
                   </span>
                 </div>
@@ -67,6 +68,11 @@
           </div>
         </div>
       }
+      @empty {
+        <div class="text-white w-fit h-fit p-5 mx-auto text-2xl font-bold">
+          Your cart is empty
+        </div>
+      }
     </section>
 
     <section
@@ -75,8 +81,8 @@
       <h2 class="mb-2 text-2xl text-white font-bold">Order Summary</h2>
 
       <div class="flex justify-between gap-5 items-center">
-        <span class="text-slate-400 text-lg">Subtotal (2 items)</span>
-        <span class="text-slate-400 text-lg">{{ 438.0 | currency }}</span>
+        <span class="text-slate-400 text-lg">Subtotal ({{ ItemsCount }} items)</span>
+        <span class="text-slate-400 text-lg">{{ TotalPrice | currency }}</span>
       </div>
 
       <div class="flex justify-between gap-5 items-center">
@@ -93,7 +99,7 @@
 
       <div class="flex justify-between gap-5 items-center">
         <span class="text-white text-xl">Total</span>
-        <span class="text-white font-bold text-3xl">{{ 473.04 | currency }}</span>
+        <span class="text-white font-bold text-3xl">{{ TotalPrice | currency }}</span>
       </div>
 
       <button

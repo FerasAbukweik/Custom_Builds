@@ -6,10 +6,9 @@ import { CartItemServices } from '../../core/services/cart-item-services';
 import { __importDefault } from 'tslib';
 import { ICartItemDTO } from '../../core/DTO/cart-item-dto';
 import { ILazyGetCartItemsDTO } from '../../core/DTO/lazy-get-cart-items-dto';
-import { debounceTime, switchMap } from 'rxjs';
+import { catchError, debounceTime, firstValueFrom, map, of, switchMap, tap } from 'rxjs';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { INewQuantities } from './cart.model';
-import id from '@angular/common/locales/id';
 
 @Component({
   selector: 'app-cart',
@@ -26,6 +25,7 @@ export class CartComponent implements OnInit {
   newQuantities = signal<INewQuantities>({});
 
   // observables
+  // use observable for debounce time
   newQuantities$ = toObservable(this.newQuantities);
 
   // fields
@@ -36,7 +36,7 @@ export class CartComponent implements OnInit {
 
   ngOnInit(): void {
     // get inital cart items
-    const sub = this.cartItemService.GetCartItems(this.requestData)
+    this.cartItemService.GetCartItems(this.requestData)
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
       next: (res) => {
@@ -49,33 +49,66 @@ export class CartComponent implements OnInit {
       },
     });
 
+    // we need this for later if something goes wrong and we need to restore the previous state
+    let prevItems : ICartItemDTO[] = [];
 
     // check for quantities changes
-    const sub2 = this.newQuantities$.pipe(debounceTime(250) , takeUntilDestroyed(this.destroyRef))
+    this.newQuantities$.pipe(
+      tap((val) => {
+
+      if(prevItems.length === 0) prevItems = this.cartItems();
+
+      // update quantity immediately for better user experience
+      const idsSet = new Set(Object.keys(val));
+
+      this.cartItems.update(curr =>
+        curr.map(item => idsSet.has(item.id) ? {...item, quantity: val[item.id]!} : item));
+
+    }) ,
+    debounceTime(500) , takeUntilDestroyed(this.destroyRef))
     .subscribe({
-      next: (newQuantities : INewQuantities) => {
-        this.updateItemQuantity(newQuantities)
+      next: async (newQuantities : INewQuantities) => {
+        if(!(await this.updateItemsQuantity(newQuantities))){
+          // restore previous items
+          this.cartItems.set(prevItems);
+        }
+
+        prevItems = [];
       }
     });
   }
 
 
-  updateItemQuantity(newQuantities: INewQuantities) {
+  async updateItemsQuantity(newQuantities: INewQuantities): Promise<boolean> {
+  try
+  {
+    await firstValueFrom(
+      this.cartItemService.updateQuantity(newQuantities).pipe(takeUntilDestroyed(this.destroyRef))
+    );
+    return true;
+  }
+  catch (error) {
+    return false;
+  }
+}
+
+  Remove(id : string) {
     // to get back to previous state if something went wrong
     const prevItems = this.cartItems();
-    // set for o(1) time to check for ids
-    const idsSet = new Set(Object.keys(newQuantities));
-    
-    // update quantity immediately for better user experience
-    this.cartItems.update(curr =>
-      curr.map(item => idsSet.has(item.id) ? {...item, quantity: newQuantities[item.id]} : item));
 
-    // call api to update quantity
-    const sub = this.cartItemService.updateQuantity(newQuantities)
+    this.cartItems.update(curr => curr.filter(ci => ci.id !== id));
+    
+    // remove item from newQuantities signal
+    this.newQuantities.update(curr => {
+      const { [id]: _, ...rest } = curr;
+      return rest;
+    });
+
+    this.cartItemService.remove(id)
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
       error: () => {
-        // if something went wrong, return to previous data
+        // if something went wrong return to previous data
         // toDo: show error message
         this.cartItems.set(prevItems);
       },
@@ -85,9 +118,34 @@ export class CartComponent implements OnInit {
   updateQuantity(id : string , add : number) {
     const originalQuantity: number = this.cartItems().find(i => i.id === id)?.quantity!;
 
-    this.newQuantities.update(curr => ({...curr, [id]: (curr[id] ?? originalQuantity) + add }));
+    const newVal = (this.newQuantities()[id] ?? originalQuantity) + add;
+
+    if(newVal <= 0){
+      this.Remove(id);
+      return;
+    }
+      
+    this.newQuantities.update(curr => ({...curr, [id]: newVal}));
   }
 
 
+  get TotalPrice(){
+    let totalPrice = 0;
 
+    this.cartItems().forEach(item => {
+      totalPrice += item.totalPrice * item.quantity;
+    });
+
+    return totalPrice;
+  }
+
+
+  get ItemsCount(){
+    let itemsCount = 0;
+    this.cartItems().forEach(item => {
+      itemsCount += item.quantity;
+    });
+
+    return itemsCount;
+  }
 }

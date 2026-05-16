@@ -37,5 +37,9 @@ export class CartItemServices {
     return this.httpClient.put(`${this.url}/updateQuantity`, body);
   }
 
-  
+
+  // remove item
+  public remove = (id: string) => {
+    return this.httpClient.delete(`${this.url}/Remove/${id}`);
+  }
 }

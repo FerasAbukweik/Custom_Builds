@@ -7,6 +7,7 @@ import { CustomBuildTypeEnum } from '../../../../../../../core/enums/custom-buil
 import { ActivatedRoute, Router } from '@angular/router';
 import { IPart } from '../../../../../../../core/interfaces/customize-data/customize-data.model';
 import { PartServices } from '../../../../../../../core/services/part-services';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'aside[customizerSideBar]',
@@ -18,6 +19,7 @@ import { PartServices } from '../../../../../../../core/services/part-services';
   },
 })
 export class CustomizerSidebarComponent implements OnInit {
+  // injections
   readonly customizerService = inject(CustomizerService);
   readonly cartItemServices = inject(CartItemServices);
   readonly activatedRoute = inject(ActivatedRoute);
@@ -25,34 +27,35 @@ export class CustomizerSidebarComponent implements OnInit {
   readonly partServices = inject(PartServices);
   readonly destroyRef = inject(DestroyRef);
 
+  // data
   readonly selectedProduct = this.customizerService.selectedProduct;
 
+  // signals
   activePartId = signal<string>('');
   customizeData = signal<IPart[]>([]);
+  isAddingToCart = signal<boolean>(false);
 
+  // computed
   currentPartSections = computed(
     () => this.customizeData()?.find((part) => part.id === this.activePartId())?.sections ?? [],
   );
 
+  // getters
+  get pageType(): CustomBuildTypeEnum{
+    return this.activatedRoute.snapshot.data['pageType'];
+  }
+
   ngOnInit() {
-    const sub = this.partServices.getAllParts().subscribe({
+    this.partServices.getAllParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.customizeData.set(data);
+        if (data.length > 0) {
+          this.activePartId.set(data[0].id);
+        }
       },
       error: (error) => {
         //todo: show error message
       },
-    });
-
-    if (this.customizeData().length <= 0) {
-      // toDo: show error message
-      console.log('no data');
-      return;
-    }
-    this.activePartId.set(this.customizeData()[0].id!);
-
-    this.destroyRef.onDestroy(() => {
-      sub.unsubscribe();
     });
   }
 
@@ -60,25 +63,14 @@ export class CustomizerSidebarComponent implements OnInit {
     this.activePartId.set(newId);
   }
 
-  addToCart = () => {
-    const currPage: CustomBuildTypeEnum = this.activatedRoute.snapshot.data['pageType'];
+  addToCart(){
+    if(this.isAddingToCart()) return;
+    this.isAddingToCart.set(true);
 
-    let currentCustomBuildType!: CustomBuildTypeEnum;
-    switch (currPage) {
-      case CustomBuildTypeEnum.Controller:
-        currentCustomBuildType = CustomBuildTypeEnum.Controller;
-        break;
-      case CustomBuildTypeEnum.Keyboard:
-        currentCustomBuildType = CustomBuildTypeEnum.Keyboard;
-        break;
-      default:
-        //todo: should not happen - throw error
-        break;
-    }
 
     const newCartItem: IAddCustomBuildDTO = {
       modificationIds: Object.values(this.selectedProduct()).filter((id) => id),
-      customBuildType: currentCustomBuildType,
+      customBuildType: this.pageType,
     };
 
     this.cartItemServices.addCustomBuild(newCartItem).subscribe({
