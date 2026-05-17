@@ -9,8 +9,7 @@
   </div>
 
   <button
-    routerLink="./"
-    [queryParams]="{ mode: 'new-build' }"
+    [routerLink]="['/customizer/controller']"
     class="bg-secondary hover:opacity-90 text-white px-6 py-3 rounded-lg md:w-fit w-full font-semibold shadow-lg shadow-secondary/20 cursor-pointer whitespace-nowrap flex gap-2 justify-center items-center"
   >
     <i class="fa-solid fa-plus"></i>
@@ -18,10 +17,6 @@
   </button>
 </header>
 
-<section class="flex flex-col gap-8">
+<section class="flex flex-col gap-8 h-full">
   <ng-content />
 </section>
-
-<!-- @if (mode() === 'new-build') {
-  <dialog open class="w-full h-full bg-red-500 fixed inset-0 z-1000">testadsadsdas</dialog>
-} -->

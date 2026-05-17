@@ -1,9 +1,9 @@
+import { OrderStateEnum } from "../../../../../core/enums/order-status-enum";
+
 export interface IOrderDTO {
   id: string;
-  name: string;
+  title: string;
   image: string;
-  status: string;
+  status: OrderStateEnum;
   deliveryDate: string;
-  progress: number;
-  orderType : string
 }

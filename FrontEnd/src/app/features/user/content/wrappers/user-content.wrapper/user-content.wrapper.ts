@@ -9,7 +9,7 @@ import { map } from 'rxjs';
   imports: [RouterLink],
   templateUrl: './user-content.wrapper.html',
   host: {
-    class: 'w-full flex flex-col gap-8 px-8 py-10',
+    class: 'w-full h-full flex flex-col gap-8 px-8 py-10 overflow-hidden',
   },
 })
 export class UserContentWrapper {

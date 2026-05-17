@@ -77,10 +77,12 @@
         }
       }
       @empty {
-        @if (!isLoading()) {
+        @if (isLoading()) {
+          <app-loading class="w-full flex justify-center"/>
+        } @else {
           <div class="text-white w-fit h-fit p-5 mx-auto text-2xl font-bold">
-          Your cart is empty
-        </div>
+            Your cart is empty
+          </div>
         }
       }
     </section>

@@ -8,6 +8,8 @@
         Rejected,
         Refunded,
         Cancelled,
-        Returned
+        Returned,
+        Testing,
+        Shipped
     }
 }

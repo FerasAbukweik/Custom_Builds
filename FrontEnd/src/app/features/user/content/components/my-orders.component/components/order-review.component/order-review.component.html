@@ -1,8 +1,11 @@
+<!-- for observer direvtive -->
+<ng-content />
+
 <div class="grid grid-cols-1 xl:grid-cols-[300px_1fr] gap-6 lg:gap-8">
   <div class="rounded-xl overflow-hidden h-52 md:h-64 border border-dark-gray/20 w-full">
     <img
-      [src]="order.image"
-      [alt]="order.name"
+      [src]="order().image"
+      [alt]="order().title"
       class="group-hover:scale-110 transition-all w-full h-full object-cover duration-700 ease-out"
     />
   </div>
@@ -10,17 +13,17 @@
   <div class="flex flex-col gap-2">
     <div class="flex flex-col md:flex-row justify-between items-start gap-4">
       <div class="min-w-0">
-        <span class="text-light-steel-blue text-xs font-bold tracking-[0.2em] uppercase">{{
-          order.orderType
-        }}</span>
+        <span class="text-light-steel-blue text-xs font-bold tracking-[0.2em] uppercase">
+          Your Order Details
+        </span>
         <h2 class="text-xl md:text-2xl lg:text-3xl font-bold mt-1 text-off-white leading-tight">
-          {{ order.name }}
+          {{ order().title }}
         </h2>
       </div>
       <span
         class="bg-secondary/10 text-secondary border border-secondary/20 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide whitespace-nowrap shrink-0"
       >
-        {{ order.status }}
+        {{ getStatusString(order().status) }}
       </span>
     </div>
 
@@ -29,13 +32,17 @@
         <span class="text-soft-gray text-xs uppercase font-semibold tracking-wider"
           >Order Number</span
         >
-        <span class="font-mono text-base md:text-lg font-bold text-off-white">#{{ order.id }}</span>
+        <span class="font-mono text-base md:text-lg font-bold text-off-white"
+          >#{{ order().id }}</span
+        >
       </div>
       <div class="flex flex-col gap-1">
         <span class="text-soft-gray text-xs uppercase font-semibold tracking-wider"
           >Est. Delivery</span
         >
-        <span class="font-bold text-base md:text-lg text-off-white">{{ order.deliveryDate }}</span>
+        <span class="font-bold text-base md:text-lg text-off-white">{{
+          order().deliveryDate | date: 'dd/MM/yyyy'
+        }}</span>
       </div>
     </div>
 
@@ -56,10 +63,10 @@
 
 <div class="relative mt-12 mb-8 w-full">
   <div class="absolute top-5 left-0 w-full h-0.5 bg-dark-gray"></div>
-  <div
+  <!-- <div
     class="absolute top-5 left-0 h-0.5 bg-secondary shadow-[0_0_10px_rgba(19,91,236,0.5)] duration-500 transition-all"
-    [style.width]="order.progress + '%'"
-  ></div>
+    [style.width]="order().progress + '%'"
+  ></div> -->
 
   <div class="flex justify-between w-full relative">
     @for (step of steps; track step.id) {

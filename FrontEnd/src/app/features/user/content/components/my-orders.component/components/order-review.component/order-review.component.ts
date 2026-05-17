@@ -1,11 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { IStep } from './order-review.model';
 import { IOrderDTO } from '../../my-orders.model';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
+import { OrderStateEnum } from '../../../../../../../core/enums/order-status-enum';
 
 @Component({
   selector: 'app-order-review',
-  imports: [CommonModule],
+  imports: [CommonModule , DatePipe],
   templateUrl: './order-review.component.html',
   host: {
     class:
@@ -13,7 +14,10 @@ import { CommonModule } from '@angular/common';
   },
 })
 export class OrderReviewComponent {
-  @Input({ required: true }) order!: IOrderDTO;
+  // inputs
+  order = input.required<IOrderDTO>() ;
+
+  // data
   steps: IStep[] = [
     { id: 1, label: 'DESIGN CONFIRMED', date: 'Oct 10', status: 'completed', icon: 'fa-check' },
     { id: 2, label: 'IN ASSEMBLY', date: 'In Progress', status: 'current', icon: 'fa-tools' },
@@ -21,11 +25,18 @@ export class OrderReviewComponent {
     { id: 4, label: 'SHIPPED', date: 'Pending', status: 'upcoming', icon: 'fa-truck' },
   ];
 
+
+  // methods
   isStepActive(stepId: number): boolean {
-    if (this.order.progress === 100) return true;
-    if (this.order.progress === 75) return stepId <= 3;
-    if (this.order.progress === 50) return stepId <= 2;
-    if (this.order.progress === 25) return stepId <= 1;
+    if (this.order().status === OrderStateEnum.Completed) return true;
+    if (this.order().status === OrderStateEnum.Testing) return stepId <= 3;
+    if (this.order().status === OrderStateEnum.Processing) return stepId <= 2;
+    if (this.order().status === OrderStateEnum.Shipped) return stepId <= 1;
+
     return false;
+  }
+
+  getStatusString(status: OrderStateEnum){
+    return OrderStateEnum[status];
   }
 }

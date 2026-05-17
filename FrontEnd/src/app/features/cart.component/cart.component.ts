@@ -110,16 +110,16 @@ get ItemsCount(){
         this.requestData.Section++;
         
         this.isMoreDataAvailable = res.length > 0;
-        this.isLoading.set(false);
       },
       error: (err) => {
         // toDo: show error message
         if(err.error === "no items where found"){
           this.isMoreDataAvailable = false;
         }
-
-        this.isLoading.set(false);
       },
+      complete: () => {
+        this.isLoading.set(false);
+      }
     });
   }
 
