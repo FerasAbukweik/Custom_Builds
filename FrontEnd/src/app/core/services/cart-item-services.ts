@@ -5,6 +5,7 @@ import { IAddCustomBuildDTO } from '../DTO/add-custom-build-dto';
 import { ILazyGetCartItemsDTO } from '../DTO/lazy-get-cart-items-dto';
 import { ICartItemDTO } from '../DTO/cart-item-dto';
 import { INewQuantities } from '../../features/cart.component/cart.model';
+import { ICartSummaryInfo } from '../DTO/cart-summary-info-dto';
 
 @Injectable({ providedIn: 'root' })
 export class CartItemServices {
@@ -41,5 +42,10 @@ export class CartItemServices {
   // remove item
   public remove = (id: string) => {
     return this.httpClient.delete(`${this.url}/Remove/${id}`);
+  }
+
+  // get summary data
+  public GetSummaryInfo = () => {
+    return this.httpClient.get<ICartSummaryInfo>(`${this.url}/GetSummaryInfo`);
   }
 }

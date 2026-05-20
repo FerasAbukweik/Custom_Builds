@@ -6,6 +6,7 @@
     <img
       [src]="order().image"
       [alt]="order().title"
+      (error)="$event.target.src = 'assets/images/no-image.png'"
       class="group-hover:scale-110 transition-all w-full h-full object-cover duration-700 ease-out"
     />
   </div>

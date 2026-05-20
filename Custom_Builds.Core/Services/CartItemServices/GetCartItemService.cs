@@ -6,6 +6,7 @@ using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICartItemServices;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Custom_Builds.Core.ServiceContracts.ICustomBuildServices;
+using System.Net;
 
 namespace Custom_Builds.Core.Services.CartItemServices
 {
@@ -36,6 +37,8 @@ namespace Custom_Builds.Core.Services.CartItemServices
             // get target user cart items -- with include product so we can access product price  
             var result = await _cartItemRepository.LazyGetCartItems(getData);
             if (!result.IsSuccess) return result.MapFailure<List<CartItemDTO>>();
+
+            if (!result.Value!.Any()) return Result<List<CartItemDTO>>.Failure("no items where found", HttpStatusCode.NotFound);
 
 
             List<CartItemDTO> newCartItems = new List<CartItemDTO>();
@@ -82,6 +85,15 @@ namespace Custom_Builds.Core.Services.CartItemServices
             {
                 return Result<CartItemDTO>.Failure("Target user isnt the owner of the item");
             }
+        }
+        public async Task<Result<CartSummaryDTO>> GetCurrUserSummaryAsync()
+        {
+            var getCurrUserResult = _getCurrUserService.GetUserId();
+            if (!getCurrUserResult.IsSuccess) return getCurrUserResult.MapFailure<CartSummaryDTO>();
+
+            var getSummaryResult = await _cartItemRepository.GetSummaryInfoAsync(getCurrUserResult.Value!);
+
+            return getSummaryResult;
         }
     }
 }

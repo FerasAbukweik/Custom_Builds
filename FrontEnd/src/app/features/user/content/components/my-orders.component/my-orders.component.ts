@@ -53,12 +53,15 @@ export class MyOrdersComponent implements OnInit {
           console.log(data);
 
           this.isMoreDataAvailable = data.length > 0;
+
+          this.isLoading.set(false);
         },
         error: (err) => {
-          console.log(err.error);
-          this.isMoreDataAvailable = false;
-        },
-        complete: () => {
+          if(err.error.status === 404)
+          {
+            this.isMoreDataAvailable = false;
+          }
+
           this.isLoading.set(false);
         }
       });

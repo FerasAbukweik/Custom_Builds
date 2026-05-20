@@ -4,6 +4,7 @@ using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Custom_Builds.Core.ServiceContracts.IOrderServices;
+using System.Net;
 
 namespace Custom_Builds.Core.Services.OrderServices
 {
@@ -53,6 +54,9 @@ namespace Custom_Builds.Core.Services.OrderServices
             // get user orders
             var userOrders = await _orderRepository.GetOrdersByUserIdAsync(lazyGetUserOrdersData);
             if(!userOrders.IsSuccess) return userOrders.MapFailure<List<MiniOrderInfoDTO>>();
+
+            if (!userOrders.Value!.Any())
+                return Result<List<MiniOrderInfoDTO>>.Failure("no orders where found", HttpStatusCode.NotFound);
 
             return Result<List<MiniOrderInfoDTO>>.Success(userOrders.Value!);
         }

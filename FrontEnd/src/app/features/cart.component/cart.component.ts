@@ -11,6 +11,7 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { INewQuantities } from './cart.model';
 import { IsVisableDirective } from '../../shared/directives/is-visable.directive';
 import { LoadingComponent } from "../../shared/components/loading/loading.component/loading.component";
+import { ICartSummaryInfo } from '../../core/DTO/cart-summary-info-dto';
 
 @Component({
   selector: 'app-cart',
@@ -32,67 +33,95 @@ export class CartComponent implements OnInit {
   newQuantities$ = toObservable(this.newQuantities);
 
   // fields
+
+  // priavte
   private requestData: ILazyGetCartItemsDTO = {
     Section: 0,
     ElementsPerSection: 10,
   };
   private isMoreDataAvailable : boolean = true;
-
-  // getters
-
-  get TotalPrice(){
-    let totalPrice = 0;
-
-    this.cartItems().forEach(item => {
-      totalPrice += item.totalPrice * item.quantity;
+  
+  // public
+  summaryInfo = signal<ICartSummaryInfo>({
+    shippingCost: 0,
+    tax: 0,
+    totalOrders: 0,
+    totalPrice: 0
   });
-
-  return totalPrice;
-}
-
-get ItemsCount(){
-  let itemsCount = 0;
-
-  this.cartItems().forEach(item => {
-    itemsCount += item.quantity;
-  });
-
-  return itemsCount;
-}
-
-
-
 
   ngOnInit(): void {
     // get inital cart items
     this.lazyGetCartItems(true);
 
-    // we need this for later if something goes wrong and we need to restore the previous state
+    // get summary info
+    this.getSummaryInfo();
+
+    // track quantities changes
+    this.trackQuantitiesChanges();
+  }
+
+  trackQuantitiesChanges(){
+    // we need this for later if something went wrong and we need to restore the previous state
     let prevItems : ICartItemDTO[] = [];
+    let prevSummary : ICartSummaryInfo | undefined = undefined;
 
     // check for quantities changes
     this.newQuantities$.pipe(
+      // thats for optimisitic update
       tap((val) => {
-
       // only the first time we need backup so we dont loose data
       if(prevItems.length === 0) prevItems = this.cartItems();
+      if(!prevSummary) prevSummary = this.summaryInfo();
 
       // update quantity immediately for better user experience
       const idsSet = new Set(Object.keys(val));
 
-      this.cartItems.update(curr =>
-        curr.map(item => idsSet.has(item.id) ? {...item, quantity: val[item.id]!} : item));
+      let operation : number = 0;
+      let itemPrice : number = 0;
 
+      this.cartItems.update(curr =>
+        curr.map(item =>{
+          if(idsSet.has(item.id)){
+            operation = val[item.id] - item.quantity;
+            itemPrice = item.totalPrice;
+            return {...item, quantity: val[item.id]};
+          }
+          else{
+            return item;
+          }
+        }));
+
+
+      this.summaryInfo.update(curr => ({
+        ...curr, 
+        totalOrders: curr.totalOrders + operation,
+        totalPrice: curr.totalPrice + (operation * itemPrice)
+      }));
+      
     }) ,
     debounceTime(500) , takeUntilDestroyed(this.destroyRef))
     .subscribe({
       next: async (newQuantities : INewQuantities) => {
         if(!(await this.updateItemsQuantity(newQuantities))){
+          // TODO: show error message
           // restore previous items
           this.cartItems.set(prevItems);
+          this.summaryInfo.set(prevSummary!);
         }
 
         prevItems = [];
+        prevSummary = undefined;
+      }
+    });
+  }
+
+  getSummaryInfo(){
+    this.cartItemService.GetSummaryInfo().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => {
+        this.summaryInfo.set(res);
+      },
+      error: (err) => {
+        // toDo: show error message
       }
     });
   }
@@ -110,14 +139,14 @@ get ItemsCount(){
         this.requestData.Section++;
         
         this.isMoreDataAvailable = res.length > 0;
+        this.isLoading.set(false);
       },
       error: (err) => {
         // toDo: show error message
-        if(err.error === "no items where found"){
+        if(err.error.status === 404){
           this.isMoreDataAvailable = false;
         }
-      },
-      complete: () => {
+
         this.isLoading.set(false);
       }
     });
@@ -139,14 +168,30 @@ get ItemsCount(){
   Remove(id : string) {
     // to get back to previous state if something went wrong
     const prevItems = this.cartItems();
+    const prevSummary = this.summaryInfo();
 
-    this.cartItems.update(curr => curr.filter(ci => ci.id !== id));
+    let itemPrice = 0;
+
+    this.cartItems.update(curr => curr.filter(ci => {
+      if(ci.id === id){
+        itemPrice = ci.totalPrice
+        return false;
+      }
+
+      return true;
+    }));
+
     
     // remove item from newQuantities signal
     this.newQuantities.update(curr => {
       const { [id]: _, ...rest } = curr;
       return rest;
     });
+
+    this.summaryInfo.update(curr => ({
+      ...curr, 
+      totalOrders: curr.totalOrders - 1, 
+      totalPrice: curr.totalPrice - itemPrice}));
 
     this.cartItemService.remove(id)
     .pipe(takeUntilDestroyed(this.destroyRef))
@@ -168,7 +213,7 @@ get ItemsCount(){
       this.Remove(id);
       return;
     }
-      
+     
     this.newQuantities.update(curr => ({...curr, [id]: newVal}));
   }
 }

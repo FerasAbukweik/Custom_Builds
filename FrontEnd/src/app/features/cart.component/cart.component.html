@@ -31,6 +31,7 @@
               [src]="item.image"
               [alt]="item.title"
               class="h-48 w-full object-cover group-hover:scale-110 duration-700 ease-out transition-transform"
+              (error)="$event.target.src = 'assets/images/no-image.png'"
             />
           </div>
 
@@ -93,8 +94,8 @@
       <h2 class="mb-2 text-2xl text-white font-bold">Order Summary</h2>
 
       <div class="flex justify-between gap-5 items-center">
-        <span class="text-slate-400 text-lg">Subtotal ({{ ItemsCount }} items)</span>
-        <span class="text-slate-400 text-lg">{{ TotalPrice | currency }}</span>
+        <span class="text-slate-400 text-lg">Subtotal ({{ summaryInfo().totalOrders }} items)</span>
+        <span class="text-slate-400 text-lg">{{ summaryInfo().totalPrice | currency }}</span>
       </div>
 
       <div class="flex justify-between gap-5 items-center">
@@ -111,7 +112,7 @@
 
       <div class="flex justify-between gap-5 items-center">
         <span class="text-white text-xl">Total</span>
-        <span class="text-white font-bold text-3xl">{{ TotalPrice | currency }}</span>
+        <span class="text-white font-bold text-3xl">{{ summaryInfo().totalPrice | currency }}</span>
       </div>
 
       <button

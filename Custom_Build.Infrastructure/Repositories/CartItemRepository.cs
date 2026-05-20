@@ -2,6 +2,7 @@ using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
+using Custom_Builds.Core.Services.CartItemServices;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -78,15 +79,6 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result.Success();
         }
-        public async Task<Result<List<CartItem>>> GetAllCartItemsAsync(LazyGetCartItemsDTO getData)
-        {
-            List<CartItem> cartItems = await _dbContext.Cart.Where(c => c.UserId == getData.UserId)
-                .Skip(getData.Section * getData.ElementsPerSection)
-                .Take(getData.ElementsPerSection)
-                .ToListAsync();
-
-            return Result<List<CartItem>>.Success(cartItems);
-        }
         public async Task<Result<List<CartItem>>> FilterAsync(Expression<Func<CartItem, bool>> extraChecks, Expression<Func<CartItem, object?>>[]? includes = null)
         {
             var CartItemQuery = _dbContext.Cart.AsQueryable();
@@ -120,12 +112,28 @@ namespace Custom_Builds.Infrastructure.Repositories
                 .Take(reqData.ElementsPerSection)
                 .ToListAsync();
 
-            if(items.Count <= 0)
+            return Result<List<CartItem>>.Success(items);
+        }
+        public async Task<Result<CartSummaryDTO>> GetSummaryInfoAsync(Guid userId)
+        {
+            var result = await _dbContext.Cart
+                .Where(ci => ci.UserId == userId)
+                .GroupBy(ci => 1)
+                .Select(g => new CartSummaryDTO
+                {
+                    TotalOrders = g.Sum(ci => ci.Quantity),
+                    TotalPrice = g.Sum(ci =>
+                        (ci.Product != null ? ci.Product.Price : 0) * ci.Quantity +
+                        (ci.CustomBuild != null ? ci.CustomBuild.Modifications.Sum(m => m.Price) : 0) * ci.Quantity
+                    )
+                }).FirstOrDefaultAsync();
+
+            if(result == null)
             {
-                return Result<List<CartItem>>.Failure("no items where found");
+                return Result<CartSummaryDTO>.Failure("no cart items found for the user", statusCode: HttpStatusCode.NotFound);
             }
 
-            return Result<List<CartItem>>.Success(items);
+            return Result<CartSummaryDTO>.Success(result);
         }
     }
 }

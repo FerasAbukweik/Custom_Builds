@@ -105,5 +105,14 @@ namespace custom_Peripherals.Controllers
             return updateResult.ToActionResult();
         }
 
+        // get summary info
+        [Authorize(Roles = ($"{nameof(RoleEnums.User)}"))]
+        [HttpGet("[action]")]
+        public async Task<ActionResult<CartSummaryDTO>> GetSummaryInfo()
+        {
+            var result = await _getCartItemService.GetCurrUserSummaryAsync();
+
+            return result.ToActionResult();
+        }
     }
 }

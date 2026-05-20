@@ -8,5 +8,6 @@ namespace Custom_Builds.Core.ServiceContracts.ICartItemServices
     {
         Task<Result<CartItemDTO>> GetByIdAsync(Guid cartItemId);
         Task<Result<List<CartItemDTO>>> LazyGetAllCartItemsAsync(LazyGetCartItemsDTO getData);
+        Task<Result<CartSummaryDTO>> GetCurrUserSummaryAsync();
     }
 }
