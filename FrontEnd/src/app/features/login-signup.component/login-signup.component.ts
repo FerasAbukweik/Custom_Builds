@@ -7,7 +7,7 @@ import { customValidation } from './login-signup.validations';
 import { LoginSignupService } from './login-signup.service';
 import { IRegisterDTO } from '../../core/DTO/register-dto';
 import { RoleEnums } from '../../core/enums/role-enums';
-import { AccountServices } from '../../core/services/account-services';
+import { AccountServices } from '../../core/services/api-services/account-services';
 import { Router } from '@angular/router';
 import { ILoginDTO } from '../../core/DTO/login-dto';
 

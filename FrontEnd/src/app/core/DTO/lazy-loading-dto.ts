@@ -1,4 +1,4 @@
 export interface ILazyLoadingDTO {
-  Section: number;
+  taken: number;
   ElementsPerSection: number;
 }

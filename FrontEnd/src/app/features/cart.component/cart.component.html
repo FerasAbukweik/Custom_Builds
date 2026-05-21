@@ -24,7 +24,7 @@
           class="group flex h-fit flex-wrap gap-6 bg-dark-deep-blue p-6 rounded-xl border border-dark-gray/50 min-w-170 max-[760px]:min-w-75 justify-center"
         >
         @if(isLast){
-          <span (appIsVisable)="lazyGetCartItems()"></span>
+          <span (appIsVisable)="lazyGetCartItems"></span>
         }
           <div class="rounded-lg overflow-hidden max-[565px]:w-full">
             <img
@@ -45,7 +45,7 @@
                   <span>
                     <i
                       class="fa-regular fa-trash-can hover:text-error text-xl text-off-white/50 cursor-pointer transition-colors"
-                      (click)="Remove(item.id)"
+                      (click)="removeCartItem(item.id)"
                     ></i>
                   </span>
                 </div>
@@ -100,12 +100,12 @@
 
       <div class="flex justify-between gap-5 items-center">
         <span class="text-slate-400 text-lg">Shipping</span>
-        <span class="text-ok text-xs font-bold">FREE</span>
+        <span class="text-ok text-xs font-bold">{{ summaryInfo().shippingCost === 0 ? 'FREE' : summaryInfo().shippingCost | currency }}</span>
       </div>
 
       <div class="flex justify-between gap-5 items-center">
         <span class="text-slate-400 text-lg">Tax</span>
-        <span class="text-ok text-lg">$0.00</span>
+        <span class="text-ok text-lg">{{ summaryInfo().tax | currency }}</span>
       </div>
 
       <hr class="border-dark-gray/50 my-2" />

@@ -1,12 +1,12 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomizerService } from '../../../../customizer.service';
-import { CartItemServices } from '../../../../../../../core/services/cart-item-services';
+import { CartItemServices } from '../../../../../../../core/services/api-services/cart-item-services';
 import { IAddCustomBuildDTO } from '../../../../../../../core/DTO/add-custom-build-dto';
 import { CustomBuildTypeEnum } from '../../../../../../../core/enums/custom-build-type-enum';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IPart } from '../../../../../../../core/interfaces/customize-data/customize-data.model';
-import { PartServices } from '../../../../../../../core/services/part-services';
+import { PartServices } from '../../../../../../../core/services/api-services/part-services';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -41,32 +41,34 @@ export class CustomizerSidebarComponent implements OnInit {
   );
 
   // getters
-  get pageType(): CustomBuildTypeEnum{
+  get pageType(): CustomBuildTypeEnum {
     return this.activatedRoute.snapshot.data['pageType'];
   }
 
   ngOnInit() {
-    this.partServices.getAllParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (data) => {
-        this.customizeData.set(data);
-        if (data.length > 0) {
-          this.activePartId.set(data[0].id);
-        }
-      },
-      error: (error) => {
-        //todo: show error message
-      },
-    });
+    this.partServices
+      .getAllParts()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.customizeData.set(data);
+          if (data.length > 0) {
+            this.activePartId.set(data[0].id);
+          }
+        },
+        error: (error) => {
+          //todo: show error message
+        },
+      });
   }
 
   setActivePartId(newId: string): void {
     this.activePartId.set(newId);
   }
 
-  addToCart(){
-    if(this.isAddingToCart()) return;
+  addToCart() {
+    if (this.isAddingToCart()) return;
     this.isAddingToCart.set(true);
-
 
     const newCartItem: IAddCustomBuildDTO = {
       modificationIds: Object.values(this.selectedProduct()).filter((id) => id),
@@ -82,5 +84,5 @@ export class CustomizerSidebarComponent implements OnInit {
         //todo: show error message
       },
     });
-  };
+  }
 }

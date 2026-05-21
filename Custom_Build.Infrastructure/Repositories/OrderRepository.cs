@@ -72,7 +72,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             o.OrderStatus == OrderStateEnum.Cancelled ||
             o.OrderStatus == OrderStateEnum.Refunded ||
             o.OrderStatus == OrderStateEnum.Rejected))
-                .Skip(lazyGetUserOrdersData.Section * lazyGetUserOrdersData.ElementsPerSection)
+                .Skip(lazyGetUserOrdersData.Taken)
                 .Take(lazyGetUserOrdersData.ElementsPerSection)
                 .Select(o => new MiniOrderInfoDTO() 
                 {
@@ -93,7 +93,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         public async Task<Result<List<MiniOrderInfoDTO>>> GetOrdersByUserIdAsync(LazyGetALlOrdersDTO lazyGetOrdersData)
         {
             List<MiniOrderInfoDTO> orders = await _dbContext.Orders.Where(o => o.UserId == lazyGetOrdersData.UserId)
-                .Skip(lazyGetOrdersData.Section * lazyGetOrdersData.ElementsPerSection)
+                .Skip(lazyGetOrdersData.Taken)
                 .Take(lazyGetOrdersData.ElementsPerSection)
                 .Select(o => new MiniOrderInfoDTO()
                 {

@@ -108,7 +108,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             var items = await _dbContext.Cart
                 .Include(ci => ci.Product)
                 .Where(ci => ci.UserId == reqData.UserId)
-                .Skip(reqData.Section * reqData.ElementsPerSection)
+                .Skip(reqData.Taken)
                 .Take(reqData.ElementsPerSection)
                 .ToListAsync();
 
