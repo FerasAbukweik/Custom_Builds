@@ -4,6 +4,7 @@ import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { UserContentWrapper } from '../../wrappers/user-content.wrapper/user-content.wrapper';
 import { HistoryService } from './history.service';
 import { OrderStateEnum } from '../../../../../core/enums/order-status-enum';
+import { LoadingComponent } from '../../../../../shared/components/loading/loading.component/loading.component';
 
 const statsData: IStatsData[] = [
   { label: "Total Spent", value: "$1,248.50" },
@@ -15,7 +16,7 @@ const statsData: IStatsData[] = [
 
 @Component({
   selector: 'app-history',
-  imports: [CommonModule, UserContentWrapper , DatePipe , CurrencyPipe],
+  imports: [CommonModule, UserContentWrapper , DatePipe , CurrencyPipe , LoadingComponent],
   templateUrl: './history.component.html',
 })
 export class HistoryComponent implements OnInit {

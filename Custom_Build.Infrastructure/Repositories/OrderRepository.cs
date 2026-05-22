@@ -25,7 +25,6 @@ namespace Custom_Builds.Infrastructure.Repositories
             {
                 Id = Guid.NewGuid(),
                 UserId = toAdd.UserId,
-                TotalPrice = toAdd.TotalPrice,
                 OrderStatus = OrderStateEnum.Pending,
                 OrderType = toAdd.OrderType,
                 ProductId = toAdd.ProductId,
@@ -38,14 +37,16 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<Order>.Success(newOrder);
         }
-        public async Task<Result<int>> GetOrdersCountAsync(Guid userId)
+        public async Task<Result<int>> GetProcessingOrdersCountAsync(Guid userId)
         {
-            var sum = await _dbContext.Orders.Where(o => o.UserId == userId).CountAsync();
+            var sum = await _dbContext.Orders.Where(o => (
+            o.UserId == userId && 
+          !(o.OrderStatus == OrderStateEnum.Completed ||
+            o.OrderStatus == OrderStateEnum.Returned ||
+            o.OrderStatus == OrderStateEnum.Cancelled ||
+            o.OrderStatus == OrderStateEnum.Refunded ||
+            o.OrderStatus == OrderStateEnum.Rejected))).CountAsync();
 
-            if(sum == 0)
-            {
-                return Result<int>.Failure("no orders found for this user", statusCode: HttpStatusCode.NotFound);
-            }
 
             return Result<int>.Success(sum);
         }
@@ -59,11 +60,6 @@ namespace Custom_Builds.Infrastructure.Repositories
             o.OrderStatus == OrderStateEnum.Refunded ||
             o.OrderStatus == OrderStateEnum.Rejected))).CountAsync();
 
-            if (sum == 0)
-            {
-                return Result<int>.Failure("no completed orders found for this user", statusCode: HttpStatusCode.NotFound);
-            }
-
             return Result<int>.Success(sum);
         }
         public async Task<Result> EditByIdAsync(EditOrderDTO newData)
@@ -76,7 +72,10 @@ namespace Custom_Builds.Infrastructure.Repositories
             }
 
             toEdit.UserId = newData.UserId ?? toEdit.UserId;
-            toEdit.TotalPrice = newData.TotalPrice ?? toEdit.TotalPrice;
+            toEdit.Title = newData.Title ?? toEdit.Title;
+            toEdit.Quantity = newData.Quantity ?? toEdit.Quantity;
+            toEdit.OrderStatus = newData.OrderStatus ?? toEdit.OrderStatus;
+
 
             await _dbContext.SaveChangesAsync();
             return Result.Success();
@@ -107,27 +106,30 @@ namespace Custom_Builds.Infrastructure.Repositories
                 {
                     Id = o.Id,
                     Title = o.Title,
-
-                    Image = o.OrderType == OrderTypeEnum.Custom ? 
-                    "add image later" : 
-                    o.Product == null ? "No Product Image" : o.Product.images.FirstOrDefault() ?? "No Product Image",
-
+                    Image = o.CustomBuild != null ? "add image later" : 
+                    o.Product != null ? o.Product.images.FirstOrDefault() ?? "No Product Image" : "No Product",
                     status = o.OrderStatus,
                     DeliveryDate = o.CreatedAt.AddDays(4), // later add algorithim to determine delivery date based on other orders
                     Quantity = o.Quantity,
                     TotalPrice = ((o.Product != null ? o.Product.Price : 0) +
                     (o.CustomBuild != null ? o.CustomBuild.Modifications.Sum(m => m.Price) : 0)
                     ) * o.Quantity,
-                    specs = (o.CustomBuild != null ? o.CustomBuild.Modifications.Select(cb => cb.Name).ToList() : 
+                    specs = (o.CustomBuild != null ? o.CustomBuild.Modifications.Select(cb => cb.Name).ToList() :
                     (o.Product != null ? new List<string> { "Product" } : new List<string> { "something went wrong" })),
                 })
                 .ToListAsync();
 
             return Result<List<HistoryOrderDTO>>.Success(orders);
         }
-        public async Task<Result<List<MiniOrderInfoDTO>>> GetOrdersByUserIdAsync(LazyGetALlOrdersDTO lazyGetOrdersData)
+        public async Task<Result<List<MiniOrderInfoDTO>>> GetProcessingOrdersAsync(LazyGetALlOrdersDTO lazyGetOrdersData)
         {
-            List<MiniOrderInfoDTO> orders = await _dbContext.Orders.Where(o => o.UserId == lazyGetOrdersData.UserId)
+            List<MiniOrderInfoDTO> orders = await _dbContext.Orders.Where(o => (
+            o.UserId == lazyGetOrdersData.UserId && 
+          !(o.OrderStatus == OrderStateEnum.Completed ||
+            o.OrderStatus == OrderStateEnum.Returned ||
+            o.OrderStatus == OrderStateEnum.Cancelled ||
+            o.OrderStatus == OrderStateEnum.Refunded ||
+            o.OrderStatus == OrderStateEnum.Rejected)))
                 .Skip(lazyGetOrdersData.Taken)
                 .Take(lazyGetOrdersData.ElementsPerSection)
                 .Select(o => new MiniOrderInfoDTO()

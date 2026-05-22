@@ -33,7 +33,7 @@ namespace Custom_Builds.Core.Services.OrderServices
             _getCurrUserService = getCurrUserService;
         }
 
-        public async Task<Result<OrderDTO>> AddAsync(AddOrderDTO toAdd)
+        public async Task<Result<OrderDTO>> AddProductAsync(AddOrderDTO toAdd)
         {
             // get product so we can access its price and title
             var getProductResult = await _getProductService.GetByIdAsync(toAdd.ProductId);
@@ -47,7 +47,6 @@ namespace Custom_Builds.Core.Services.OrderServices
                 UserId = toAdd.UserId,
                 ProductId = toAdd.ProductId,
                 CustomBuildId = null,
-                TotalPrice = getProductResult.Value!.Price,
                 Title = getProductResult.Value!.Name,
                 CreatedAt = DateTime.UtcNow,
             };

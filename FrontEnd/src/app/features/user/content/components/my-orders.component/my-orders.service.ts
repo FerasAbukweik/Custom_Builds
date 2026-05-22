@@ -43,7 +43,7 @@ export class MyOrdersService {
     this.isLoading.set(true);
 
     this._orderService
-      .getAll(this._lazyData)
+      .getAllProcessingOrders(this._lazyData)
       .pipe(this.untilDestroyed)
       .subscribe({
         next: (data) => {
@@ -67,7 +67,7 @@ export class MyOrdersService {
 
   updateOrdersCount = () => {
     this._orderService
-      .getOrdersCount()
+      .getProcessingOrdersCount()
       .pipe(this.untilDestroyed)
       .subscribe({
         next: (res) => {

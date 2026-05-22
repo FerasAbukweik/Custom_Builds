@@ -14,10 +14,6 @@ namespace Custom_Builds.Core.Domain.Entities
         [Required(ErrorMessage = "{0} is required.")]
         public required Guid UserId { get; set; }
         public ApplicationUser? User { get; set; }
-
-        [Required(ErrorMessage = "{0} is required.")]
-        [Range(typeof(decimal), "0", "100000000", ErrorMessage = "Invalid {0}. {0} should be between {1} and {2}.")]
-        public required decimal TotalPrice { get; set; }
         public OrderStateEnum OrderStatus { get; set; } = OrderStateEnum.Pending;
 
         [Required(ErrorMessage = "{0} is required.")]
@@ -46,11 +42,34 @@ namespace Custom_Builds.Core.Domain.Entities
                 Id = this.Id,
                 OrderType = this.OrderType,
                 Title = this.Title,
-                TotalPrice = this.TotalPrice,
                 CreatedAt = this.CreatedAt,
                 CustomBuildId = this.CustomBuildId,
                 OrderStatus = this.OrderStatus,
-                ProductId = this.ProductId
+                ProductId = this.ProductId,
+                TotalPrice = this.OrderType switch
+                {
+                    OrderTypeEnum.Product => this.Product?.Price ?? -1,
+                    OrderTypeEnum.Custom => throw new Exception("Custom Build Price Must Be Passed to the toDTO() fun"),
+                    _ => throw new Exception("unknown order type")
+                },
+                Quantity = this.Quantity
+            };
+        }
+
+
+        public OrderDTO toDTO(decimal price)
+        {
+            return new OrderDTO
+            {
+                Id = this.Id,
+                OrderType = this.OrderType,
+                Title = this.Title,
+                CreatedAt = this.CreatedAt,
+                CustomBuildId = this.CustomBuildId,
+                OrderStatus = this.OrderStatus,
+                ProductId = this.ProductId,
+                TotalPrice = price,
+                Quantity = this.Quantity
             };
         }
     }

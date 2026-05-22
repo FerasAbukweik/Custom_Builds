@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { ApiConstrants } from '../../constants/api-constants';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { IOrderDTO } from '../../DTO/mini-order-dto'; 
+import { IOrderDTO } from '../../DTO/mini-order-dto';
 import { ILazyGetAllOrdersDTO } from '../../DTO/lazy-get-all-orders-dto';
 import { Injectable } from '@angular/core';
 import { IHistoryOrderDTO } from '../../DTO/History-orders-dto';
@@ -14,22 +14,22 @@ export class OrderService {
   private readonly _httpClient = inject(HttpClient);
 
   // get all orders
-  public getAll = (data: ILazyGetAllOrdersDTO) => {
+  public getAllProcessingOrders = (data: ILazyGetAllOrdersDTO) => {
     let params = new HttpParams();
     Object.entries(data).forEach(([key, value]) => {
       params = params.append(key, value.toString());
     });
 
-    return this._httpClient.get<IOrderDTO[]>(`${this.api}/GetAll`, { params });
+    return this._httpClient.get<IOrderDTO[]>(`${this.api}/GetAllProcessingOrders`, { params });
   };
 
   // get orders count
-  public getOrdersCount = (userId: string | null = null) => {
+  public getProcessingOrdersCount = (userId: string | null = null) => {
     let params = new HttpParams();
 
-    if(userId) params = params.append('userId', userId);
+    if (userId) params = params.append('userId', userId);
 
-    return this._httpClient.get<number>(`${this.api}/GetOrdersCount`);
+    return this._httpClient.get<number>(`${this.api}/GetProcessingOrdersCount`);
   };
 
   // get all completed orders
@@ -40,15 +40,17 @@ export class OrderService {
       params = params.append(key, val);
     });
 
-    return this._httpClient.get<IHistoryOrderDTO[]>(`${this.api}/GetAllCompletedOrders`, { params });
+    return this._httpClient.get<IHistoryOrderDTO[]>(`${this.api}/GetAllCompletedOrders`, {
+      params,
+    });
   };
 
   // get completed orders count
   public getCompletedOrdersCount = (userId: string | null = null) => {
     let params = new HttpParams();
 
-    if(userId) params = params.append("userId" , userId);
+    if (userId) params = params.append('userId', userId);
 
-    return this._httpClient.get<number>(`${this.api}/GetAllCompletedOrdersCount` , {params});
-  }
+    return this._httpClient.get<number>(`${this.api}/GetAllCompletedOrdersCount`, { params });
+  };
 }

@@ -18,7 +18,6 @@ export class UserSideBarComponent {
 
   pagesData: ISideBarData[] = [
     { id: 1, icon: 'fa-solid fa-box-open', name: 'My Orders', goTo: 'my-orders' },
-    { id: 2, icon: 'fa-regular fa-heart', name: 'Saved Builds', goTo: 'saved-builds' },
     { id: 3, icon: 'fa-solid fa-clock-rotate-left', name: 'History', goTo: 'history' },
     { id: 4, icon: 'fa-solid fa-headset', name: 'Support', goTo: 'support' },
   ];

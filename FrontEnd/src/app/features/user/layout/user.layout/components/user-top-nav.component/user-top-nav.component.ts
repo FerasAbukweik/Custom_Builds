@@ -19,7 +19,6 @@ export class UserTopNavComponent {
 
   leftNavItems: ILeftNavItem[] = [
     { text: 'My Orders', goTo: 'my-orders' },
-    { text: 'Saved Builds', goTo: 'saved-builds' },
     { text: 'History', goTo: 'history' },
     { text: 'Support', goTo: 'support' },
   ];

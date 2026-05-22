@@ -42,19 +42,19 @@ namespace Custom_Builds.Core.Services.OrderServices
 
             return Result<List<HistoryOrderDTO>>.Success(result.Value!);
         }
-        public async Task<Result<int>> GetOrdersCountAsync(Guid? userId)
+        public async Task<Result<int>> GetProcessingOrdersCountAsync(Guid? userId)
         {
             var getTargetUserIdRes = _getCurrUserService.GetTargetUserId(userId);
             if (!getTargetUserIdRes.IsSuccess) getTargetUserIdRes.MapFailure<int>();
 
             userId = getTargetUserIdRes.Value!;
 
-            var getSumRes = await _orderRepository.GetOrdersCountAsync(userId!.Value);
+            var getSumRes = await _orderRepository.GetProcessingOrdersCountAsync(userId!.Value);
 
 
             return getSumRes;
         }
-        public async Task<Result<List<MiniOrderInfoDTO>>> GetUserOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData)
+        public async Task<Result<List<MiniOrderInfoDTO>>> GetProcessingOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData)
         {
             var getCurrUserIdRes = _getCurrUserService.GetUserId();
             if (!getCurrUserIdRes.IsSuccess) getCurrUserIdRes.MapFailure<List<MiniOrderInfoDTO>>();
@@ -64,7 +64,7 @@ namespace Custom_Builds.Core.Services.OrderServices
 
 
             // get user orders
-            var userOrders = await _orderRepository.GetOrdersByUserIdAsync(lazyGetUserOrdersData);
+            var userOrders = await _orderRepository.GetProcessingOrdersAsync(lazyGetUserOrdersData);
             if(!userOrders.IsSuccess) return userOrders.MapFailure<List<MiniOrderInfoDTO>>();
 
             if (!userOrders.Value!.Any())

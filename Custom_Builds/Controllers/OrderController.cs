@@ -39,7 +39,7 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(ModelState.CollectErrors());
             }
 
-            Result result = await _addOrderService.AddAsync(toAdd);
+            Result result = await _addOrderService.AddProductAsync(toAdd);
 
             return result.ToActionResult();
         }
@@ -56,14 +56,14 @@ namespace custom_Peripherals.Controllers
 
         // get all orders -- with lazy loading
         [HttpGet("[action]")]
-        public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAll([FromQuery]LazyGetALlOrdersDTO lazyGetOrdersData)
+        public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAllProcessingOrders([FromQuery]LazyGetALlOrdersDTO lazyGetOrdersData)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState.CollectErrors());
             }
 
-            var result = await _getOrderService.GetUserOrdersAsync(lazyGetOrdersData);
+            var result = await _getOrderService.GetProcessingOrdersAsync(lazyGetOrdersData);
 
             return result.ToActionResult();
         }
@@ -85,9 +85,9 @@ namespace custom_Peripherals.Controllers
 
         // get orders count
         [HttpGet("[action]")]
-        public async Task<ActionResult<int>> GetOrdersCount([FromQuery] Guid? userId)
+        public async Task<ActionResult<int>> GetProcessingOrdersCount([FromQuery] Guid? userId)
         {
-            var result = await _getOrderService.GetOrdersCountAsync(userId);
+            var result = await _getOrderService.GetProcessingOrdersCountAsync(userId);
 
             return result.ToActionResult();
         }

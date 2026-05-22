@@ -8,13 +8,13 @@ export const routes: Routes = [
         (x) => x.MyOrdersComponent,
       ),
   },
-  {
-    path: 'saved-builds',
-    loadComponent: () =>
-      import('./content/components/saved-builds.component/saved-builds.component').then(
-        (x) => x.SavedBuildsComponent,
-      ),
-  },
+  // {
+  //   path: 'saved-builds',
+  //   loadComponent: () =>
+  //     import('./content/components/saved-builds.component/saved-builds.component').then(
+  //       (x) => x.SavedBuildsComponent,
+  //     ),
+  // },
   {
     path: 'history',
     loadComponent: () =>

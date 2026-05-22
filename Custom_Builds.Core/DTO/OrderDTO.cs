@@ -16,5 +16,6 @@ namespace Custom_Builds.Core.DTO
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public Guid? CustomBuildId { get; set; }
         public Guid? ProductId { get; set; }
+        public required int Quantity { get; set; }
     }
 }
