@@ -19,9 +19,9 @@ export class TopNavComponent {
 
   leftNavItems: ILeftNavItem[] = [
     { text: 'Home', goTo: '/' },
-    { text: 'Controllers', goTo: '/controllers' },
-    { text: 'Keyboards', goTo: '/keyboards' },
-    { text: 'Community', goTo: '/community' },
+    { text: 'Controllers', goTo: '/customizer/controller' },
+    { text: 'Keyboards', goTo: '/customizer/keyboard' },
+    { text: 'support', goTo: '/user/support' },
   ];
 
   rightNavItems: IRightNavItem[] = [

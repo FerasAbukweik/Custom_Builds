@@ -40,7 +40,7 @@ namespace Custom_Builds.Core.Services.CurrUserServices
 
                 if (!isAdminRes.Value)
                 {
-                    return Result<Guid>.Failure("Only admin can delete other users");
+                    return Result<Guid>.Failure("Only admin can delete other users" , HttpStatusCode.Forbidden);
                 }
             }
 
@@ -69,14 +69,14 @@ namespace Custom_Builds.Core.Services.CurrUserServices
         public Result<bool> IsAdmin()
         {
             // is current user an admin ?
-            bool? isAdmin = _httpContextAccessor.HttpContext?.User.IsInRole(RoleEnums.Admin.ToString());
-            if (isAdmin == null)
+            var isAdmin = _httpContextAccessor.HttpContext?.User.IsInRole(RoleEnums.Admin.ToString());
+            if (isAdmin == null || !isAdmin.Value)
             {
                 // if cannt determine user role , return failure result
                 return Result<bool>.Failure("Failed to determine user role.", HttpStatusCode.InternalServerError);
             }
 
-            return Result<bool>.Success(isAdmin.Value);
+            return Result<bool>.Success(true);
         }
     }
 }

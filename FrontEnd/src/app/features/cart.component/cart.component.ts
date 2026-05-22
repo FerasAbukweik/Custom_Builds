@@ -26,14 +26,14 @@ import { CartItemGlobalService } from '../../core/services/global-services/cart-
 })
 export class CartComponent implements OnInit {
   // injections
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly cartService = inject(CartItemGlobalService);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _cartService = inject(CartItemGlobalService);
 
   // signals
   newQuantities = signal<INewQuantities>({});
-  cartItems = this.cartService.getCartItems;
-  summaryInfo = this.cartService.getSummaryInfo;
-  isLoading = this.cartService.getIsLoading;
+  cartItems = this._cartService.getCartItems;
+  summaryInfo = this._cartService.getSummaryInfo;
+  isLoading = this._cartService.getIsLoading;
 
   // observables
   // use observable for debounce time
@@ -41,21 +41,23 @@ export class CartComponent implements OnInit {
 
   ngOnInit(): void {
     // get inital cart items
-    this.cartService.lazyGetCartItems();
+    this._cartService.lazyGetCartItems();
 
     // get summary info
-    this.cartService.updateSummaryInfo();
+    this._cartService.updateSummaryInfo();
 
     // track quantities changes
     this.trackQuantitiesChanges();
+
+    // set isMoreDataAvaiable to true so each time we open the cart we check for new items
+    this._cartService.setIsMoreDataAvaiable(true);
   }
 
+
+  // methods
 
   // lazy get cart items
-  get lazyGetCartItems() {
-    return this.cartService.lazyGetCartItems();
-  }
-
+  lazyGetCartItems = this._cartService.lazyGetCartItems;
 
 
   // track quantities changes
@@ -95,19 +97,19 @@ export class CartComponent implements OnInit {
           };
 
           // optimistic update for better ux
-          this.cartService.setCartItems(newCartItems);
-          this.cartService.setSummartInfo(newSummaryInfo);
+          this._cartService.setCartItems(newCartItems);
+          this._cartService.setSummartInfo(newSummaryInfo);
         }),
         debounceTime(500),
-        takeUntilDestroyed(this.destroyRef),
+        takeUntilDestroyed(this._destroyRef),
       )
       .subscribe({
         next: async (newQuantities: INewQuantities) => {
-          if (!(await this.cartService.updateItemsQuantity(newQuantities))) {
+          if (!(await this._cartService.updateItemsQuantity(newQuantities))) {
             // TODO: show error message
             // restore previous items
-            this.cartService.setCartItems(prevItems);
-            this.cartService.setSummartInfo(prevSummary!);
+            this._cartService.setCartItems(prevItems);
+            this._cartService.setSummartInfo(prevSummary!);
           }
 
           prevItems = [];
@@ -134,6 +136,6 @@ export class CartComponent implements OnInit {
 
   // remove cart item
   removeCartItem(id: string) {
-    this.cartService.removeCartItem(id);
+    this._cartService.removeCartItem(id);
   }
 }

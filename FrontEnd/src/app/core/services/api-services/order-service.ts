@@ -20,4 +20,11 @@ export class OrderService {
 
     return this._httpClient.get<IOrderDTO[]>(`${this.api}/GetAll`, { params });
   }
+
+  public GetOrdersCount(userId : string | null = null){
+    let params = new HttpParams();
+    params = params.append("userId" , userId ?? "null");
+
+    return this._httpClient.get<number>(`${this.api}/GetOrdersCount`)
+  }
 }

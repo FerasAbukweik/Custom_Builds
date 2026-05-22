@@ -51,19 +51,22 @@ export class CartItemGlobalService {
 
 
   // setters
-  setCartItems(newCartItem: ICartItemDTO[]) {
+  setCartItems = (newCartItem: ICartItemDTO[]) => {
     this.cartItems.set(newCartItem);
   }
 
-  setSummartInfo(newSummaryInfo: ICartSummaryInfo) {
+  setSummartInfo = (newSummaryInfo: ICartSummaryInfo) => {
     this.summaryInfo.set(newSummaryInfo);
   }
 
+  setIsMoreDataAvaiable = (newVal: boolean) => {
+    this.isMoreDataAvailable = newVal;
+  }
   
   // methods
 
   // update summary info
-  updateSummaryInfo() {
+  updateSummaryInfo = () => {
     this.cartItemService.GetSummaryInfo()
       .pipe(this.untilDestroyed)
       .subscribe({
@@ -77,7 +80,7 @@ export class CartItemGlobalService {
   }
 
   // get cart items from api with lazy laoding
-  async lazyGetCartItems() {
+  lazyGetCartItems = async ()  => {
     if (!this.isMoreDataAvailable || this.isLoading()) return;
     this.isLoading.set(true);
 
@@ -111,7 +114,7 @@ export class CartItemGlobalService {
   }
 
   // update items quantity
-  async updateItemsQuantity(newQuantities: INewQuantities): Promise<boolean> {
+  updateItemsQuantity = async (newQuantities: INewQuantities): Promise<boolean> => {
     try {
       await firstValueFrom(
         this.cartItemService.updateQuantity(newQuantities)
@@ -124,7 +127,7 @@ export class CartItemGlobalService {
   }
 
   // remove cart item
-  async removeCartItem(id: string): Promise<boolean> {
+  removeCartItem = async (id: string): Promise<boolean> => {
     if(this.isDeleteing() || this.isLoading()) return false;
     this.isDeleteing.set(true);
     // to get back to previous state if something went wrong

@@ -38,6 +38,17 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<Order>.Success(newOrder);
         }
+        public async Task<Result<int>> GetOrdersCountAsync(Guid userId)
+        {
+            var sum = await _dbContext.Orders.Where(o => o.UserId == userId).CountAsync();
+
+            if(sum == 0)
+            {
+                return Result<int>.Failure("no orders found for this user", statusCode: HttpStatusCode.NotFound);
+            }
+
+            return Result<int>.Success(sum);
+        }
         public async Task<Result> EditByIdAsync(EditOrderDTO newData)
         {
             Order? toEdit = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == newData.Id);

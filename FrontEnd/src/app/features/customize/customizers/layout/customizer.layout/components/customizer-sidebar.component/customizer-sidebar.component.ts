@@ -1,13 +1,6 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CustomizerService } from '../../../../customizer.service';
-import { CartItemServices } from '../../../../../../../core/services/api-services/cart-item-services';
-import { IAddCustomBuildDTO } from '../../../../../../../core/DTO/add-custom-build-dto';
-import { CustomBuildTypeEnum } from '../../../../../../../core/enums/custom-build-type-enum';
-import { ActivatedRoute, Router } from '@angular/router';
-import { IPart } from '../../../../../../../core/interfaces/customize-data/customize-data.model';
-import { PartServices } from '../../../../../../../core/services/api-services/part-services';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CustomizerService } from '../../../../../customizer.service';
 
 @Component({
   selector: 'aside[customizerSideBar]',
@@ -20,69 +13,28 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class CustomizerSidebarComponent implements OnInit {
   // injections
-  readonly customizerService = inject(CustomizerService);
-  readonly cartItemServices = inject(CartItemServices);
-  readonly activatedRoute = inject(ActivatedRoute);
-  readonly router = inject(Router);
-  readonly partServices = inject(PartServices);
-  readonly destroyRef = inject(DestroyRef);
-
-  // data
-  readonly selectedProduct = this.customizerService.selectedProduct;
+  private readonly _customizerService = inject(CustomizerService);
 
   // signals
-  activePartId = signal<string>('');
-  customizeData = signal<IPart[]>([]);
-  isAddingToCart = signal<boolean>(false);
+  activePartId = this._customizerService.getActivePartId;
+  customizeData = this._customizerService.getCustomizeData;
+  selectedModifications = this._customizerService.getSelectedModifications;
 
   // computed
   currentPartSections = computed(
     () => this.customizeData()?.find((part) => part.id === this.activePartId())?.sections ?? [],
   );
 
-  // getters
-  get pageType(): CustomBuildTypeEnum {
-    return this.activatedRoute.snapshot.data['pageType'];
-  }
+
 
   ngOnInit() {
-    this.partServices
-      .getAllParts()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => {
-          this.customizeData.set(data);
-          if (data.length > 0) {
-            this.activePartId.set(data[0].id);
-          }
-        },
-        error: (error) => {
-          //todo: show error message
-        },
-      });
+    this._customizerService.updateModifications();
   }
 
-  setActivePartId(newId: string): void {
-    this.activePartId.set(newId);
-  }
+  // methods
+  setActivePartId = this._customizerService.setActivePartId;
 
-  addToCart() {
-    if (this.isAddingToCart()) return;
-    this.isAddingToCart.set(true);
+  addToCart = this._customizerService.addToCart;
 
-    const newCartItem: IAddCustomBuildDTO = {
-      modificationIds: Object.values(this.selectedProduct()).filter((id) => id),
-      customBuildType: this.pageType,
-    };
-
-    this.cartItemServices.addCustomBuild(newCartItem).subscribe({
-      next: () => {
-        //todo: show item added to cart with like 3s delay
-        this.router.navigate(['/cart']);
-      },
-      error: (error) => {
-        //todo: show error message
-      },
-    });
-  }
+  selectModification = this._customizerService.selectModification;
 }

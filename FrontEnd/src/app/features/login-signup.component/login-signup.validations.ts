@@ -1,8 +1,5 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { regexPatterns } from '../../core/constants/regex';
-import { PageTypes } from './login-signup.model';
-import { inject } from '@angular/core';
-import { LoginSignupService } from './login-signup.service';
 
 const validation = {
   userName: (s: string) => (!s ? 'Username is required' : ''),
@@ -15,16 +12,9 @@ const validation = {
   server: (s: string) => '',
 };
 
-const customValidationFn = (type: keyof typeof validation, skipOn?: PageTypes): ValidatorFn => {
-  const loginSignupService = inject(LoginSignupService);
+const customValidationFn = (type: keyof typeof validation): ValidatorFn => {
 
   return (control: AbstractControl) => {
-    if (skipOn) {
-      const currPage = loginSignupService.getCurrPage();
-
-      if (currPage === skipOn) return null;
-    }
-
     const error = validation[type](control.value);
 
     if (error) {
@@ -34,12 +24,11 @@ const customValidationFn = (type: keyof typeof validation, skipOn?: PageTypes): 
   };
 };
 
-type validationInputType = { skipOn?: PageTypes };
 
 export const customValidation = {
-  userName: (input?: validationInputType) => customValidationFn('userName', input?.skipOn),
-  email: (input?: validationInputType) => customValidationFn('email', input?.skipOn),
-  phoneNumber: (input?: validationInputType) => customValidationFn('phoneNumber', input?.skipOn),
-  password: (input?: validationInputType) => customValidationFn('password', input?.skipOn),
-  server: (input?: validationInputType) => customValidationFn('server', input?.skipOn),
+  userName: customValidationFn('userName'),
+  email: customValidationFn('email'),
+  phoneNumber: customValidationFn('phoneNumber'),
+  password: customValidationFn('password'),
+  server: customValidationFn('server'),
 };

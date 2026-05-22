@@ -27,18 +27,16 @@
         <h3 class="text-white text-xs font-bold uppercase tracking-widest">
           {{ section.title }}
         </h3>
-        <span class="text-secondary text-[10px] font-bold uppercase">
-          to modify later
-        </span>
+        <span class="text-secondary text-[10px] font-bold uppercase"> to modify later </span>
       </div>
 
       <div class="flex flex-wrap gap-3">
         @for (modification of section.modifications; track modification.id) {
           <button
-            (click)="customizerService.selectModification(section.id, modification.id)"
+            (click)="selectModification(section.id, modification.id)"
             [class]="
               `flex-1 min-w-40 max-w-60 max-[381px]:max-w-none! relative flex transition-all rounded-lg border-2 ${
-                selectedProduct()[section.id] === modification.id
+                selectedModifications()[section.id] === modification.id
                   ? 'border-secondary bg-white/5 ring-1 ring-secondary/30'
                   : 'border-dark-blue-gray hover:border-soft-gray/30 bg-transparent'
               } ${
@@ -56,8 +54,8 @@
                 ></div>
                 <span
                   class="text-xs font-bold"
-                  [class.text-white]="selectedProduct()[section.id] === modification.id"
-                  [class.text-soft-gray]="selectedProduct()[section.id] !== modification.id"
+                  [class.text-white]="selectedModifications()[section.id] === modification.id"
+                  [class.text-soft-gray]="selectedModifications()[section.id] !== modification.id"
                 >
                   {{ modification.name }}
                 </span>

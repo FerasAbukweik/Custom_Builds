@@ -29,7 +29,7 @@ namespace custom_Peripherals.Controllers
             _getOrderService = getOrderService;
         }
 
-        // add cart item
+        // add order
         [Authorize(Roles = nameof(RoleEnums.User))]
         [HttpPost("[action]")]
         public async Task<IActionResult> Add([FromBody] AddOrderDTO toAdd)
@@ -44,7 +44,7 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
-        // remove cart item
+        // remove order
         [Authorize(Roles = nameof(RoleEnums.User))]
         [HttpDelete("[action]/{orderId}")]
         public async Task<IActionResult> Remove([FromRoute]Guid orderId)
@@ -54,7 +54,7 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
-        // get all cart items -- with lazy loading
+        // get all orders -- with lazy loading
         [HttpGet("[action]")]
         public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAll([FromQuery]LazyGetALlOrdersDTO lazyGetOrdersData)
         {
@@ -68,7 +68,7 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
-        // get all cart completed items -- with lazy loading
+        // get all completed orders -- with lazy loading
         [HttpGet("[action]")]
         public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAllCompletedOrders([FromQuery]LazyGetALlOrdersDTO lazyGetOrdersData)
         {
@@ -79,6 +79,15 @@ namespace custom_Peripherals.Controllers
 
 
             var result = await _getOrderService.GetCompletedUserOrdersAsync(lazyGetOrdersData);
+
+            return result.ToActionResult();
+        }
+
+        // get orders count
+        [HttpGet("[action]")]
+        public async Task<ActionResult<int>> GetOrdersCount([FromQuery] Guid? userId)
+        {
+            var result = await _getOrderService.GetOrdersCountAsync(userId);
 
             return result.ToActionResult();
         }

@@ -4,12 +4,12 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { IFooterExtraPages, IFormGroupType, PageTypes } from './login-signup.model';
 import { customValidation } from './login-signup.validations';
-import { LoginSignupService } from './login-signup.service';
 import { IRegisterDTO } from '../../core/DTO/register-dto';
 import { RoleEnums } from '../../core/enums/role-enums';
 import { AccountServices } from '../../core/services/api-services/account-services';
 import { Router } from '@angular/router';
 import { ILoginDTO } from '../../core/DTO/login-dto';
+import { disabled } from '@angular/forms/signals';
 
 const footerExtraPages: IFooterExtraPages[] = [
   { icon: 'fa-google', color: '#34A850', title: 'Google', link: '' },
@@ -29,7 +29,6 @@ const footerExtraPages: IFooterExtraPages[] = [
 })
 export class LoginSignupComponent {
   // inject services
-  private readonly loginSignupService = inject(LoginSignupService);
   private readonly accountServices = inject(AccountServices);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -37,28 +36,30 @@ export class LoginSignupComponent {
   // so we can access it in the html
   readonly footerExtraPages = footerExtraPages;
 
-  currPage = this.loginSignupService.getCurrPage;
+  // signals
   isShowPassword = signal(false);
+  currPage = signal<PageTypes>('signin');
+
 
   // define form for both login and signup pages
   form: FormGroup<IFormGroupType> = new FormGroup<IFormGroupType>({
     email: new FormControl('', {
       nonNullable: true,
-      validators: [customValidation.email()],
+      validators: [customValidation.email],
     }),
     password: new FormControl('', {
       nonNullable: true,
-      validators: [customValidation.password()],
+      validators: [customValidation.password],
     }),
-    phoneNumber: new FormControl('', {
+    phoneNumber: new FormControl({value: '' , disabled: true}, {
       nonNullable: true,
       // skip validation on signin page
-      validators: [customValidation.phoneNumber({ skipOn: 'signin' })],
+      validators: [customValidation.phoneNumber],
     }),
-    userName: new FormControl('', {
+    userName: new FormControl({value: '' , disabled: true}, {
       nonNullable: true,
       // skip validation on signin page
-      validators: [customValidation.userName({ skipOn: 'signin' })],
+      validators: [customValidation.userName],
     }),
   });
 
@@ -93,12 +94,19 @@ export class LoginSignupComponent {
   }
 
   changePage(newPage: PageTypes) {
-    // if same page dont do anything
     if (this.currPage() === newPage) return;
 
-    this.loginSignupService.changePage(newPage);
+    this.currPage.set(newPage);
     this.form.reset();
-  }
+
+    if (newPage === 'signin') {
+      this.form.controls.userName.disable();
+      this.form.controls.phoneNumber.disable();
+    } else {
+      this.form.controls.userName.enable();
+      this.form.controls.phoneNumber.enable();
+    }
+}
 
   onSubmit() {
     // for isError to work Correctly

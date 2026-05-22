@@ -9,5 +9,6 @@ namespace Custom_Builds.Core.ServiceContracts.IOrderServices
         Task<Result<Order>> GetByIdAsync(Guid orderId);
         Task<Result<List<MiniOrderInfoDTO>>> GetUserOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData);
         Task<Result<List<MiniOrderInfoDTO>>> GetCompletedUserOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData);
+        Task<Result<int>> GetOrdersCountAsync(Guid? userId);
     }
 }
