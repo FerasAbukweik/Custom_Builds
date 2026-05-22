@@ -38,7 +38,6 @@ namespace Custom_Builds.Infrastructure.Repositories
                 orderType = toAdd.orderType,
                 CustomBuildId = toAdd.CustomBuildId,
                 ProductId = toAdd.ProductId,
-                Quantity = 1,
             };
 
             _dbContext.Cart.Add(newCartItem);

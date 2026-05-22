@@ -13,5 +13,6 @@ namespace Custom_Builds.Core.Domain.RepositryContracts
         Task<Result> EditByIdAsync(EditCustomBuildDTO newData);
         Task<Result> RemoveByIdAsync(Guid customBuildId);
         Task<Result<List<CustomBuild>>> FilterAsync(Expression<Func<CustomBuild, bool>> extraChecks, Expression<Func<CustomBuild, object>>[]? includes = null);
+        Task<Result<decimal>> GetPriceAsync(Guid customBuildId);
     }
 }

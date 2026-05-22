@@ -27,6 +27,8 @@ namespace Custom_Builds.Core.Domain.Entities
         public required string Title { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [Required(ErrorMessage = "{0} is required")]
+        public int Quantity { get; set; } = 1;
 
 
         public Guid? CustomBuildId { get; set; }

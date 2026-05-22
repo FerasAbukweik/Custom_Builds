@@ -23,23 +23,5 @@ namespace Custom_Builds.Core.Services.ModificationServices
 
             return Result<Modification>.Success(result.Value!);
         }
-        public async Task<Result<decimal>> GetModificationsPriceAsync(List<Guid> modificationIds)
-        {
-            // hashset so the comparision is faster
-            HashSet<Guid> ids = new HashSet<Guid>(modificationIds);
-
-            // get modifications based on the list of ids so we can sum their prices
-            var modificationsResult = await _modificationsRepository.FilterAsync(m => ids.Contains(m.Id));
-            if (!modificationsResult.IsSuccess) return modificationsResult.MapFailure<decimal>();
-
-            if (modificationsResult.Value!.Count != modificationIds.Count)
-            {
-                return Result<decimal>.Failure("One or more modifications were not found", HttpStatusCode.NotFound);
-            }
-
-            // sum modifications price
-            decimal totalPrice = modificationsResult.Value.Sum(m => m.Price);
-            return Result<decimal>.Success(totalPrice);
-        }
     }
 }

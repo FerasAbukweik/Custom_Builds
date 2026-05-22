@@ -3,7 +3,7 @@ import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { TopNavComponent } from '../../layouts/top-nav.component/top-nav.component';
 import { RouterLink } from '@angular/router';
 import { __importDefault } from 'tslib';
-import { ICartItemDTO } from '../../core/DTO/cart-item-dto';
+import { IMiniCartItemDTO } from '../../core/DTO/mini-cart-item-dto';
 import { debounceTime, tap } from 'rxjs';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { INewQuantities } from './cart.model';
@@ -53,17 +53,18 @@ export class CartComponent implements OnInit {
     this._cartService.setIsMoreDataAvaiable(true);
   }
 
-
   // methods
 
   // lazy get cart items
   lazyGetCartItems = this._cartService.lazyGetCartItems;
 
+  // remove cart item
+  removeCartItem = this._cartService.removeCartItem;
 
   // track quantities changes
   trackQuantitiesChanges() {
     // we need this for later if something went wrong and we need to restore the previous state
-    let prevItems: ICartItemDTO[] = [];
+    let prevItems: IMiniCartItemDTO[] = [];
     let prevSummary: ICartSummaryInfo | undefined = undefined;
 
     // check for quantities changes
@@ -81,10 +82,10 @@ export class CartComponent implements OnInit {
           let operation: number = 0; // -1 or 1
           let itemPrice: number = 0;
 
-          const newCartItems: ICartItemDTO[] = this.cartItems().map((item) => {
+          const newCartItems: IMiniCartItemDTO[] = this.cartItems().map((item) => {
             if (idsSet.has(item.id)) {
               operation = this.newQuantities()[item.id] - item.quantity;
-              itemPrice = item.totalPrice;
+              itemPrice = item.Price;
               return { ...item, quantity: this.newQuantities()[item.id] };
             }
             return item;
@@ -93,7 +94,7 @@ export class CartComponent implements OnInit {
           const newSummaryInfo: ICartSummaryInfo = {
             ...this.summaryInfo(),
             totalOrders: this.summaryInfo().totalOrders + operation,
-            totalPrice: this.summaryInfo().totalPrice + (operation * itemPrice),
+            totalPrice: this.summaryInfo().totalPrice + operation * itemPrice,
           };
 
           // optimistic update for better ux
@@ -118,7 +119,6 @@ export class CartComponent implements OnInit {
       });
   }
 
-
   // update quantity
   updateQuantity(id: string, add: number) {
     const originalQuantity: number = this.cartItems().find((i) => i.id === id)?.quantity!;
@@ -131,11 +131,5 @@ export class CartComponent implements OnInit {
     }
 
     this.newQuantities.update((curr) => ({ ...curr, [id]: newVal }));
-  }
-
-
-  // remove cart item
-  removeCartItem(id: string) {
-    this._cartService.removeCartItem(id);
   }
 }

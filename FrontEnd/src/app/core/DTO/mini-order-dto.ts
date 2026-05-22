@@ -1,4 +1,4 @@
-import { OrderStateEnum } from "../../../../../core/enums/order-status-enum";
+import { OrderStateEnum } from "../enums/order-status-enum";
 
 export interface IOrderDTO {
   id: string;

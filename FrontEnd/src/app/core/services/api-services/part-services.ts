@@ -8,7 +8,7 @@ export class PartServices {
   private readonly url = ApiConstrants.url + '/Part';
   private readonly http = inject(HttpClient);
 
-  public getAllParts() {
+  public getAllParts = () => {
     return this.http.get<IPart[]>(`${this.url}/GetAllParts`);
   }
 }

@@ -70,7 +70,7 @@ namespace custom_Peripherals.Controllers
 
         // get all completed orders -- with lazy loading
         [HttpGet("[action]")]
-        public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAllCompletedOrders([FromQuery]LazyGetALlOrdersDTO lazyGetOrdersData)
+        public async Task<ActionResult<List<HistoryOrderDTO>>> GetAllCompletedOrders([FromQuery]LazyGetALlOrdersDTO lazyGetOrdersData)
         {
             if (!ModelState.IsValid)
             {
@@ -78,7 +78,7 @@ namespace custom_Peripherals.Controllers
             }
 
 
-            var result = await _getOrderService.GetCompletedUserOrdersAsync(lazyGetOrdersData);
+            var result = await _getOrderService.GetCompletedOrdersAsync(lazyGetOrdersData);
 
             return result.ToActionResult();
         }
@@ -88,6 +88,15 @@ namespace custom_Peripherals.Controllers
         public async Task<ActionResult<int>> GetOrdersCount([FromQuery] Guid? userId)
         {
             var result = await _getOrderService.GetOrdersCountAsync(userId);
+
+            return result.ToActionResult();
+        }
+
+        // get AllCompletedOrders count
+        [HttpGet("[action]")]
+        public async Task<ActionResult<int>> GetAllCompletedOrdersCount([FromQuery] Guid? userId)
+        {
+            var result = await _getOrderService.GetAllCompletedOrdersCountAsync(userId);
 
             return result.ToActionResult();
         }

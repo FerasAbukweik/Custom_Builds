@@ -90,6 +90,15 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<List<CustomBuild>>.Success(customBuilds);
         }
+        public async Task<Result<decimal>> GetPriceAsync(Guid customBuildId)
+        {
+            var priceSum = await _dbContext.CustomBuilds
+                .Where(cb => cb.Id == customBuildId)
+                .SelectMany(cb => cb.Modifications)
+                .SumAsync(m => m.Price);
+
+            return Result<decimal>.Success(priceSum);
+        }
 
     }
 }

@@ -17,19 +17,19 @@ namespace Custom_Builds.Core.Services.CartItemServices
         private readonly IGetProductService _getProductService;
         private readonly IAddCustomBuildService _addCustomBuildService;
         private readonly IGetCurrUserService _getCurrUserService;
-        private readonly IGetModificationService _getModificationService;
+        private readonly ICustomBuildRepository _customBuildRepository;
 
         public AddCartItemService(ICartItemRepository cartItemRepository,
                                   IGetProductService getProductService,
                                   IAddCustomBuildService customBuildService,
                                   IGetCurrUserService getCurrUserService,
-                                  IGetModificationService getModificationService)
+                                  ICustomBuildRepository customBuildRepository)
         {
             _cartItemRepository = cartItemRepository;
             _getProductService = getProductService;
             _addCustomBuildService = customBuildService;
             _getCurrUserService = getCurrUserService;
-            _getModificationService = getModificationService;
+            _customBuildRepository = customBuildRepository;
         }
 
         public async Task<Result<CartItemDTO>> AddAsync(Guid productId)
@@ -77,7 +77,6 @@ namespace Custom_Builds.Core.Services.CartItemServices
                 UserId = getCurrentUserId.Value,
                 ProductId = null,
                 CustomBuildId = addCustomBuildResult.Value!.Id,
-                Quantity = 1
             };
 
             // adding item to the cart
@@ -86,7 +85,7 @@ namespace Custom_Builds.Core.Services.CartItemServices
 
 
             // get modifications price to add it to the dto
-            var getModificaitonsPrice = await _getModificationService.GetModificationsPriceAsync(toAdd.ModificationIds);
+            var getModificaitonsPrice = await _customBuildRepository.GetPriceAsync(addCustomBuildResult.Value!.Id);
             if (!getModificaitonsPrice.IsSuccess) return getModificaitonsPrice.MapFailure<CartItemDTO>();
 
             return Result<CartItemDTO>.Success(addToCartResult.Value!.toDTO(getModificaitonsPrice.Value!));

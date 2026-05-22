@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { IStep } from './order-review.model';
-import { IOrderDTO } from '../../my-orders.model';
+import { IOrderDTO } from '../../../../../../../core/DTO/mini-order-dto';
 import { CommonModule, DatePipe } from '@angular/common';
 import { OrderStateEnum } from '../../../../../../../core/enums/order-status-enum';
 

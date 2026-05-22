@@ -27,7 +27,7 @@ namespace Custom_Builds.Core.Services.OrderServices
 
             return Result<Order>.Success(result.Value!);
         }
-        public async Task<Result<List<MiniOrderInfoDTO>>> GetCompletedUserOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData)
+        public async Task<Result<List<HistoryOrderDTO>>> GetCompletedOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData)
         {
             var getCurrUserIdRes = _getCurrUserService.GetUserId();
             if (!getCurrUserIdRes.IsSuccess) getCurrUserIdRes.MapFailure<List<MiniOrderInfoDTO>>();
@@ -36,11 +36,11 @@ namespace Custom_Builds.Core.Services.OrderServices
             lazyGetUserOrdersData.UserId = getCurrUserIdRes.Value!;
 
             // get the data from DB
-            var result = await _orderRepository.GetCompletedUserOrdersAsync(lazyGetUserOrdersData);
-            if (!result.IsSuccess) return result.MapFailure<List<MiniOrderInfoDTO>>();
+            var result = await _orderRepository.GetCompletedOrdersAsync(lazyGetUserOrdersData);
+            if (!result.IsSuccess) return result.MapFailure<List<HistoryOrderDTO>>();
 
 
-            return Result<List<MiniOrderInfoDTO>>.Success(result.Value!);
+            return Result<List<HistoryOrderDTO>>.Success(result.Value!);
         }
         public async Task<Result<int>> GetOrdersCountAsync(Guid? userId)
         {
@@ -71,6 +71,18 @@ namespace Custom_Builds.Core.Services.OrderServices
                 return Result<List<MiniOrderInfoDTO>>.Failure("no orders where found", HttpStatusCode.NotFound);
 
             return Result<List<MiniOrderInfoDTO>>.Success(userOrders.Value!);
+        }
+        public async Task<Result<int>> GetAllCompletedOrdersCountAsync(Guid? userId)
+        {
+            var getTargetUserIdRes = _getCurrUserService.GetTargetUserId(userId);
+            if (!getTargetUserIdRes.IsSuccess) getTargetUserIdRes.MapFailure<int>();
+
+            userId = getTargetUserIdRes.Value!;
+
+            var getSumRes = await _orderRepository.GetCompletedOrdersCountAsync(userId!.Value);
+
+
+            return getSumRes;
         }
     }
 }

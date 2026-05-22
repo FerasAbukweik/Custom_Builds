@@ -1,27 +1,69 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { IOrderHistory, IStatsData } from './history.component.model';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { UserContentWrapper } from '../../wrappers/user-content.wrapper/user-content.wrapper';
+import { HistoryService } from './history.service';
+import { OrderStateEnum } from '../../../../../core/enums/order-status-enum';
+
+const statsData: IStatsData[] = [
+  { label: "Total Spent", value: "$1,248.50" },
+  { label: "Total Orders", value: "12" },
+  { label: "Active Builds", value: "2", highlight: true },
+  { label: "Loyalty Points", value: "840", badge: "GOLD" },
+];
+
 
 @Component({
   selector: 'app-history',
-  imports: [CommonModule, UserContentWrapper],
+  imports: [CommonModule, UserContentWrapper , DatePipe , CurrencyPipe],
   templateUrl: './history.component.html',
 })
-export class HistoryComponent {
-statsData: IStatsData[] = [
-    { label: "Total Spent", value: "$1,248.50" },
-    { label: "Total Orders", value: "12" },
-    { label: "Active Builds", value: "2", highlight: true },
-    { label: "Loyalty Points", value: "840", badge: "GOLD" },
-  ];
+export class HistoryComponent implements OnInit {
+  // injections
+  private readonly _historyService = inject(HistoryService);
 
-  orderHistory: IOrderHistory[] = [
-    { id: "#CP-8291", date: "Sept 12, 2023", item: "'Neon-Night' 65% Keyboard", specs: "Custom PCB, Cherry MX Blue", status: "Delivered", price: "$249.00", statusType: "ok" },
-    { id: "#CP-7742", date: "Aug 28, 2023", item: "Pro-Grip Wireless Mouse", specs: "Carbon Fiber Shell", status: "Delivered", price: "$159.99", statusType: "ok" },
-    { id: "#CP-7105", date: "July 04, 2023", item: "Elite Series Controller", specs: "Trigger Stops, Paddle Map", status: "Refunded", price: "$189.00", statusType: "error" },
-  ];
+  // signals
+  currentSection = this._historyService.getCurrentSection;
+  completedOrdersCount = this._historyService.getCompletedOrdersCount;
+  SectionOrders = this._historyService.getSectionOrders;
+  isLoading = this._historyService.getIsLoading;
 
-  pages = [1, 2, 3];
-  currentPage = signal<number>(1);
+  // computed
+  currOrders = computed(() => this.SectionOrders()[this.currentSection() - 1])
+
+  // fields
+  statsData: IStatsData[] = statsData;
+
+  ngOnInit(): void {
+    this._historyService.init();
+  }
+
+
+  // methods
+  generateBottomNumbers = (maxLen: number = 3) : number[] => {
+    const numberOfSections = this.SectionOrders().length;
+
+    const takeRight = Math.min(maxLen - 1 , numberOfSections - this.currentSection());
+    const takeLeft = Math.min(maxLen - takeRight - 1,  this.currentSection() - 1);
+
+    let begin = this.currentSection() - takeLeft;
+    const finalLen = 1 + takeRight + takeLeft;
+    const resArr = Array.from({ length: finalLen }, () => begin++);
+
+    return resArr;
+  }
+
+
+  // change section
+  changeSection(newSection: number){
+    if(this.currentSection() === newSection) return;
+    if(newSection < 1 || newSection > this.SectionOrders().length) return;
+
+    this._historyService.updateOrders(newSection);
+  }
+
+  // get status name
+  getStatusName = (status: OrderStateEnum) => {
+    return OrderStateEnum[status];
+  } 
 }

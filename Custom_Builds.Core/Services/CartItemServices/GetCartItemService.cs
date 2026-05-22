@@ -49,13 +49,13 @@ namespace Custom_Builds.Core.Services.CartItemServices
                 if (item.orderType == OrderTypeEnum.Product) newCartItems.Add(item.toDTO());
                 
 
-                // if it is custom build sum its modifications prices
+                // if it is custom build get its price first
                 else if (item.orderType == OrderTypeEnum.Custom)
                 {
-                    var getModificationsPriceRes = await _getCustomBuildService.GetTotalPriceAsync(item.CustomBuildId!.Value);
-                    if (!getModificationsPriceRes.IsSuccess) throw new Exception(getModificationsPriceRes.ErrorMessage);
+                    var getCustomBuildPriceResult = await _getCustomBuildService.GetPriceAsync(item.CustomBuildId!.Value);
+                    if (!getCustomBuildPriceResult.IsSuccess) throw new Exception(getCustomBuildPriceResult.ErrorMessage);
 
-                    newCartItems.Add(item.toDTO(getModificationsPriceRes.Value!));
+                    newCartItems.Add(item.toDTO(getCustomBuildPriceResult.Value!));
                 }
 
                 else

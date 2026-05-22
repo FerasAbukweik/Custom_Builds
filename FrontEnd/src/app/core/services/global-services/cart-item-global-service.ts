@@ -1,6 +1,6 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { CartItemServices } from '../api-services/cart-item-services';
-import { ICartItemDTO } from '../../DTO/cart-item-dto';
+import { IMiniCartItemDTO } from '../../DTO/mini-cart-item-dto';
 import { ICartSummaryInfo } from '../../DTO/cart-summary-info-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ILazyGetCartItemsDTO } from '../../DTO/lazy-get-cart-items-dto';
@@ -16,7 +16,7 @@ export class CartItemGlobalService {
   private readonly destroyRef = inject(DestroyRef);
 
   // signals
-  private cartItems = signal<ICartItemDTO[]>([]);
+  private cartItems = signal<IMiniCartItemDTO[]>([]);
   private isLoading = signal<boolean>(false);
   private isDeleteing = signal<boolean>(false);
   private summaryInfo = signal<ICartSummaryInfo>({
@@ -49,25 +49,25 @@ export class CartItemGlobalService {
     return this.isLoading.asReadonly();
   }
 
-
   // setters
-  setCartItems = (newCartItem: ICartItemDTO[]) => {
+  setCartItems = (newCartItem: IMiniCartItemDTO[]) => {
     this.cartItems.set(newCartItem);
-  }
+  };
 
   setSummartInfo = (newSummaryInfo: ICartSummaryInfo) => {
     this.summaryInfo.set(newSummaryInfo);
-  }
+  };
 
   setIsMoreDataAvaiable = (newVal: boolean) => {
     this.isMoreDataAvailable = newVal;
-  }
-  
+  };
+
   // methods
 
   // update summary info
   updateSummaryInfo = () => {
-    this.cartItemService.GetSummaryInfo()
+    this.cartItemService
+      .GetSummaryInfo()
       .pipe(this.untilDestroyed)
       .subscribe({
         next: (res) => {
@@ -77,26 +77,27 @@ export class CartItemGlobalService {
           // toDo: show error message
         },
       });
-  }
+  };
 
   // get cart items from api with lazy laoding
-  lazyGetCartItems = async ()  => {
+  lazyGetCartItems = async () => {
     if (!this.isMoreDataAvailable || this.isLoading()) return;
     this.isLoading.set(true);
 
-    while(this.isDeleteing()){
-      await new Promise<void>(res => setTimeout(res , 250))
+    while (this.isDeleteing()) {
+      await new Promise<void>((res) => setTimeout(res, 250));
     }
 
-    this.cartItemService.GetCartItems(this.requestData)
+    this.cartItemService
+      .GetCartItems(this.requestData)
       .pipe(this.untilDestroyed)
       .subscribe({
         next: (res) => {
-          this.cartItems.update((curr) => [...curr, ...(res as ICartItemDTO[])]);
+          this.cartItems.update((curr) => [...curr, ...(res as IMiniCartItemDTO[])]);
 
-          const itemsLen = (res as ICartItemDTO[]).length;
-          console.log("test");
-          console.log(res as ICartItemDTO[]);
+          const itemsLen = (res as IMiniCartItemDTO[]).length;
+          console.log('test');
+          console.log(res as IMiniCartItemDTO[]);
 
           this.requestData.taken += itemsLen;
           this.isMoreDataAvailable = itemsLen > 0;
@@ -111,36 +112,35 @@ export class CartItemGlobalService {
           this.isLoading.set(false);
         },
       });
-  }
+  };
 
   // update items quantity
   updateItemsQuantity = async (newQuantities: INewQuantities): Promise<boolean> => {
     try {
       await firstValueFrom(
-        this.cartItemService.updateQuantity(newQuantities)
-          .pipe(this.untilDestroyed),
+        this.cartItemService.updateQuantity(newQuantities).pipe(this.untilDestroyed),
       );
       return true;
     } catch (error) {
       return false;
     }
-  }
+  };
 
   // remove cart item
   removeCartItem = async (id: string): Promise<boolean> => {
-    if(this.isDeleteing() || this.isLoading()) return false;
+    if (this.isDeleteing() || this.isLoading()) return false;
     this.isDeleteing.set(true);
     // to get back to previous state if something went wrong
     const prevItems = this.cartItems();
     const prevSummary = this.summaryInfo();
 
-    let itemPrice : number = 0;
-    let quantity : number = 0;
+    let itemPrice: number = 0;
+    let quantity: number = 0;
 
     this.cartItems.update((curr) =>
       curr.filter((ci) => {
         if (ci.id === id) {
-          itemPrice = ci.totalPrice;
+          itemPrice = ci.Price;
           quantity = ci.quantity;
           return false;
         }
@@ -152,12 +152,11 @@ export class CartItemGlobalService {
     this.summaryInfo.update((curr) => ({
       ...curr,
       totalOrders: curr.totalOrders - quantity,
-      totalPrice: curr.totalPrice - (itemPrice * quantity),
+      totalPrice: curr.totalPrice - itemPrice * quantity,
     }));
 
     return await firstValueFrom(
-      this.cartItemService.remove(id)
-      .pipe(
+      this.cartItemService.remove(id).pipe(
         this.untilDestroyed,
         map(() => {
           this.requestData.taken--;
@@ -173,5 +172,5 @@ export class CartItemGlobalService {
         }),
       ),
     );
-  }
+  };
 }

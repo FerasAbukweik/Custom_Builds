@@ -3,7 +3,7 @@ import { ApiConstrants } from '../../constants/api-constants';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { IAddCustomBuildDTO } from '../../DTO/add-custom-build-dto';
 import { ILazyGetCartItemsDTO } from '../../DTO/lazy-get-cart-items-dto';
-import { ICartItemDTO } from '../../DTO/cart-item-dto';
+import { IMiniCartItemDTO } from '../../DTO/mini-cart-item-dto';
 import { INewQuantities } from '../../../features/cart.component/cart.model';
 import { ICartSummaryInfo } from '../../DTO/cart-summary-info-dto';
 
@@ -25,7 +25,7 @@ export class CartItemServices {
       params = params.append(key, value.toString());
     });
 
-    return this.httpClient.get<ICartItemDTO[]>(`${this.url}/GetCartItems`, { params });
+    return this.httpClient.get<IMiniCartItemDTO[]>(`${this.url}/GetCartItems`, { params });
   };
 
   // update quantity

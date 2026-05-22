@@ -2,7 +2,7 @@ import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { OrderService } from '../../../../../core/services/api-services/order-service';
 import { ILazyLoadingDTO } from '../../../../../core/DTO/lazy-loading-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { IOrderDTO } from './my-orders.model';
+import { IOrderDTO } from '../../../../../core/DTO/mini-order-dto';
 
 @Injectable({ providedIn: 'root' })
 export class MyOrdersService {
@@ -43,7 +43,7 @@ export class MyOrdersService {
     this.isLoading.set(true);
 
     this._orderService
-      .GetAll(this._lazyData)
+      .getAll(this._lazyData)
       .pipe(this.untilDestroyed)
       .subscribe({
         next: (data) => {
@@ -67,7 +67,7 @@ export class MyOrdersService {
 
   updateOrdersCount = () => {
     this._orderService
-      .GetOrdersCount()
+      .getOrdersCount()
       .pipe(this.untilDestroyed)
       .subscribe({
         next: (res) => {

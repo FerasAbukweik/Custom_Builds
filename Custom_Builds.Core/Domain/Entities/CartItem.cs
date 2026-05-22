@@ -25,7 +25,7 @@ namespace Custom_Builds.Core.Domain.Entities
         public Product? Product { get; set; }
 
         [Required(ErrorMessage = "{0} is required.")]
-        public required int Quantity { get; set; }
+        public int Quantity { get; set; } = 1;
 
         public CartItemDTO toDTO()
         {
@@ -35,7 +35,7 @@ namespace Custom_Builds.Core.Domain.Entities
                 orderType = this.orderType,
                 CustomBuildId = this.CustomBuildId,
                 ProductId = this.ProductId,
-                TotalPrice = this.orderType switch
+                Price = this.orderType switch
                 {
                     OrderTypeEnum.Product => this.Product?.Price ?? -1,
                     OrderTypeEnum.Custom => throw new Exception("Custom Build Price Must Be Passed to the toDTO() fun"),
@@ -43,7 +43,7 @@ namespace Custom_Builds.Core.Domain.Entities
                 },
                 image = this.orderType switch
                 {
-                    OrderTypeEnum.Product => this.Product?.Name ?? "missing product",
+                    OrderTypeEnum.Product => this.Product?.images.FirstOrDefault() ?? "no image",
                     OrderTypeEnum.Custom => "Custom Build image",
                     _ => throw new Exception("unknown order type")
                 },
@@ -54,7 +54,7 @@ namespace Custom_Builds.Core.Domain.Entities
                     OrderTypeEnum.Custom => "Custom Build",
                     _ => throw new Exception("unknown order type")
                 },
-                Specs = ["normal product"]
+                Specs = ["Product"]
             };
         }
 
@@ -66,10 +66,10 @@ namespace Custom_Builds.Core.Domain.Entities
                 orderType = this.orderType,
                 CustomBuildId = this.CustomBuildId,
                 ProductId = this.ProductId,
-                TotalPrice = totalPrice,
+                Price = totalPrice,
                 image = this.orderType switch
                 {
-                    OrderTypeEnum.Product => this.Product?.Name ?? "missing product",
+                    OrderTypeEnum.Product => this.Product?.images.FirstOrDefault() ?? "no image",
                     OrderTypeEnum.Custom => "Custom Build image",
                     _ => throw new Exception("unknown order type")
                 },

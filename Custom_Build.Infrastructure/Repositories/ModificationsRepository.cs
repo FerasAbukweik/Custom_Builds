@@ -89,6 +89,5 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<List<Modification>>.Success(modifications);
         }
-
     }
 }
