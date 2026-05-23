@@ -69,7 +69,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Cart");
+                    b.ToTable("Cart", (string)null);
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.CustomBuild", b =>
@@ -88,7 +88,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.ToTable("CustomBuilds");
+                    b.ToTable("CustomBuilds", (string)null);
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Message", b =>
@@ -123,7 +123,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Modification", b =>
@@ -154,7 +154,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Modifications");
+                    b.ToTable("Modifications", (string)null);
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Order", b =>
@@ -196,7 +196,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Part", b =>
@@ -215,7 +215,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Parts");
+                    b.ToTable("Parts", (string)null);
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Product", b =>
@@ -237,7 +237,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Section", b =>
@@ -252,7 +252,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sections");
+                    b.ToTable("Sections", (string)null);
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Identity.ApplicationRole", b =>
@@ -372,7 +372,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

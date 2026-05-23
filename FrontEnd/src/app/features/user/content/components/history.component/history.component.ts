@@ -5,6 +5,7 @@ import { UserContentWrapper } from '../../wrappers/user-content.wrapper/user-con
 import { HistoryService } from './history.service';
 import { OrderStateEnum } from '../../../../../core/enums/order-status-enum';
 import { LoadingComponent } from '../../../../../shared/components/loading/loading.component/loading.component';
+import { max } from 'rxjs';
 
 
 @Component({
@@ -37,8 +38,21 @@ export class HistoryComponent implements OnInit {
   generateBottomNumbers = (maxLen: number = 3) : number[] => {
     const numberOfSections = this.SectionOrders().length;
 
-    const takeRight = Math.min(maxLen - 1 , numberOfSections - this.currentSection());
-    const takeLeft = Math.min(maxLen - takeRight - 1,  this.currentSection() - 1);
+    let canTakeRight = numberOfSections - this.currentSection()
+    let canTakeLeft = this.currentSection() - 1;
+
+    const isEven = (maxLen%2 == 0 ? 1 : 0);
+    let maxCanTake = Math.trunc(maxLen/2) - isEven;
+
+    let takeRight = Math.min(maxCanTake + isEven , canTakeRight);
+    canTakeRight -= takeRight;
+
+    let takeLeft = Math.min(maxCanTake , canTakeLeft);
+    canTakeLeft -= takeLeft;
+
+    if(takeLeft < maxCanTake) takeRight += Math.min(maxCanTake - takeLeft , canTakeRight);
+    else if(takeRight < maxCanTake + isEven) takeLeft += Math.min(maxCanTake + isEven - takeRight , canTakeLeft);
+    
 
     let begin = this.currentSection() - takeLeft;
     const finalLen = 1 + takeRight + takeLeft;
