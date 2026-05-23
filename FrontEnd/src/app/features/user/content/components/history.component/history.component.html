@@ -5,31 +5,39 @@
 >
   <section class="flex flex-col gap-8 max-h-max overflow-y-scroll">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      @for (stat of statsData; track stat.label) {
-        <div
-          class="bg-deep-blue border border-dark-blue-gray rounded-xl p-6 transition-all duration-300 hover:border-secondary/30 hover:shadow-lg hover:shadow-secondary/5 group"
+      <div
+        class="bg-deep-blue border border-dark-blue-gray rounded-xl p-6 transition-all duration-300 hover:border-secondary/30 hover:shadow-lg hover:shadow-secondary/5 group"
+      >
+        <p
+          class="text-xs font-bold text-light-steel-blue uppercase tracking-wider mb-2 group-hover:text-secondary transition-colors"
         >
+        Total Spent
+        </p>
+        <div class="flex items-center gap-3">
           <p
-            class="text-xs font-bold text-light-steel-blue uppercase tracking-wider mb-2 group-hover:text-secondary transition-colors"
+            class="text-3xl font-bold text-off-white"
           >
-            {{ stat.label }}
+          {{totalSpent() | currency}}
           </p>
-          <div class="flex items-center gap-3">
-            <p
-              class="text-3xl font-bold {{ stat.highlight ? 'text-secondary' : 'text-off-white' }}"
-            >
-              {{ stat.value }}
-            </p>
-            @if (stat.badge) {
-              <span
-                class="bg-yellow-500/10 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded border border-yellow-500/20 animate-pulse"
-              >
-                {{ stat.badge }}
-              </span>
-            }
-          </div>
         </div>
-      }
+      </div>
+
+      <div
+        class="bg-deep-blue border border-dark-blue-gray rounded-xl p-6 transition-all duration-300 hover:border-secondary/30 hover:shadow-lg hover:shadow-secondary/5 group"
+      >
+        <p
+          class="text-xs font-bold text-light-steel-blue uppercase tracking-wider mb-2 group-hover:text-secondary transition-colors"
+        >
+        Total Orders
+        </p>
+        <div class="flex items-center gap-3">
+          <p
+            class="text-3xl font-bold text-off-white"
+          >
+          {{completedOrdersCount()}}
+          </p>
+        </div>
+      </div>
     </div>
 
     <div class="bg-deep-blue border border-dark-blue-gray rounded-xl shadow-xl mb-8">
@@ -56,7 +64,7 @@
                     <div
                       class="font-bold text-off-white group-hover:text-secondary transition-colors"
                     >
-                      {{ order.id }}
+                      {{ order.title }}
                     </div>
                     <div class="text-sm text-dark-gray mt-1">{{ order.deliveryDate | date }}</div>
                   </td>
@@ -69,7 +77,7 @@
                         (error)="$event.target.src = 'assets/images/no-image.png'">
                       </div>
                       <div>
-                        <div class="font-medium text-off-white">{{ order.title }}</div>
+                        <div class="font-medium text-off-white">#{{ order.id }}</div>
                         <div class="text-xs text-dark-gray mt-1">{{`x${order.quantity}, ${order.specs.toString()}`}}</div>
                       </div>
                     </div>
@@ -107,6 +115,7 @@
                       </button>
                       <button
                         class="bg-dark-blue-gray hover:bg-secondary active:scale-90 text-off-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shadow-lg"
+                        (click)="buyAgain(order.id)"
                       >
                         Buy Again
                       </button>

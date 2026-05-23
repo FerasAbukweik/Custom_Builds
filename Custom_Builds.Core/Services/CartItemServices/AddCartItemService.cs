@@ -6,7 +6,6 @@ using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.CartItemServices;
 using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
-using Custom_Builds.Core.ServiceContracts.IModificationServices;
 using Custom_Builds.Core.ServiceContracts.IProductServices;
 
 namespace Custom_Builds.Core.Services.CartItemServices
@@ -46,6 +45,7 @@ namespace Custom_Builds.Core.Services.CartItemServices
                 UserId = getCurrentUserId.Value!,
                 ProductId = productId,
                 Quantity = 1,
+                AddedAt = DateTime.UtcNow,
             };
 
             // adding item to the cart
@@ -77,6 +77,7 @@ namespace Custom_Builds.Core.Services.CartItemServices
                 UserId = getCurrentUserId.Value,
                 ProductId = null,
                 CustomBuildId = addCustomBuildResult.Value!.Id,
+                AddedAt = DateTime.UtcNow,
             };
 
             // adding item to the cart

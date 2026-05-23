@@ -27,6 +27,9 @@ namespace Custom_Builds.Core.Domain.Entities
         [Required(ErrorMessage = "{0} is required.")]
         public int Quantity { get; set; } = 1;
 
+        [Required(ErrorMessage = "{0} is required.")]
+        public required DateTime AddedAt { get; set; }
+
         public CartItemDTO toDTO()
         {
             return new CartItemDTO()

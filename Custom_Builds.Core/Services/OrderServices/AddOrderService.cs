@@ -14,23 +14,17 @@ namespace Custom_Builds.Core.Services.OrderServices
     public class AddOrderService : IAddOrderService
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly IAddCustomBuildService _addCustomBuildService;
         private readonly IGetProductService _getProductService;
-        private readonly IGetModificationService _getModificationsService;
-        private readonly IGetCurrUserService _getCurrUserService;
+        private readonly IGetCurrUserService _currUserService;
 
         public AddOrderService(
             IOrderRepository orderRepository,
-            IAddCustomBuildService addCustomBuildService,
             IGetProductService getProductService,
-            IGetModificationService getModificationsService,
-            IGetCurrUserService getCurrUserService)
+            IGetCurrUserService currUserService)
         {
             _orderRepository = orderRepository;
-            _addCustomBuildService = addCustomBuildService;
             _getProductService = getProductService;
-            _getModificationsService = getModificationsService;
-            _getCurrUserService = getCurrUserService;
+            _currUserService = currUserService;
         }
 
         public async Task<Result<OrderDTO>> AddProductAsync(AddOrderDTO toAdd)
@@ -56,6 +50,16 @@ namespace Custom_Builds.Core.Services.OrderServices
             if (!addToCartResult.IsSuccess) return addToCartResult.MapFailure<OrderDTO>();
 
             return Result<OrderDTO>.Success(addToCartResult.Value!.toDTO());
+        }
+
+        public async Task<Result> BuyAgain(Guid OrderId)
+        {
+            var getCurrUserIdRes = _currUserService.GetUserId();
+            if (!getCurrUserIdRes.IsSuccess) return getCurrUserIdRes;
+
+            var addOrderResult = await _orderRepository.BuyAgainAsync(OrderId, getCurrUserIdRes.Value);
+
+            return addOrderResult;
         }
     }
 }

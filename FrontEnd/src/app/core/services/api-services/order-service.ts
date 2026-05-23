@@ -5,6 +5,7 @@ import { IOrderDTO } from '../../DTO/mini-order-dto';
 import { ILazyGetAllOrdersDTO } from '../../DTO/lazy-get-all-orders-dto';
 import { Injectable } from '@angular/core';
 import { IHistoryOrderDTO } from '../../DTO/History-orders-dto';
+import { IOrderHistoryDTO } from '../../DTO/order-history-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -46,11 +47,17 @@ export class OrderService {
   };
 
   // get completed orders count
-  public getCompletedOrdersCount = (userId: string | null = null) => {
+  public getHistorySummary = (userId: string | null = null) => {
     let params = new HttpParams();
 
     if (userId) params = params.append('userId', userId);
 
-    return this._httpClient.get<number>(`${this.api}/GetAllCompletedOrdersCount`, { params });
+    return this._httpClient.get<IOrderHistoryDTO>(`${this.api}/GetHistorySummary`, { params });
   };
+
+  // buy order again
+  public buyAgain(orderId: string){
+
+    return this._httpClient.post(this.api+"/BuyAgain" , JSON.stringify(orderId));
+  }
 }

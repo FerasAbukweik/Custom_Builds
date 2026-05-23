@@ -50,17 +50,29 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<int>.Success(sum);
         }
-        public async Task<Result<int>> GetCompletedOrdersCountAsync(Guid userId)
+        public async Task<Result<OrderHistoryDTO>> GetHistorySummaryAsync(Guid userId)
         {
-            var sum = await _dbContext.Orders.Where(o => (
-            o.UserId == userId && 
+            OrderHistoryDTO? res = await _dbContext.Orders.Where(o => (
+            o.UserId == userId &&
            (o.OrderStatus == OrderStateEnum.Completed ||
             o.OrderStatus == OrderStateEnum.Returned ||
             o.OrderStatus == OrderStateEnum.Cancelled ||
             o.OrderStatus == OrderStateEnum.Refunded ||
-            o.OrderStatus == OrderStateEnum.Rejected))).CountAsync();
+            o.OrderStatus == OrderStateEnum.Rejected)))
+            .GroupBy(g => 1)
+            .Select(g => new OrderHistoryDTO()
+            {
+                Count = g.Count(),
+                TotalPrice = g.Sum(o => ((o.Product != null ? o.Product.Price : 0) +
+                    (o.CustomBuild != null ? o.CustomBuild.Modifications.Sum(m => m.Price) : 0)) * o.Quantity)
+            }).FirstOrDefaultAsync();
 
-            return Result<int>.Success(sum);
+            if(res == null)
+            {
+                return Result<OrderHistoryDTO>.Failure("didnt find user orders" , HttpStatusCode.NotFound);
+            }
+
+            return Result<OrderHistoryDTO>.Success(res);
         }
         public async Task<Result> EditByIdAsync(EditOrderDTO newData)
         {
@@ -100,6 +112,7 @@ namespace Custom_Builds.Infrastructure.Repositories
                 o.OrderStatus == OrderStateEnum.Cancelled ||
                 o.OrderStatus == OrderStateEnum.Refunded ||
                 o.OrderStatus == OrderStateEnum.Rejected)))
+                .OrderBy(o => o.CreatedAt)
                 .Skip(lazyGetUserOrdersData.Taken)
                 .Take(lazyGetUserOrdersData.ElementsPerSection)
                 .Select(o => new HistoryOrderDTO() 
@@ -130,6 +143,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             o.OrderStatus == OrderStateEnum.Cancelled ||
             o.OrderStatus == OrderStateEnum.Refunded ||
             o.OrderStatus == OrderStateEnum.Rejected)))
+                .OrderBy(o => o.CreatedAt)
                 .Skip(lazyGetOrdersData.Taken)
                 .Take(lazyGetOrdersData.ElementsPerSection)
                 .Select(o => new MiniOrderInfoDTO()
@@ -177,6 +191,34 @@ namespace Custom_Builds.Infrastructure.Repositories
             List<Order> orders = await orderQuery.Where(extraChecks).ToListAsync();
 
             return Result<List<Order>>.Success(orders);
+        }
+        public async Task<Result> BuyAgainAsync(Guid orderId , Guid userId)
+        {
+            var order = await _dbContext.Orders
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if(order == null)
+            {
+                return Result.Failure("Order Wasnt Found");
+            }
+
+            Order newOrder = new Order()
+            {
+                Id = Guid.NewGuid(),
+                OrderStatus = OrderStateEnum.Processing,
+                CreatedAt = DateTime.UtcNow,
+                CustomBuildId = order.CustomBuildId,
+                UserId = userId,
+                ProductId = order.ProductId,
+                OrderType = order.OrderType,
+                Quantity = 1,
+                Title = order.Title,
+            };
+
+            _dbContext.Orders.Add(newOrder);
+            await _dbContext.SaveChangesAsync();
+
+            return Result.Success();
         }
     }
 }

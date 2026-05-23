@@ -6,5 +6,6 @@ namespace Custom_Builds.Core.ServiceContracts.OrderServices
     public interface IAddOrderService
     {
         Task<Result<OrderDTO>> AddProductAsync(AddOrderDTO toAdd);
+        Task<Result> BuyAgain(Guid OrderId);
     }
 }

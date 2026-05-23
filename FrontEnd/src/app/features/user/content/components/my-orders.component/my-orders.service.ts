@@ -72,8 +72,6 @@ export class MyOrdersService {
       .subscribe({
         next: (res) => {
           this.ordersCount.set(res as number);
-
-          console.log(res);
         },
         error: () => {
           // toDo: show error message

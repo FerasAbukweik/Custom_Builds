@@ -1,8 +1,6 @@
 export interface IStatsData {
   label: string;
   value: string;
-  highlight?: boolean;
-  badge?: string;
 }
 
 export interface IOrderHistory {

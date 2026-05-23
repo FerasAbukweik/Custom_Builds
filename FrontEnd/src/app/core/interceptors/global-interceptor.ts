@@ -6,6 +6,7 @@ import { catchError, throwError } from 'rxjs';
 export const globalInterceptor: HttpInterceptorFn = (req, next) => {
   const clonedRequest = req.clone({
     withCredentials: true,
+    headers: req.headers.set('Content-Type', 'application/json')
   });
 
   const router = inject(Router);

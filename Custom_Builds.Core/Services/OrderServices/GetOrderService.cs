@@ -72,17 +72,17 @@ namespace Custom_Builds.Core.Services.OrderServices
 
             return Result<List<MiniOrderInfoDTO>>.Success(userOrders.Value!);
         }
-        public async Task<Result<int>> GetAllCompletedOrdersCountAsync(Guid? userId)
+        public async Task<Result<OrderHistoryDTO>> GetHistorySummaryAsync(Guid? userId)
         {
             var getTargetUserIdRes = _getCurrUserService.GetTargetUserId(userId);
             if (!getTargetUserIdRes.IsSuccess) getTargetUserIdRes.MapFailure<int>();
 
             userId = getTargetUserIdRes.Value!;
 
-            var getSumRes = await _orderRepository.GetCompletedOrdersCountAsync(userId!.Value);
+            var getDataRes = await _orderRepository.GetHistorySummaryAsync(userId!.Value);
 
 
-            return getSumRes;
+            return getDataRes;
         }
     }
 }

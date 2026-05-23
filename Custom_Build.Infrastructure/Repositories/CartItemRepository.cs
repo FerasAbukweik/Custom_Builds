@@ -38,6 +38,7 @@ namespace Custom_Builds.Infrastructure.Repositories
                 orderType = toAdd.orderType,
                 CustomBuildId = toAdd.CustomBuildId,
                 ProductId = toAdd.ProductId,
+                AddedAt = DateTime.UtcNow
             };
 
             _dbContext.Cart.Add(newCartItem);
@@ -107,6 +108,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             var items = await _dbContext.Cart
                 .Include(ci => ci.Product)
                 .Where(ci => ci.UserId == reqData.UserId)
+                .OrderBy(o => o.AddedAt)
                 .Skip(reqData.Taken)
                 .Take(reqData.ElementsPerSection)
                 .ToListAsync();

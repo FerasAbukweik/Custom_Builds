@@ -94,9 +94,18 @@ namespace custom_Peripherals.Controllers
 
         // get AllCompletedOrders count
         [HttpGet("[action]")]
-        public async Task<ActionResult<int>> GetAllCompletedOrdersCount([FromQuery] Guid? userId)
+        public async Task<ActionResult<OrderHistoryDTO>> GetHistorySummary([FromQuery] Guid? userId)
         {
-            var result = await _getOrderService.GetAllCompletedOrdersCountAsync(userId);
+            var result = await _getOrderService.GetHistorySummaryAsync(userId);
+
+            return result.ToActionResult();
+        }
+
+        // buy again
+        [HttpPost("[action]")]
+        public async Task<IActionResult> BuyAgain([FromBody]Guid orderId)
+        {
+            Result result = await _addOrderService.BuyAgain(orderId);
 
             return result.ToActionResult();
         }

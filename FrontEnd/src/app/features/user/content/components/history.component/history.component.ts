@@ -6,13 +6,6 @@ import { HistoryService } from './history.service';
 import { OrderStateEnum } from '../../../../../core/enums/order-status-enum';
 import { LoadingComponent } from '../../../../../shared/components/loading/loading.component/loading.component';
 
-const statsData: IStatsData[] = [
-  { label: "Total Spent", value: "$1,248.50" },
-  { label: "Total Orders", value: "12" },
-  { label: "Active Builds", value: "2", highlight: true },
-  { label: "Loyalty Points", value: "840", badge: "GOLD" },
-];
-
 
 @Component({
   selector: 'app-history',
@@ -28,12 +21,12 @@ export class HistoryComponent implements OnInit {
   completedOrdersCount = this._historyService.getCompletedOrdersCount;
   SectionOrders = this._historyService.getSectionOrders;
   isLoading = this._historyService.getIsLoading;
+  totalSpent = this._historyService.getTotalSpent;
 
   // computed
   currOrders = computed(() => this.SectionOrders()[this.currentSection() - 1])
 
   // fields
-  statsData: IStatsData[] = statsData;
 
   ngOnInit(): void {
     this._historyService.init();
@@ -67,4 +60,7 @@ export class HistoryComponent implements OnInit {
   getStatusName = (status: OrderStateEnum) => {
     return OrderStateEnum[status];
   } 
+
+  // buyAgain
+  buyAgain = this._historyService.buyAgain;
 }
