@@ -3,12 +3,6 @@
 >
   <div class="flex items-center gap-4">
     <h2 class="text-lg font-bold text-off-white">Support Chat</h2>
-    <div
-      class="hidden md:flex items-center gap-2 px-3 py-1 bg-ok/10 text-ok rounded-full text-xs font-bold animate-pulse"
-    >
-      <span class="w-1.5 h-1.5 rounded-full bg-ok"></span>
-      Agents Online
-    </div>
   </div>
   <div class="flex items-center gap-4">
     <button
@@ -33,86 +27,94 @@
     </span>
   </div>
 
-  @for (msg of messages(); track msg.id; let isFirst = $first) {
+  @if(currUserId())
+  {
+    @for (msg of messages(); track msg.id; let isFirst = $first) {
 
-    @if(isFirst){
-      @if(!isLoading()) {<div class="w-full h-20" (appIsVisable)="lazyLoadMessages()"></div>}
+      @if(isFirst){
+        @if(!isLoading()) {<div class="w-full h-20" (appIsVisable)="lazyLoadMessages()"></div>}
 
-      @if(isLoading()){
-        <div class="w-full h-full flex justify-center py-20">
-          <app-loading class="scale-125"/>
-        </div>
-      }
-    }
-
-    <div
-      class="flex items-start gap-4 max-w-[85%] md:max-w-[70%] transition-all duration-500 transform scale-100"
-      [ngClass]="{ 'ml-auto flex-row-reverse': msg.senderId === currUserId() }"
-    >
-      <div
-        class="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold shadow-lg border border-dark-blue-gray transition-transform hover:rotate-12"
-        [ngClass]="
-          msg.senderId !== currUserId() ? 'bg-secondary text-white' : 'bg-dark-gray overflow-hidden'
-        "
-      >
-        {{ msg.senderId !== currUserId() ? 'M' : '' }}
-        @if (msg.senderId === currUserId()) {
-          <div class="w-full h-full bg-soft-gray/30"></div>
+        @if(isLoading()){
+          <div class="w-full h-fit flex justify-center py-20">
+            <app-loading class="scale-125"/>
+          </div>
         }
-      </div>
+      }
 
       <div
-        [class]="
-          `p-5 rounded-2xl shadow-sm border border-dark-blue-gray relative transition-all hover:shadow-xl ${
-            msg.senderId === currUserId();
-              ? 'bg-secondary text-white rounded-tr-none'
-              : 'bg-deep-blue text-off-white rounded-tl-none'
-          }`
-        "
+        class="flex items-start gap-4 max-w-[85%] md:max-w-[70%] transition-all duration-500 transform scale-100"
+        [ngClass]="{ 'ml-auto flex-row-reverse': msg.senderId === currUserId() }"
       >
-        <div class="flex items-center justify-between gap-4 mb-1">
-          <span
-            class="text-xs font-bold text-light-steel-blue"
-            [ngClass]="{ 'text-white/80': msg.senderId === currUserId() }"
-          >
-            {{ msg.senderName }}
-          </span>
-          @if (msg.senderId !== currUserId() && msg.role) {
-            <span class="text-[10px] text-dark-gray font-medium opacity-60">• {{ msg.role }}</span>
+        <div
+          class="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold shadow-lg border border-dark-blue-gray transition-transform hover:rotate-12"
+          [ngClass]="
+            msg.senderId !== currUserId() ? 'bg-secondary text-white' : 'bg-dark-gray overflow-hidden'
+          "
+        >
+          {{ msg.senderId !== currUserId() ? 'M' : '' }}
+          @if (msg.senderId === currUserId()) {
+            <div class="w-full h-full bg-soft-gray/30"></div>
           }
         </div>
 
-        @if (msg.messageType === 1) {
-          <div
-            class="flex items-center gap-3 bg-dark-deep-blue/50 p-3 rounded-lg border border-dark-blue-gray group cursor-pointer hover:bg-dark-deep-blue transition-colors"
-          >
-            <div
-              class="bg-secondary/20 p-2 rounded text-secondary group-hover:scale-110 transition-transform"
-            >
-              <i class="fa-solid fa-file-code text-xl"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="text-xs font-bold text-off-white mb-0.5">{{ msg.fileName }}</div>
-              <div class="text-[11px] text-soft-gray">{{ msg.content }}</div>
-            </div>
-            <i class="fa-solid fa-download text-soft-gray text-xs group-hover:text-secondary"></i>
-          </div>
-        } @else {
-          <p
-            class="text-sm leading-relaxed"
-            [ngClass]="msg.senderId === currUserId() ? 'text-white' : 'text-off-white'"
-          >
-            {{ msg.content }}
-          </p>
-        }
-
-        <span
-          class="text-[10px] mt-2 block text-right"
-          [ngClass]="msg.senderId === currUserId() ? 'text-white/60' : 'text-dark-gray'"
+        <div
+          [class]="
+            `p-5 rounded-2xl shadow-sm border border-dark-blue-gray relative transition-all hover:shadow-xl ${
+              msg.senderId === currUserId();
+                ? 'bg-secondary text-white rounded-tr-none'
+                : 'bg-deep-blue text-off-white rounded-tl-none'
+            }`
+          "
         >
-          {{ msg.createdAt | date }}
-        </span>
+          <div class="flex items-center justify-between gap-4 mb-1">
+            <span
+              class="text-xs font-bold text-light-steel-blue"
+              [ngClass]="{ 'text-white/80': msg.senderId === currUserId() }"
+            >
+              {{ msg.senderName }}
+            </span>
+            @if (msg.senderId !== currUserId() && msg.role) {
+              <span class="text-[10px] text-dark-gray font-medium opacity-60">• {{ msg.role }}</span>
+            }
+          </div>
+
+          @if (msg.messageType === 1) {
+            <div
+              class="flex items-center gap-3 bg-dark-deep-blue/50 p-3 rounded-lg border border-dark-blue-gray group cursor-pointer hover:bg-dark-deep-blue transition-colors"
+            >
+              <div
+                class="bg-secondary/20 p-2 rounded text-secondary group-hover:scale-110 transition-transform"
+              >
+                <i class="fa-solid fa-file-code text-xl"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-bold text-off-white mb-0.5">{{ msg.fileName }}</div>
+                <div class="text-[11px] text-soft-gray">{{ msg.content }}</div>
+              </div>
+              <i class="fa-solid fa-download text-soft-gray text-xs group-hover:text-secondary"></i>
+            </div>
+          } @else {
+            <p
+              class="text-sm leading-relaxed"
+              [ngClass]="msg.senderId === currUserId() ? 'text-white' : 'text-off-white'"
+            >
+              {{ msg.content }}
+            </p>
+          }
+
+          <span
+            class="text-[10px] mt-2 block text-right"
+            [ngClass]="msg.senderId === currUserId() ? 'text-white/60' : 'text-dark-gray'"
+          >
+            {{ msg.createdAt | date }}
+          </span>
+        </div>
       </div>
+    }
+  }
+  @else {
+    <div class="w-full h-full flex justify-center items-center">
+      <app-loading class="scale-125"/>
     </div>
   }
 

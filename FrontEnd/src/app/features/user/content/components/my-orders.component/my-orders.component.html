@@ -18,6 +18,8 @@
       }
     }
     @empty {
+      <span (appIsVisable)="lazyGetOrders()"></span>
+      
       @if (isLoading()) {
         <app-loading class="w-full flex justify-center" />
       } @else {

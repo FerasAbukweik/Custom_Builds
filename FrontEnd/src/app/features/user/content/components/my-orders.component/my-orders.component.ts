@@ -23,9 +23,6 @@ export class MyOrdersComponent implements OnInit {
   OrdersCount = this._myOrdersService.getOrdersCount;
 
   ngOnInit(): void {
-    // get initial orders
-    this.lazyGetOrders();
-
     // update orders Count
     this._myOrdersService.updateOrdersCount();
   }

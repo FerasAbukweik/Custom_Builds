@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+  afterNextRender,
   Component,
   DestroyRef,
   ElementRef,
@@ -8,7 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { SupportService } from './support.service';
 import { ChatHubService } from '../../../../../core/services/global-services/chat-global-service';
@@ -43,7 +44,7 @@ export class SupportComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
 
   // signals
-  messages = signal<IMessageDTO[]>([]);
+  messages = this._supportService.getMessages;
   isLoading = this._supportService.getIsLoading;
   currUserId = signal<string>('');
   messageInput = signal<string>('');
@@ -55,11 +56,24 @@ export class SupportComponent implements OnInit {
 
   // fields
 
-  // priavte
+  // private
   private _chatGroupId!: string;
 
   // public
   quickActions = quickActions;
+
+
+  constructor() {
+  const sub = toObservable(this.isLoading).subscribe({
+    next: (isLoading) => {
+      if (!isLoading && this.currUserId()) {
+        this._scrollToBottom();
+        sub.unsubscribe();
+      }
+    }
+  });
+}
+
 
   // methods
   async ngOnInit() {
@@ -69,6 +83,15 @@ export class SupportComponent implements OnInit {
       // toDo: show error message
       return;
     }
+
+    // set curr user id
+    this.currUserId.set(getInitDataRes.userId);
+
+    // set chatGroup id so we can send it with the add message request
+    this._chatGroupId = getInitDataRes.chatGroupId;
+
+    // in case we already had messages in the service
+    this._scrollToBottom();
 
     // start connection with the hub
     let isSignalRConnected = await this._chatService.startConnection(getInitDataRes.chatGroupId);
@@ -81,40 +104,33 @@ export class SupportComponent implements OnInit {
     // get inital messages
     this._supportService.lazyGetMessages();
 
-    // set curr user id
-    this.currUserId.set(getInitDataRes.userId);
-
-    // set chatGroup id so we can send it with the add message request
-    this._chatGroupId = getInitDataRes.chatGroupId;
 
     this.handleReceiveMessage();
     this._handleUserTyping();
     this._handleStoppedTyping();
-
-    this._handleLazyGetMessages();
   }
 
   // lazy load messages
   lazyLoadMessages = this._supportService.lazyGetMessages;
 
   // scroll to bottom
-  private _scrollToBottom = () => {
+  private _scrollToBottom = (delay: number = 0) => {
     setTimeout(() => {
       this.myScrollContainer().nativeElement.scrollTo(
         0,
         this.myScrollContainer().nativeElement.scrollHeight,
       );
-    }, 100);
+    } , delay);
   };
 
-  private _scrollBy = (scrollVal: number) => {
+  private _scrollBy = (scrollVal: number , delay: number = 100) => {
     setTimeout(() => {
       this.myScrollContainer().nativeElement.scrollBy({
         top: scrollVal,
-        behavior: 'smooth'
-      })
-    }, 100);
-  }
+        behavior: 'smooth',
+      });
+    } , delay);
+  };
 
   // ---------------------------------- signalR related ----------------------------------
 
@@ -122,10 +138,7 @@ export class SupportComponent implements OnInit {
   private handleReceiveMessage = () => {
     this._chatService.newMessage$.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
       next: (msg) => {
-        this.messages.update((curr) =>
-          [...curr, msg as IMessageDTO].sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1)),
-        );
-
+        this._supportService.addMessage(msg as IMessageDTO);
         this._scrollToBottom();
       },
     });
@@ -172,23 +185,4 @@ export class SupportComponent implements OnInit {
   };
 
   // ---------------------------------- signalR related ----------------------------------
-
-  // handle lazy get messages
-  private _handleLazyGetMessages = () => {
-    this._supportService.newMesssages$.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: (data) => {
-        const newMessages = data as IMessageDTO[];
-
-        let idScrollToBottom: boolean = false;
-        if(!this.messages().length) idScrollToBottom = true;
-
-        this.messages.update((curr) =>
-          [...curr, ...newMessages].sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1)),
-        );
-
-        if(idScrollToBottom) this._scrollToBottom();
-        else this._scrollBy(0);
-      },
-    });
-  };
 }

@@ -40,9 +40,6 @@ export class CartComponent implements OnInit {
   newQuantities$ = toObservable(this.newQuantities);
 
   ngOnInit(): void {
-    // get inital cart items
-    this._cartService.lazyGetCartItems();
-
     // get summary info
     this._cartService.updateSummaryInfo();
 

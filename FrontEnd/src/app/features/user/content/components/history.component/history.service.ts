@@ -6,7 +6,7 @@ import { IHistoryOrderDTO } from '../../../../../core/DTO/History-orders-dto';
 import { IOrderHistoryDTO } from '../../../../../core/DTO/order-history-dto';
 import { ILazyGetUserDataDTO } from '../../../../../core/DTO/lazy-get-user-data-dto';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class HistoryService {
   // injections
   private readonly _orderService = inject(OrderService);
