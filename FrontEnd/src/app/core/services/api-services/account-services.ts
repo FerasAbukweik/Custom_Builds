@@ -6,18 +6,23 @@ import { ILoginDTO } from '../../DTO/login-dto';
 
 @Injectable({ providedIn: 'root' })
 export class AccountServices {
-  private url: string = ApiConstrants.url + '/Account';
-  private readonly httpClient = inject(HttpClient);
+  private _api: string = ApiConstrants.apiUrl + '/Account';
+  private readonly _httpClient = inject(HttpClient);
 
   public register = (registerDTO: IRegisterDTO) => {
-    return this.httpClient.post(`${this.url}/Register`, registerDTO);
+    return this._httpClient.post(`${this._api}/Register`, registerDTO);
   };
 
   public login = (loginDTO: ILoginDTO) => {
-    return this.httpClient.post(`${this.url}/Login`, loginDTO);
+    return this._httpClient.post(`${this._api}/Login`, loginDTO);
   };
 
   public checkToken = () => {
-    return this.httpClient.get(`${this.url}/CheckToken`);
+    return this._httpClient.get(`${this._api}/CheckToken`);
+  };
+
+  // get curr user id
+  public getCurrUserId = () => {
+    return this._httpClient.get<string>(this._api + '/GetCurrUserId');
   };
 }

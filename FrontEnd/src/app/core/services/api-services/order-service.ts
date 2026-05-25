@@ -2,20 +2,20 @@ import { inject } from '@angular/core';
 import { ApiConstrants } from '../../constants/api-constants';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { IOrderDTO } from '../../DTO/mini-order-dto';
-import { ILazyGetAllOrdersDTO } from '../../DTO/lazy-get-all-orders-dto';
 import { Injectable } from '@angular/core';
 import { IHistoryOrderDTO } from '../../DTO/History-orders-dto';
 import { IOrderHistoryDTO } from '../../DTO/order-history-dto';
+import { ILazyGetUserDataDTO } from '../../DTO/lazy-get-user-data-dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OrderService {
-  private readonly api = ApiConstrants.url + '/Order';
+  private readonly api = ApiConstrants.apiUrl + '/Order';
   private readonly _httpClient = inject(HttpClient);
 
   // get all orders
-  public getAllProcessingOrders = (data: ILazyGetAllOrdersDTO) => {
+  public getAllProcessingOrders = (data: ILazyGetUserDataDTO) => {
     let params = new HttpParams();
     Object.entries(data).forEach(([key, value]) => {
       params = params.append(key, value.toString());
@@ -34,7 +34,7 @@ export class OrderService {
   };
 
   // get all completed orders
-  public getAllCompletedOrders = (data: ILazyGetAllOrdersDTO) => {
+  public getAllCompletedOrders = (data: ILazyGetUserDataDTO) => {
     let params = new HttpParams();
 
     Object.entries(data).forEach(([key, val]) => {
@@ -56,8 +56,7 @@ export class OrderService {
   };
 
   // buy order again
-  public buyAgain(orderId: string){
-
-    return this._httpClient.post(this.api+"/BuyAgain" , JSON.stringify(orderId));
+  public buyAgain(orderId: string) {
+    return this._httpClient.post(this.api + '/BuyAgain', JSON.stringify(orderId));
   }
 }

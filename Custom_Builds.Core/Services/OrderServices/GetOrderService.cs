@@ -27,7 +27,7 @@ namespace Custom_Builds.Core.Services.OrderServices
 
             return Result<Order>.Success(result.Value!);
         }
-        public async Task<Result<List<HistoryOrderDTO>>> GetCompletedOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData)
+        public async Task<Result<List<HistoryOrderDTO>>> GetCompletedOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData)
         {
             var getCurrUserIdRes = _getCurrUserService.GetUserId();
             if (!getCurrUserIdRes.IsSuccess) getCurrUserIdRes.MapFailure<List<MiniOrderInfoDTO>>();
@@ -54,7 +54,7 @@ namespace Custom_Builds.Core.Services.OrderServices
 
             return getSumRes;
         }
-        public async Task<Result<List<MiniOrderInfoDTO>>> GetProcessingOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData)
+        public async Task<Result<List<MiniOrderInfoDTO>>> GetProcessingOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData)
         {
             var getCurrUserIdRes = _getCurrUserService.GetUserId();
             if (!getCurrUserIdRes.IsSuccess) getCurrUserIdRes.MapFailure<List<MiniOrderInfoDTO>>();

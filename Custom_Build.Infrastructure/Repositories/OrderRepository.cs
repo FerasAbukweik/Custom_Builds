@@ -21,21 +21,10 @@ namespace Custom_Builds.Infrastructure.Repositories
 
         public async Task<Result<Order>> AddAsync(Order toAdd)
         {
-            Order newOrder = new Order()
-            {
-                Id = Guid.NewGuid(),
-                UserId = toAdd.UserId,
-                OrderStatus = OrderStateEnum.Pending,
-                OrderType = toAdd.OrderType,
-                ProductId = toAdd.ProductId,
-                CustomBuildId = toAdd.CustomBuildId,
-                Title = toAdd.Title
-            };
-
-            _dbContext.Orders.Add(newOrder);
+            _dbContext.Orders.Add(toAdd);
             await _dbContext.SaveChangesAsync();
 
-            return Result<Order>.Success(newOrder);
+            return Result<Order>.Success(toAdd);
         }
         public async Task<Result<int>> GetProcessingOrdersCountAsync(Guid userId)
         {
@@ -103,7 +92,7 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<Order>.Success(order);
         }
-        public async Task<Result<List<HistoryOrderDTO>>> GetCompletedOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData)
+        public async Task<Result<List<HistoryOrderDTO>>> GetCompletedOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData)
         {
             List<HistoryOrderDTO> orders = await _dbContext.Orders.Where(o => (
                 o.UserId == lazyGetUserOrdersData.UserId &&
@@ -134,7 +123,7 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<List<HistoryOrderDTO>>.Success(orders);
         }
-        public async Task<Result<List<MiniOrderInfoDTO>>> GetProcessingOrdersAsync(LazyGetALlOrdersDTO lazyGetOrdersData)
+        public async Task<Result<List<MiniOrderInfoDTO>>> GetProcessingOrdersAsync(LazyGetUserDataDTO lazyGetOrdersData)
         {
             List<MiniOrderInfoDTO> orders = await _dbContext.Orders.Where(o => (
             o.UserId == lazyGetOrdersData.UserId && 
@@ -194,26 +183,28 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<Result> BuyAgainAsync(Guid orderId , Guid userId)
         {
-            var order = await _dbContext.Orders
+            var newOrder = await _dbContext.Orders
+                .Select(o => new Order()
+                {
+                    Id = Guid.NewGuid(),
+                    OrderStatus = OrderStateEnum.Processing,
+                    CreatedAt = DateTime.UtcNow,
+                    CustomBuildId = o.CustomBuildId,
+                    UserId = userId,
+                    ProductId = o.ProductId,
+                    OrderType = o.OrderType,
+                    Title = o.Title,
+                    // make sure we have the current price (in case it changed)
+                    TotalPrice = (o.Product != null ? o.Product.Price : 0) +
+                                 (o.CustomBuild != null ? o.CustomBuild.Modifications.Sum(m => m.Price) : 0),
+                    Quantity = 1
+                })
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
-            if(order == null)
+            if(newOrder == null)
             {
                 return Result.Failure("Order Wasnt Found");
             }
-
-            Order newOrder = new Order()
-            {
-                Id = Guid.NewGuid(),
-                OrderStatus = OrderStateEnum.Processing,
-                CreatedAt = DateTime.UtcNow,
-                CustomBuildId = order.CustomBuildId,
-                UserId = userId,
-                ProductId = order.ProductId,
-                OrderType = order.OrderType,
-                Quantity = 1,
-                Title = order.Title,
-            };
 
             _dbContext.Orders.Add(newOrder);
             await _dbContext.SaveChangesAsync();

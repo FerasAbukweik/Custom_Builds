@@ -17,19 +17,21 @@ namespace Custom_Builds.Core.Domain.Entities
 
         [Required(ErrorMessage = "{0} Is reqired")]
         public MessageTypeEnum MessageType { get; set; }
-
-        [Required(ErrorMessage = "{0} Is reqired")]
         public string? FileName { get; set; }
 
 
-        // these are nullable so if the user gets deleted we can store null in them and still have the messages
-        // using DeleteBehavior.SetNull
-        public Guid? SenderId { get; set; }
-        public ApplicationUser? Sender { get; set; }
-        public Guid? ReceiverId { get; set; }
-        public ApplicationUser? Receiver { get; set; }
 
-        public MessageDTO toDTO()
+        [Required(ErrorMessage = "{0} Is reqired")]
+        public required Guid SenderId { get; set; }
+        public ApplicationUser? Sender { get; set; }
+
+        [Required(ErrorMessage = "{0} Is reqired")]
+        public required Guid ChatGroupId { get; set; }
+        public ChatGroup? ChatGroup { get; set; }
+
+
+
+        public MessageDTO toDTO(string senderName , string role)
         {
             return new MessageDTO()
             {
@@ -39,7 +41,8 @@ namespace Custom_Builds.Core.Domain.Entities
                 FileName = this.FileName,
                 MessageType = this.MessageType,
                 SenderId = this.SenderId,
-                ReceiverId = this.ReceiverId,
+                SenderName = senderName,
+                Role = role
             };
         }
     }

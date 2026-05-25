@@ -6,6 +6,7 @@ using Custom_Builds.Core.ServiceContracts.CookieServices;
 using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
 using Custom_Builds.Core.ServiceContracts.IAccountServices;
 using Custom_Builds.Core.ServiceContracts.ICartItemServices;
+using Custom_Builds.Core.ServiceContracts.IChatGroupServices;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Custom_Builds.Core.ServiceContracts.ICustomBuildServices;
@@ -22,6 +23,7 @@ using Custom_Builds.Core.ServiceContracts.OrderServices;
 using Custom_Builds.Core.ServiceContracts.PartServices;
 using Custom_Builds.Core.Services.AccountServices;
 using Custom_Builds.Core.Services.CartItemServices;
+using Custom_Builds.Core.Services.ChatGroupServices;
 using Custom_Builds.Core.Services.CookiesServices;
 using Custom_Builds.Core.Services.CurrUserServices;
 using Custom_Builds.Core.Services.CustomBuildServices;
@@ -116,7 +118,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     x=>x.MigrationsAssembly("Custom_Builds.Infrastructure"))
 );
 
-// add identity services and store users,roles in DB
+// add identity services and store users,roles in DBF
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
 {
     // user password attributes
@@ -212,8 +214,12 @@ builder.Services.AddScoped<IGetCookieService , GetCookieService>();
 // Message services + repository
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IAddMessageService, AddMessageService>();
-builder.Services.AddScoped<IEditMessageService, EditMessageService>();
+builder.Services.AddScoped<IGetMessageService, GetMessageService>();
 
+// Chat group services + repository
+builder.Services.AddScoped<IChatGroupRepository, ChatGroupRepository>();
+builder.Services.AddScoped<IAddChatGroupService, AddChatGroupService>();
+builder.Services.AddScoped<IGetChatGroupService, GetChatGroupService>();
 
 // Current User Services
 builder.Services.AddScoped<IGetCurrUserService, GetCurrUserService>();
@@ -222,7 +228,7 @@ builder.Services.AddScoped<IGetCurrUserService, GetCurrUserService>();
 builder.Services.AddHttpContextAccessor();
 
 // add signalR service
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options => options.EnableDetailedErrors = true);
 
 // DI --------------------------------------------------------------------------
 

@@ -3,7 +3,7 @@ import { CartItemServices } from '../api-services/cart-item-services';
 import { IMiniCartItemDTO } from '../../DTO/mini-cart-item-dto';
 import { ICartSummaryInfo } from '../../DTO/cart-summary-info-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ILazyGetCartItemsDTO } from '../../DTO/lazy-get-cart-items-dto';
+import { ILazyGetUserDataDTO } from '../../DTO/lazy-get-user-data-dto';
 import { INewQuantities } from '../../../features/cart.component/cart.model';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
 
@@ -30,7 +30,7 @@ export class CartItemGlobalService {
 
   // private
   private isMoreDataAvailable: boolean = true;
-  private requestData: ILazyGetCartItemsDTO = {
+  private requestData: ILazyGetUserDataDTO = {
     taken: 0,
     ElementsPerSection: 10,
   };
@@ -154,6 +154,8 @@ export class CartItemGlobalService {
       totalOrders: curr.totalOrders - quantity,
       totalPrice: curr.totalPrice - itemPrice * quantity,
     }));
+
+    console.log(this.summaryInfo());
 
     return await firstValueFrom(
       this.cartItemService.remove(id).pipe(

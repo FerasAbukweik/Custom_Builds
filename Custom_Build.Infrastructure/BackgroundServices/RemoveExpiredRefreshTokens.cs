@@ -37,9 +37,9 @@ namespace Custom_Builds.Infrastructure.BackgroundServices
         {
 
             using var scope = _scopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var _dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            var deleted = await dbContext.RefreshTokens
+            var deleted = await _dbContext.RefreshTokens
                 .Where(t => t.ExpierDate < DateTime.UtcNow)
                 .ExecuteDeleteAsync();
 

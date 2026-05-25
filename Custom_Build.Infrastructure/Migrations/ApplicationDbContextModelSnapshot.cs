@@ -22,6 +22,21 @@ namespace Custom_Builds.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ApplicationUserChatGroup", b =>
+                {
+                    b.Property<Guid>("ChatGroupsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SupportersId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ChatGroupsId", "SupportersId");
+
+                    b.HasIndex("SupportersId");
+
+                    b.ToTable("ChatGroup_User_ManyToMany", (string)null);
+                });
+
             modelBuilder.Entity("CustomBuildModification", b =>
                 {
                     b.Property<Guid>("CustomBuildsId")
@@ -69,7 +84,24 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Cart", (string)null);
+                    b.ToTable("Cart");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.ChatGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("ChatGroups");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.CustomBuild", b =>
@@ -88,13 +120,16 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.ToTable("CustomBuilds", (string)null);
+                    b.ToTable("CustomBuilds");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Message", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChatGroupId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
@@ -105,25 +140,21 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("FileName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("MessageType")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("ReceiverId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("SenderId")
+                    b.Property<Guid>("SenderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReceiverId");
+                    b.HasIndex("ChatGroupId");
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Modification", b =>
@@ -154,7 +185,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Modifications", (string)null);
+                    b.ToTable("Modifications");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Order", b =>
@@ -185,6 +216,9 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -196,7 +230,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Part", b =>
@@ -215,7 +249,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Parts", (string)null);
+                    b.ToTable("Parts");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Product", b =>
@@ -237,7 +271,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Section", b =>
@@ -252,7 +286,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sections", (string)null);
+                    b.ToTable("Sections");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Identity.ApplicationRole", b =>
@@ -372,7 +406,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -508,6 +542,21 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.ToTable("Section_Parts_ManyToMany", (string)null);
                 });
 
+            modelBuilder.Entity("ApplicationUserChatGroup", b =>
+                {
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.ChatGroup", null)
+                        .WithMany()
+                        .HasForeignKey("ChatGroupsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("SupportersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CustomBuildModification", b =>
                 {
                     b.HasOne("Custom_Builds.Core.Domain.Entities.CustomBuild", null)
@@ -548,6 +597,17 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.ChatGroup", b =>
+                {
+                    b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "User")
+                        .WithOne("ChatGroup")
+                        .HasForeignKey("Custom_Builds.Core.Domain.Entities.ChatGroup", "UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.CustomBuild", b =>
                 {
                     b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "Creator")
@@ -560,17 +620,19 @@ namespace Custom_Builds.Infrastructure.Migrations
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Message", b =>
                 {
-                    b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "Receiver")
-                        .WithMany("MessageReceivers")
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.ChatGroup", "ChatGroup")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "Sender")
                         .WithMany("MessageSenders")
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.Navigation("Receiver");
+                    b.Navigation("ChatGroup");
 
                     b.Navigation("Sender");
                 });
@@ -692,6 +754,11 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.ChatGroup", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.CustomBuild", b =>
                 {
                     b.Navigation("CartItems");
@@ -710,9 +777,9 @@ namespace Custom_Builds.Infrastructure.Migrations
                 {
                     b.Navigation("CartItems");
 
-                    b.Navigation("CustomBuilds");
+                    b.Navigation("ChatGroup");
 
-                    b.Navigation("MessageReceivers");
+                    b.Navigation("CustomBuilds");
 
                     b.Navigation("MessageSenders");
 

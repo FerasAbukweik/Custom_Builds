@@ -25,7 +25,7 @@ namespace Custom_Builds.Core.Services.CartItemServices
             _getCustomBuildService = getCustomBuildService;
         }
 
-        public async Task<Result<List<CartItemDTO>>> LazyGetAllCartItemsAsync(LazyGetCartItemsDTO getData)
+        public async Task<Result<List<CartItemDTO>>> LazyGetAllCartItemsAsync(LazyGetUserDataDTO getData)
         {
             // get target userId to insure
             var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(getData.UserId);

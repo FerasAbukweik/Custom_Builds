@@ -4,7 +4,7 @@ import { ILazyLoadingDTO } from '../../../../../core/DTO/lazy-loading-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { IOrderDTO } from '../../../../../core/DTO/mini-order-dto';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class MyOrdersService {
   // injections
   private readonly _orderService = inject(OrderService);

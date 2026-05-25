@@ -42,13 +42,6 @@ namespace Custom_Builds.Core.Services.AccountServices
 
         public async Task<Result> LoginAsync(LoginDTO loginInfo)
         {
-            // response so we can write new tokens to user browser cookies
-            HttpResponse? response = _httpContextAccessor.HttpContext?.Response;
-            if (response == null)
-            {
-                return Result.Failure("Http Response is null", HttpStatusCode.InternalServerError);
-            }
-
             // find user by email so we can check email exist and so we can verify password using PasswordSignInAsync(user, loginInfo.Password, false, false)
             ApplicationUser? user = await _userManager.FindByEmailAsync(loginInfo.Email);
             if (user == null)
@@ -58,7 +51,7 @@ namespace Custom_Builds.Core.Services.AccountServices
 
 
             // check password
-            var result = await _signinManager.PasswordSignInAsync(user, loginInfo.Password, false, false);
+            var result = await _signinManager.PasswordSignInAsync(user, loginInfo.Password, true, false);
             if (!result.Succeeded)
             {
                 return Result.Failure("Wrong Email or Passowrd", HttpStatusCode.Unauthorized);
@@ -85,8 +78,8 @@ namespace Custom_Builds.Core.Services.AccountServices
             Result addRefreshResult = _addCookieService.Add("RefreshToken", refreshTokenResult.Value!.RefreshTokenString, Double.Parse(_configuration["JWT:RefreshTokenLife"]!));
             if (!addRefreshResult.IsSuccess) return addRefreshResult;
 
-            // remove identity tokens from browser cookies
-            await _signinManager.SignInAsync(user, false);
+            // add identity tokens to browser cookies
+            await _signinManager.SignInAsync(user, true);
 
             return Result.Success();
         }

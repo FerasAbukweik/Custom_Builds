@@ -103,7 +103,7 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result.Success();
         }
-        public async Task<Result<List<CartItem>>> LazyGetCartItems(LazyGetCartItemsDTO reqData)
+        public async Task<Result<List<CartItem>>> LazyGetCartItems(LazyGetUserDataDTO reqData)
         {
             var items = await _dbContext.Cart
                 .Include(ci => ci.Product)

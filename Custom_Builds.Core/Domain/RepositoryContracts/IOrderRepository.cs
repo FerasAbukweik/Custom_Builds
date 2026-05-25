@@ -13,8 +13,8 @@ namespace Custom_Builds.Core.Domain.RepositryContracts
         Task<Result<Order>> AddAsync(Order toAdd);
         Task<Result> EditByIdAsync(EditOrderDTO newData);
         Task<Result> RemoveByIdAsync(Guid orderId);
-        Task<Result<List<MiniOrderInfoDTO>>> GetProcessingOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData);
-        Task<Result<List<HistoryOrderDTO>>> GetCompletedOrdersAsync(LazyGetALlOrdersDTO lazyGetUserOrdersData);
+        Task<Result<List<MiniOrderInfoDTO>>> GetProcessingOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData);
+        Task<Result<List<HistoryOrderDTO>>> GetCompletedOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData);
         Task<Result<List<Order>>> FilterAsync(Expression<Func<Order, bool>> extraChecks, Expression<Func<Order, object>>[]? includes = null);
         Task<Result> BuyAgainAsync(Guid orderId, Guid userId);
     }

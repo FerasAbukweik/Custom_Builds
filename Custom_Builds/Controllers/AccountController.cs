@@ -103,10 +103,20 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
+        // check token
         [HttpGet("[action]")]
         public IActionResult CheckToken()
         {
             return Ok();
+        }
+
+        // get current user id
+        [HttpGet("[action]")]
+        public ActionResult<Guid> GetCurrUserId()
+        {
+            var GetIdResult = _getCurrUserService.GetUserId();
+
+            return GetIdResult.ToActionResult();
         }
     }
 }

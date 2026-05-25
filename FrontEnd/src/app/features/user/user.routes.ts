@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+import { HistoryService } from './content/components/history.component/history.service';
+import { MyOrdersService } from './content/components/my-orders.component/my-orders.service';
+import { SupportService } from './content/components/support.component/support.service';
 
 export const routes: Routes = [
   {
@@ -7,6 +10,7 @@ export const routes: Routes = [
       import('./content/components/my-orders.component/my-orders.component').then(
         (x) => x.MyOrdersComponent,
       ),
+      providers: [MyOrdersService]
   },
   // {
   //   path: 'saved-builds',
@@ -21,6 +25,7 @@ export const routes: Routes = [
       import('./content/components/history.component/history.component').then(
         (x) => x.HistoryComponent,
       ),
+      providers: [HistoryService]
   },
 
   {
@@ -29,6 +34,7 @@ export const routes: Routes = [
       import('./content/components/support.component/support.component').then(
         (x) => x.SupportComponent,
       ),
+      providers: [SupportService]
   },
   {
     path: '**',

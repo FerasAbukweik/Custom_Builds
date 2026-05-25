@@ -24,7 +24,7 @@
   </div>
 </div>
 
-<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<div #myScrollContainer class="flex-1 overflow-y-auto p-6 space-y-6">
   <div class="flex justify-center">
     <span
       class="text-[11px] font-bold text-soft-gray bg-deep-blue px-4 py-1.5 rounded-full uppercase tracking-widest border border-dark-blue-gray shadow-sm"
@@ -33,19 +33,30 @@
     </span>
   </div>
 
-  @for (msg of messages; track msg.id) {
+  @for (msg of messages(); track msg.id; let isFirst = $first) {
+
+    @if(isFirst){
+      @if(!isLoading()) {<div class="w-full h-20" (appIsVisable)="lazyLoadMessages()"></div>}
+
+      @if(isLoading()){
+        <div class="w-full h-full flex justify-center py-20">
+          <app-loading class="scale-125"/>
+        </div>
+      }
+    }
+
     <div
       class="flex items-start gap-4 max-w-[85%] md:max-w-[70%] transition-all duration-500 transform scale-100"
-      [ngClass]="{ 'ml-auto flex-row-reverse': msg.sender === 'user' }"
+      [ngClass]="{ 'ml-auto flex-row-reverse': msg.senderId === currUserId() }"
     >
       <div
         class="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold shadow-lg border border-dark-blue-gray transition-transform hover:rotate-12"
         [ngClass]="
-          msg.sender === 'agent' ? 'bg-secondary text-white' : 'bg-dark-gray overflow-hidden'
+          msg.senderId !== currUserId() ? 'bg-secondary text-white' : 'bg-dark-gray overflow-hidden'
         "
       >
-        {{ msg.sender === 'agent' ? 'M' : '' }}
-        @if (msg.sender === 'user') {
+        {{ msg.senderId !== currUserId() ? 'M' : '' }}
+        @if (msg.senderId === currUserId()) {
           <div class="w-full h-full bg-soft-gray/30"></div>
         }
       </div>
@@ -53,7 +64,7 @@
       <div
         [class]="
           `p-5 rounded-2xl shadow-sm border border-dark-blue-gray relative transition-all hover:shadow-xl ${
-            msg.sender === 'user'
+            msg.senderId === currUserId();
               ? 'bg-secondary text-white rounded-tr-none'
               : 'bg-deep-blue text-off-white rounded-tl-none'
           }`
@@ -62,16 +73,16 @@
         <div class="flex items-center justify-between gap-4 mb-1">
           <span
             class="text-xs font-bold text-light-steel-blue"
-            [ngClass]="{ 'text-white/80': msg.sender === 'user' }"
+            [ngClass]="{ 'text-white/80': msg.senderId === currUserId() }"
           >
-            {{ msg.name }}
+            {{ msg.senderName }}
           </span>
-          @if (msg.sender === 'agent' && msg.role) {
+          @if (msg.senderId !== currUserId() && msg.role) {
             <span class="text-[10px] text-dark-gray font-medium opacity-60">• {{ msg.role }}</span>
           }
         </div>
 
-        @if (msg.type === 'file') {
+        @if (msg.messageType === 1) {
           <div
             class="flex items-center gap-3 bg-dark-deep-blue/50 p-3 rounded-lg border border-dark-blue-gray group cursor-pointer hover:bg-dark-deep-blue transition-colors"
           >
@@ -89,7 +100,7 @@
         } @else {
           <p
             class="text-sm leading-relaxed"
-            [ngClass]="msg.sender === 'user' ? 'text-white' : 'text-off-white'"
+            [ngClass]="msg.senderId === currUserId() ? 'text-white' : 'text-off-white'"
           >
             {{ msg.content }}
           </p>
@@ -97,26 +108,28 @@
 
         <span
           class="text-[10px] mt-2 block text-right"
-          [ngClass]="msg.sender === 'user' ? 'text-white/60' : 'text-dark-gray'"
+          [ngClass]="msg.senderId === currUserId() ? 'text-white/60' : 'text-dark-gray'"
         >
-          {{ msg.time }}
+          {{ msg.createdAt | date }}
         </span>
       </div>
     </div>
   }
 
-  <div class="flex items-center gap-3 text-dark-gray py-2 ml-14">
-    <div class="flex gap-1">
-      <span class="w-1.5 h-1.5 bg-secondary/50 rounded-full animate-bounce"></span>
-      <span
-        class="w-1.5 h-1.5 bg-secondary/50 rounded-full animate-bounce [animation-delay:0.2s]"
-      ></span>
-      <span
-        class="w-1.5 h-1.5 bg-secondary/50 rounded-full animate-bounce [animation-delay:0.4s]"
-      ></span>
+  @if(isTyping()){
+    <div class="flex items-center gap-3 text-dark-gray py-2 ml-14">
+      <div class="flex gap-1">
+        <span class="w-1.5 h-1.5 bg-secondary/50 rounded-full animate-bounce"></span>
+        <span
+          class="w-1.5 h-1.5 bg-secondary/50 rounded-full animate-bounce [animation-delay:0.2s]"
+        ></span>
+        <span
+          class="w-1.5 h-1.5 bg-secondary/50 rounded-full animate-bounce [animation-delay:0.4s]"
+        ></span>
+      </div>
+      <span class="text-xs italic font-medium">typing...</span>
     </div>
-    <span class="text-xs italic font-medium">Marcus is typing...</span>
-  </div>
+  }
 </div>
 
 <div class="p-6 pt-0">
@@ -124,6 +137,7 @@
     @for (action of quickActions; track $index) {
       <button
         class="whitespace-nowrap px-4 py-2 bg-deep-blue hover:bg-secondary/20 text-soft-gray hover:text-secondary text-xs font-bold rounded-full border border-dark-blue-gray transition-all shadow-md cursor-pointer active:scale-95"
+        (click)="handleSendMessage(action)"
       >
         {{ action }}
       </button>
@@ -142,13 +156,22 @@
     </div>
 
     <input
+      [(ngModel)] = "messageInput"
+      (ngModelChange)="manageIsTyping()"
+      (keydown.enter)="handleSendMessage(messageInput())"
       type="text"
       class="flex-1 bg-transparent border-none text-off-white p-2 placeholder-dark-gray outline-none text-sm"
       placeholder="Type your message here..."
     />
 
     <button
-      class="bg-secondary hover:bg-blue-600 text-white pl-4 pr-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-90 flex items-center gap-2 cursor-pointer group absolute right-2 top-1/2 -translate-y-1/2"
+    [class]="'text-white pl-4 pr-5 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2 absolute right-2 top-1/2 -translate-y-1/2 group ' + 
+           (!isSignalRConnected()
+             ? 'bg-gray-500 opacity-50 cursor-not-allowed scale-100' 
+             : 'bg-secondary hover:bg-blue-600 active:scale-90 cursor-pointer')"
+
+    (click)="handleSendMessage(messageInput())"
+    [disabled]="!isSignalRConnected()"
     >
       <span class="font-bold text-[11px] uppercase tracking-wider">Send</span>
       <i

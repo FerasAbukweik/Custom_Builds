@@ -6,6 +6,6 @@ namespace Custom_Builds.Core.ServiceContracts.IMessageServices
 {
     public interface IAddMessageService
     {
-        Task<Result<MessageDTO>> Add(SentMessageDTO toAdd);
+        Task<Result<MessageDTO>> AddAsync(AddMessageDTO toAdd);
     }
 }

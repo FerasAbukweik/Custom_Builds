@@ -77,7 +77,7 @@ namespace custom_Peripherals.Controllers
         // get cart items -- with lazy loading
         [Authorize(Roles = ($"{nameof(RoleEnums.User)} , {nameof(RoleEnums.Admin)}"))]
         [HttpGet("[action]")]
-        public async Task<ActionResult<List<CartItemDTO>>> GetCartItems([FromQuery]LazyGetCartItemsDTO getData)
+        public async Task<ActionResult<List<CartItemDTO>>> GetCartItems([FromQuery] LazyGetUserDataDTO getData)
         {
             if(!ModelState.IsValid)
             {

@@ -78,5 +78,15 @@ namespace Custom_Builds.Core.Services.CurrUserServices
 
             return Result<bool>.Success(true);
         }
+        public Result<List<string>> GetRoles()
+        {
+            // get current user roles from claim
+            var roles = _httpContextAccessor.HttpContext?.User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+            if (roles == null)
+            {
+                return Result<List<string>>.Failure("Cannot find current user roles.");
+            }
+            return Result<List<string>>.Success(roles);
+        }
     }
 }

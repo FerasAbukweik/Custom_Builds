@@ -11,19 +11,16 @@ namespace Custom_Builds.Core.Services.AccountServices
     public class LogoutAccountService : ILogoutAccountService
     {
         private readonly SignInManager<ApplicationUser> _signinManager;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IDeleteCookieService _deleteCookieService;
         private readonly IGetCookieService _getCookieService;
         private readonly IRemoveRefreshTokenService _removeRefreshTokenService;
 
         public LogoutAccountService(SignInManager<ApplicationUser> signinManager,
-                                    IHttpContextAccessor httpContextAccessor,
                                     IDeleteCookieService deleteCookieService,
                                     IGetCookieService getCookieService,
                                     IRemoveRefreshTokenService removeRefreshTokenService)
         {
             _signinManager = signinManager;
-            _httpContextAccessor = httpContextAccessor;
             _deleteCookieService = deleteCookieService;
             _getCookieService = getCookieService;
             _removeRefreshTokenService = removeRefreshTokenService;

@@ -12,12 +12,10 @@ namespace Custom_Builds.Infrastructure.Repositories
     public class SectionRepository : ISectionRepository
     {
         private readonly ApplicationDbContext _dbContext;
-
         public SectionRepository(ApplicationDbContext dbContext) 
         {
             _dbContext = dbContext;
         }
-
 
         public async Task<Result<Section>> AddAsync(Section toAdd)
         {

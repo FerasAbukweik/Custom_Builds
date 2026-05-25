@@ -56,7 +56,7 @@ namespace custom_Peripherals.Controllers
 
         // get all orders -- with lazy loading
         [HttpGet("[action]")]
-        public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAllProcessingOrders([FromQuery]LazyGetALlOrdersDTO lazyGetOrdersData)
+        public async Task<ActionResult<List<MiniOrderInfoDTO>>> GetAllProcessingOrders([FromQuery]LazyGetUserDataDTO lazyGetOrdersData)
         {
             if (!ModelState.IsValid)
             {
@@ -70,7 +70,7 @@ namespace custom_Peripherals.Controllers
 
         // get all completed orders -- with lazy loading
         [HttpGet("[action]")]
-        public async Task<ActionResult<List<HistoryOrderDTO>>> GetAllCompletedOrders([FromQuery]LazyGetALlOrdersDTO lazyGetOrdersData)
+        public async Task<ActionResult<List<HistoryOrderDTO>>> GetAllCompletedOrders([FromQuery]LazyGetUserDataDTO lazyGetOrdersData)
         {
             if (!ModelState.IsValid)
             {

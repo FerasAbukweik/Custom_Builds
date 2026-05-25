@@ -18,33 +18,37 @@ namespace custom_Peripherals.Hub
             _currUserServices = currUserServices;
         }
 
-        public async Task SendMessage(SentMessageDTO toAdd)
+
+        public async Task JoinChatGroup(string chatGroupId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, chatGroupId);
+        }
+        public async Task SendMessage(AddMessageDTO toAdd)
         {
             //store message to DB
-            var result = await _addMessageService.Add(toAdd);
+            var result = await _addMessageService.AddAsync(toAdd);
             if (!result.IsSuccess) return;
 
 
             // send full DTO to receiver
-            await Clients.User(toAdd.ReceiverId.ToString()).ReceiveMessageAsync(result.Value!);
-            await Clients.Caller.ReceiveMessageAsync(result.Value!);
+            await Clients.Group(toAdd.ChatGroupId.ToString()).ReceiveMessageAsync(result.Value!);
         }
 
 
-        public async Task NotifyTyping(Guid receiverId)
+        public async Task NotifyTyping(Guid groupId)
         {
             var getSenderId = _currUserServices.GetUserId();
             if (!getSenderId.IsSuccess) return;
 
-            await Clients.User(receiverId.ToString()).UserIsTypingAsync(getSenderId.Value!);
+            await Clients.Group(groupId.ToString()).UserIsTypingAsync(getSenderId.Value!);
         }
 
-        public async Task NotifyStoppedTyping(Guid receiverId)
+        public async Task NotifyStoppedTyping(Guid groupId)
         {
             var getSenderId = _currUserServices.GetUserId();
             if (!getSenderId.IsSuccess) return;
 
-            await Clients.User(receiverId.ToString()).UserStoppedTypingAsync(getSenderId.Value!);
+            await Clients.Group(groupId.ToString()).UserStoppedTypingAsync(getSenderId.Value!);
         }
     }
 }

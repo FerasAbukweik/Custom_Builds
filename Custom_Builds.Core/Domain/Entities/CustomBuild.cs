@@ -15,7 +15,7 @@ namespace Custom_Builds.Core.Domain.Entities
         public Guid? CreatorId { get; set; }
         public ApplicationUser? Creator { get; set; }
 
-
+        
         public List<Modification> Modifications { get; set; } = new List<Modification>();
         public List<CartItem> CartItems { get; set; } = new List<CartItem>();
 

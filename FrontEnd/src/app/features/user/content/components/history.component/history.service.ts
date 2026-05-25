@@ -1,13 +1,12 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { OrderService } from '../../../../../core/services/api-services/order-service';
 import { ILazyLoadingDTO } from '../../../../../core/DTO/lazy-loading-dto';
-import { ILazyGetAllOrdersDTO } from '../../../../../core/DTO/lazy-get-all-orders-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { IHistoryOrderDTO } from '../../../../../core/DTO/History-orders-dto';
-import { IOrderHistory } from './history.component.model';
 import { IOrderHistoryDTO } from '../../../../../core/DTO/order-history-dto';
+import { ILazyGetUserDataDTO } from '../../../../../core/DTO/lazy-get-user-data-dto';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class HistoryService {
   // injections
   private readonly _orderService = inject(OrderService);
@@ -61,7 +60,7 @@ export class HistoryService {
     }
     this._isLoading.set(true);
 
-    const requestData: ILazyGetAllOrdersDTO = {
+    const requestData: ILazyGetUserDataDTO = {
       taken: section * this._lazyLoadingData.ElementsPerSection,
       ElementsPerSection: this._lazyLoadingData.ElementsPerSection,
     };
@@ -79,8 +78,8 @@ export class HistoryService {
             return next;
         });
 
-          this._isLoading.set(false);
           this._currentSection.set(section + 1);
+          this._isLoading.set(false);
         },
         error: () => {
           this._isLoading.set(false);

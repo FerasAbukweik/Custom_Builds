@@ -49,5 +49,17 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result.Success();
         }
+        public async Task<Result<List<Message>>> GetMessagesAsync(LazyLoadMessagesDTO lazyLoadData)
+        {
+            var messages = await _dbContext.Messages
+                .Where(m => m.ChatGroupId == lazyLoadData.chatGroupId)
+                .Include(m => m.Sender)
+                .OrderByDescending(m => m.CreatedAt)
+                .Skip(lazyLoadData.Taken)
+                .Take(lazyLoadData.ElementsPerSection)
+                .ToListAsync();
+
+            return Result<List<Message>>.Success(messages);
+        }   
     }
 }

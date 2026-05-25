@@ -19,18 +19,15 @@ namespace Custom_Builds.Core.Services.AccountServices
         private readonly SignInManager<ApplicationUser> _signinManager;
         private readonly IDeleteCookieService _deleteCookieService;
         private readonly IGetCurrUserService _getCurrUserService;
-        private readonly IEditMessageService _editMessageService;
         public DeleteUserService(UserManager<ApplicationUser> userManager,
                                         SignInManager<ApplicationUser> signinManager,
                                         IDeleteCookieService deleteCookieService,
-                                        IGetCurrUserService getCurrUserService,
-                                        IEditMessageService deleteMessageService)
+                                        IGetCurrUserService getCurrUserService)
         {
             _userManager = userManager;
             _signinManager = signinManager;
             _deleteCookieService = deleteCookieService;
             _getCurrUserService = getCurrUserService;
-            _editMessageService = deleteMessageService;
         }
         public async Task<Result> DeleteUserAsync(Guid? id)
         {
@@ -61,10 +58,6 @@ namespace Custom_Builds.Core.Services.AccountServices
             // delete refresh token from cookies
             Result delrefResult = _deleteCookieService.Delete("RefreshToken");
             if (!delrefResult.IsSuccess) return delrefResult;
-
-            // remove target user from messages manually
-            Result setMessagesToNullResult = await _editMessageService.SetUserMessagesToNull(getTargetUserIdRes.Value!);
-            if (!setMessagesToNullResult.IsSuccess) return setMessagesToNullResult;
 
             // remove User from IdentityUser table
             // also removes all user refreshTokens because DeleteBehavior.cascade

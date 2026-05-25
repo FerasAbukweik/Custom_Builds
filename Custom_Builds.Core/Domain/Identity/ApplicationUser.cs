@@ -12,5 +12,7 @@ namespace Custom_Builds.Core.Domain.Identity
         public List<Message> MessageReceivers = new List<Message>();
         public List<Message> MessageSenders = new List<Message>();
         public List<CustomBuild> CustomBuilds = new List<CustomBuild>();
+        public List<ChatGroup> ChatGroups = new List<ChatGroup>();
+        public ChatGroup? ChatGroup { get; set; }
     }
 }

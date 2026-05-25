@@ -3,9 +3,7 @@ using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
-using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
 using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
-using Custom_Builds.Core.ServiceContracts.IModificationServices;
 using Custom_Builds.Core.ServiceContracts.IProductServices;
 using Custom_Builds.Core.ServiceContracts.OrderServices;
 
@@ -43,6 +41,9 @@ namespace Custom_Builds.Core.Services.OrderServices
                 CustomBuildId = null,
                 Title = getProductResult.Value!.Name,
                 CreatedAt = DateTime.UtcNow,
+                TotalPrice = getProductResult.Value.Price * toAdd.Quantity,
+                Quantity = toAdd.Quantity,
+                OrderStatus = OrderStateEnum.Processing,
             };
 
             // add item to cart table
@@ -51,7 +52,6 @@ namespace Custom_Builds.Core.Services.OrderServices
 
             return Result<OrderDTO>.Success(addToCartResult.Value!.toDTO());
         }
-
         public async Task<Result> BuyAgain(Guid OrderId)
         {
             var getCurrUserIdRes = _currUserService.GetUserId();

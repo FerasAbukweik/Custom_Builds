@@ -7,5 +7,6 @@ namespace Custom_Builds.Core.ServiceContracts.ICurrUserServices
         Result<Guid> GetUserId();
         Result<Guid> GetTargetUserId(Guid? suppliedId);
         Result<bool> IsAdmin();
+        Result<List<string>> GetRoles();
     }
 }

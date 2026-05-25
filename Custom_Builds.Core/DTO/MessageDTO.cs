@@ -5,8 +5,9 @@ namespace Custom_Builds.Core.DTO
     public class MessageDTO
     {
         public required Guid Id { get; set; }
-        public Guid? SenderId { get; set; }
-        public Guid? ReceiverId { get; set; }
+        public Guid SenderId { get; set; }
+        public required string SenderName { get; set; }
+        public required string? Role { get; set; }
         public required string Content { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public MessageTypeEnum MessageType { get; set; }

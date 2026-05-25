@@ -77,12 +77,6 @@ namespace Custom_Builds.Infrastructure.DBcontext
                 .HasForeignKey(m => m.SenderId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.Entity<Message>()
-                .HasOne(m => m.Receiver)
-                .WithMany(u => u.MessageReceivers)
-                .HasForeignKey(m => m.ReceiverId)
-                .OnDelete(DeleteBehavior.NoAction);
-
             builder.Entity<CustomBuild>()
                 .HasOne(cb => cb.Creator)
                 .WithMany(u => u.CustomBuilds)
@@ -92,6 +86,23 @@ namespace Custom_Builds.Infrastructure.DBcontext
             builder.Entity<RefreshToken>()
                 .HasIndex(rt => rt.RefreshTokenString)
                 .IsUnique(true);
+
+            builder.Entity<ChatGroup>()
+                .HasOne(cg => cg.User)
+                .WithOne(u => u.ChatGroup)
+                .HasForeignKey<ChatGroup>(cg => cg.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<ChatGroup>()
+                .HasMany(cg => cg.Supporters)
+                .WithMany(u => u.ChatGroups)
+                .UsingEntity(e => e.ToTable("ChatGroup_User_ManyToMany"));
+
+            builder.Entity<Message>()
+                .HasOne(m => m.ChatGroup)
+                .WithMany(cg => cg.Messages)
+                .HasForeignKey(m => m.ChatGroupId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -103,5 +114,6 @@ namespace Custom_Builds.Infrastructure.DBcontext
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<CustomBuild> CustomBuilds { get; set; }
         public virtual DbSet<Message> Messages { get; set; }
+        public virtual DbSet<ChatGroup> ChatGroups { get; set; }
     }
 }

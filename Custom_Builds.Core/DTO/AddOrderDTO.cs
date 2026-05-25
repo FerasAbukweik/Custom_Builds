@@ -9,5 +9,8 @@ namespace Custom_Builds.Core.DTO
 
         [Required(ErrorMessage = "{0} is required.")]
         public required Guid ProductId { get; set; }
+
+        [Required(ErrorMessage = "{0} is required.")]
+        public required int Quantity { get; set; }
     }
 }
