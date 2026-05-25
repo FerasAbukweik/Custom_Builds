@@ -66,6 +66,14 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result<List<Product>>.Success(products);
         }
+        public async Task<Result<List<Product>>> LazyGetAllProductsAsync(LazyDTO reqData)
+        {
+            var products = await _dbContext.Products
+                .Skip(reqData.Taken)
+                .Take(reqData.ElementsPerSection)
+                .ToListAsync();
 
+            return Result<List<Product>>.Success(products);
+        }
     }
 }

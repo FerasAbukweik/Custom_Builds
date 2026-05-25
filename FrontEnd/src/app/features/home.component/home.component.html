@@ -49,6 +49,7 @@
           src="assets/images/keyboard-image.png"
           alt="image"
           class="w-full h-full object-cover rounded-2xl max-[1120px]:aspect-3/2 aspect-14/10"
+          (error)="$event.target.src = 'assets/images/no-image.png'"
         />
         <div
           class="flex flex-col absolute bottom-6 w-[calc(100%-3rem)] left-6 bg-primary border border-dark-gray/50 rounded-xl p-3.5 leading-6 font-bold cursor-pointer hover:brightness-110 transition-colors z-20"
@@ -117,10 +118,27 @@
         </div>
       </div>
       <div #designsDiv class="overflow-x-scroll mt-10 flex gap-6.5 max-w-[calc(100vw-3.5rem)]">
-        @for (product of trendingProducts; track $index) {
-          <app-product-card />
+        @for (product of products(); track product.id; let isLast = $last) {
+          <app-product-card [productData]="product"/>
+
+          @if(isLast){
+            <span (appIsVisable)="lazyGetData()"></span>
+
+            @if(isLoading()){
+              <div class="w-full h-110 flex justify-center items-center self-stretch flex-1"><app-loading/></div>
+            }
+          }
+        }
+        @empty {
+          <span (appIsVisable)="lazyGetData()"></span>
+
+          @if(!isLoading()) {<div class="w-full h-full flex justify-center items-center font-bold text-off-white text-2xl">No Products To Show</div>}
         }
       </div>
+
+      @if(isLoading() && products().length === 0){
+        <div class="w-full h-full flex justify-center items-center"><app-loading/></div>
+      }
     </section>
 
     <section

@@ -17,6 +17,7 @@ export class SupportService {
   // signals
   private _isLoading = signal<boolean>(false);
   private _messages = signal<IMessageDTO[]>([]);
+  private _currUserId = signal<string>('');
 
   // fields
   // private
@@ -27,6 +28,7 @@ export class SupportService {
   };
   private _isMoreDataAvaiable: boolean = true;
   private readonly _untilDestroyed = takeUntilDestroyed(this._destroyRef);
+  private _chatGroupId!: string;
 
   // getters
   get getIsLoading() {
@@ -35,6 +37,23 @@ export class SupportService {
 
   get getMessages() {
     return this._messages.asReadonly();
+  }
+
+  get getCurrUserId(){
+    return this._currUserId.asReadonly();
+  }
+
+  get getChatGroupId(){
+    return this._chatGroupId;
+  }
+
+  // setters
+  setCurrUserId(userId: string){
+    this._currUserId.set(userId);
+  }
+
+  setChatGroupId(chatGroupId: string){
+    this._chatGroupId = chatGroupId
   }
 
   // methods
@@ -65,7 +84,7 @@ export class SupportService {
         },
         error: (err) => {
           // toDo: show error message
-          if (err.status == 404) this._isMoreDataAvaiable = false;
+          if (err.status === 404) this._isMoreDataAvaiable = false;
           this._isLoading.set(false);
         },
       });

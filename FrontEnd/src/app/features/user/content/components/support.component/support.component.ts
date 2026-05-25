@@ -46,7 +46,7 @@ export class SupportComponent implements OnInit {
   // signals
   messages = this._supportService.getMessages;
   isLoading = this._supportService.getIsLoading;
-  currUserId = signal<string>('');
+  currUserId = this._supportService.getCurrUserId;
   messageInput = signal<string>('');
   isTyping = signal<boolean>(false);
   isSignalRConnected = signal<boolean>(false);
@@ -57,7 +57,6 @@ export class SupportComponent implements OnInit {
   // fields
 
   // private
-  private _chatGroupId!: string;
 
   // public
   quickActions = quickActions;
@@ -78,23 +77,25 @@ export class SupportComponent implements OnInit {
   // methods
   async ngOnInit() {
     // get important inital data
-    const getInitDataRes = await this._supportService.getInitialData();
-    if (!getInitDataRes) {
-      // toDo: show error message
-      return;
+    if(!this.currUserId() || !this._supportService.getChatGroupId){
+      const getInitDataRes = await this._supportService.getInitialData();
+      if (!getInitDataRes) {
+        // toDo: show error message
+        return;
+      }
+
+      // set curr user id
+      this._supportService.setCurrUserId(getInitDataRes.userId);
+
+      // set chatGroup id so we can send it with the add message request
+      this._supportService.setChatGroupId(getInitDataRes.chatGroupId);
     }
-
-    // set curr user id
-    this.currUserId.set(getInitDataRes.userId);
-
-    // set chatGroup id so we can send it with the add message request
-    this._chatGroupId = getInitDataRes.chatGroupId;
 
     // in case we already had messages in the service
     this._scrollToBottom();
 
     // start connection with the hub
-    let isSignalRConnected = await this._chatService.startConnection(getInitDataRes.chatGroupId);
+    let isSignalRConnected = await this._chatService.startConnection(this._supportService.getChatGroupId);
     if (!isSignalRConnected) {
       // toDo: show error message
     }
@@ -168,8 +169,8 @@ export class SupportComponent implements OnInit {
 
   // manage is typing
   manageIsTyping = () => {
-    if (this.messageInput()) this._chatService.notifyTyping(this._chatGroupId);
-    else this._chatService.notifyStoppedTyping(this._chatGroupId);
+    if (this.messageInput()) this._chatService.notifyTyping(this._supportService.getChatGroupId);
+    else this._chatService.notifyStoppedTyping(this._supportService.getChatGroupId);
   };
 
   // handel send message
@@ -177,7 +178,7 @@ export class SupportComponent implements OnInit {
     const toSendMessage: ISendMessageDTO = {
       messageType: MessageTypeEnum.text,
       content: input,
-      ChatGroupId: this._chatGroupId,
+      ChatGroupId: this._supportService.getChatGroupId,
     };
 
     this._chatService.sendMessage(toSendMessage);

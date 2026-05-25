@@ -12,5 +12,7 @@ namespace Custom_Builds.Core.Domain.RepositryContracts
         Task<Result> EditByIdAsync(EditProductDTO newData);
         Task<Result> RemoveByIdAsync(Guid productId);
         Task<Result<List<Product>>> FilterAsync(Expression<Func<Product, bool>> extraChecks, Expression<Func<Product, object>>[]? includes = null);
+
+        Task<Result<List<Product>>> LazyGetAllProductsAsync(LazyDTO reqData);
     }
 }

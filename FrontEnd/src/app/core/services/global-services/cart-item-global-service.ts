@@ -96,16 +96,15 @@ export class CartItemGlobalService {
           this.cartItems.update((curr) => [...curr, ...(res as IMiniCartItemDTO[])]);
 
           const itemsLen = (res as IMiniCartItemDTO[]).length;
-          console.log('test');
-          console.log(res as IMiniCartItemDTO[]);
 
           this.requestData.taken += itemsLen;
           this.isMoreDataAvailable = itemsLen > 0;
+            console.log("testing " , this.isMoreDataAvailable)
           this.isLoading.set(false);
         },
         error: (err) => {
           // toDo: show error message
-          if (err.error.status === 404) {
+          if (err.status === 404) {
             this.isMoreDataAvailable = false;
           }
 
@@ -155,7 +154,6 @@ export class CartItemGlobalService {
       totalPrice: curr.totalPrice - itemPrice * quantity,
     }));
 
-    console.log(this.summaryInfo());
 
     return await firstValueFrom(
       this.cartItemService.remove(id).pipe(

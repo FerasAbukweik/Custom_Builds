@@ -25,6 +25,9 @@ export class MyOrdersComponent implements OnInit {
   ngOnInit(): void {
     // update orders Count
     this._myOrdersService.updateOrdersCount();
+
+    // so we check for new orders every time we open it again
+    this._myOrdersService.setIsMoreDataAvaiable(true);
   }
 
   // methods

@@ -38,6 +38,11 @@ export class MyOrdersService {
     return this.ordersCount.asReadonly();
   }
 
+  // setters
+  setIsMoreDataAvaiable = (newVal: boolean) => {
+    this.isMoreDataAvailable = newVal;
+  }
+
   lazyGetOrders = () => {
     if (!this.isMoreDataAvailable || this.isLoading()) return;
     this.isLoading.set(true);
@@ -56,7 +61,7 @@ export class MyOrdersService {
           this.isLoading.set(false);
         },
         error: (err) => {
-          if (err.error.status === 404) {
+          if (err.status === 404) {
             this.isMoreDataAvailable = false;
           }
 
