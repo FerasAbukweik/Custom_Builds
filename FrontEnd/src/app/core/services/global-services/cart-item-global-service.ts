@@ -99,7 +99,6 @@ export class CartItemGlobalService {
 
           this.requestData.taken += itemsLen;
           this.isMoreDataAvailable = itemsLen > 0;
-            console.log("testing " , this.isMoreDataAvailable)
           this.isLoading.set(false);
         },
         error: (err) => {

@@ -129,11 +129,6 @@ namespace Custom_Builds.Infrastructure.Repositories
                     )
                 }).FirstOrDefaultAsync();
 
-            if(result == null)
-            {
-                return Result<CartSummaryDTO>.Failure("no cart items found for the user", statusCode: HttpStatusCode.NotFound);
-            }
-
             return Result<CartSummaryDTO>.Success(result);
         }
     }

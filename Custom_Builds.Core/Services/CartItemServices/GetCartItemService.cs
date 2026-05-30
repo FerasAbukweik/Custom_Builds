@@ -38,8 +38,6 @@ namespace Custom_Builds.Core.Services.CartItemServices
             var result = await _cartItemRepository.LazyGetCartItems(getData);
             if (!result.IsSuccess) return result.MapFailure<List<CartItemDTO>>();
 
-            if (!result.Value!.Any()) return Result<List<CartItemDTO>>.Failure("no items where found", HttpStatusCode.NotFound);
-
 
             List<CartItemDTO> newCartItems = new List<CartItemDTO>();
 

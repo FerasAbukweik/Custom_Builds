@@ -49,10 +49,10 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return Result.Success();
         }
-        public async Task<Result<List<Message>>> GetMessagesAsync(LazyLoadMessagesDTO lazyLoadData)
+        public async Task<Result<List<Message>>> GetMessagesAsync(LazyGetUserDataDTO lazyLoadData)
         {
             var messages = await _dbContext.Messages
-                .Where(m => m.ChatGroupId == lazyLoadData.chatGroupId)
+                .Where(m => m.ChatGroup!.UserId == lazyLoadData.UserId)
                 .Include(m => m.Sender)
                 .OrderByDescending(m => m.CreatedAt)
                 .Skip(lazyLoadData.Taken)

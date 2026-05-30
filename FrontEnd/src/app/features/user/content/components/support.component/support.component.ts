@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import {
-  afterNextRender,
   Component,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
   OnInit,
@@ -46,7 +46,6 @@ export class SupportComponent implements OnInit {
   // signals
   messages = this._supportService.getMessages;
   isLoading = this._supportService.getIsLoading;
-  currUserId = this._supportService.getCurrUserId;
   messageInput = signal<string>('');
   isTyping = signal<boolean>(false);
   isSignalRConnected = signal<boolean>(false);
@@ -65,10 +64,16 @@ export class SupportComponent implements OnInit {
   constructor() {
   const sub = toObservable(this.isLoading).subscribe({
     next: (isLoading) => {
-      if (!isLoading && this.currUserId()) {
+      if (!isLoading) {
         this._scrollToBottom();
         sub.unsubscribe();
       }
+    }
+  });
+
+  effect(() => {
+    if(this.isTyping()){
+      this._scrollToBottom();
     }
   });
 }
@@ -76,26 +81,11 @@ export class SupportComponent implements OnInit {
 
   // methods
   async ngOnInit() {
-    // get important inital data
-    if(!this.currUserId() || !this._supportService.getChatGroupId){
-      const getInitDataRes = await this._supportService.getInitialData();
-      if (!getInitDataRes) {
-        // toDo: show error message
-        return;
-      }
-
-      // set curr user id
-      this._supportService.setCurrUserId(getInitDataRes.userId);
-
-      // set chatGroup id so we can send it with the add message request
-      this._supportService.setChatGroupId(getInitDataRes.chatGroupId);
-    }
-
     // in case we already had messages in the service
     this._scrollToBottom();
 
     // start connection with the hub
-    let isSignalRConnected = await this._chatService.startConnection(this._supportService.getChatGroupId);
+    let isSignalRConnected = await this._chatService.startConnection();
     if (!isSignalRConnected) {
       // toDo: show error message
     }
@@ -148,10 +138,8 @@ export class SupportComponent implements OnInit {
   // handle user is typing
   private _handleUserTyping = () => {
     this._chatService.typingUserId$.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: (res) => {
-        const newTypingId = res as string;
-
-        if (this.currUserId() !== newTypingId) this.isTyping.set(true);
+      next: () => {
+        this.isTyping.set(true);
       },
     });
   };
@@ -159,18 +147,16 @@ export class SupportComponent implements OnInit {
   // handle stpped typing
   private _handleStoppedTyping = () => {
     this._chatService.stoppedTypingUserId$.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
-      next: (res) => {
-        const newStoppedTypingId = res as string;
-
-        if (this.currUserId() !== newStoppedTypingId) this.isTyping.set(false);
+      next: () => {
+        this.isTyping.set(false);
       },
     });
   };
 
   // manage is typing
   manageIsTyping = () => {
-    if (this.messageInput()) this._chatService.notifyTyping(this._supportService.getChatGroupId);
-    else this._chatService.notifyStoppedTyping(this._supportService.getChatGroupId);
+    if (this.messageInput()) this._chatService.notifyTyping();
+    else this._chatService.notifyStoppedTyping();
   };
 
   // handel send message
@@ -178,10 +164,10 @@ export class SupportComponent implements OnInit {
     const toSendMessage: ISendMessageDTO = {
       messageType: MessageTypeEnum.text,
       content: input,
-      ChatGroupId: this._supportService.getChatGroupId,
     };
 
     this._chatService.sendMessage(toSendMessage);
+    this._supportService.addToTaken(1);
     this.messageInput.set('');
   };
 

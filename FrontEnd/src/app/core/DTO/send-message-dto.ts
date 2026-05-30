@@ -4,5 +4,4 @@ export interface SendMessageDTO {
   content: string;
   messageType: MessageTypeEnum; 
   fileName?: string; 
-  ChatGroupId: string;
 }

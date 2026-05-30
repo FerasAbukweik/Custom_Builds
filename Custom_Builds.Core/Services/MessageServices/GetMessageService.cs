@@ -23,10 +23,18 @@ namespace Custom_Builds.Core.Services.MessageServices
             _userManager = userManager;
         }
 
-        public async Task<Result<List<MessageDTO>>> GetMessagesAsync(LazyLoadMessagesDTO lazyLoadData)
+        public async Task<Result<List<MessageDTO>>> GetMessagesAsync(LazyDTO lazyLoadData)
         {
-            var getMessagesResult = await _messageRepository.GetMessagesAsync(lazyLoadData);
+            var getCurrUserIdResult = _getCurrUserService.GetUserId();
+            if (!getCurrUserIdResult.IsSuccess) return getCurrUserIdResult.MapFailure<List<MessageDTO>>();
+
+            var getMessagesResult = await _messageRepository.GetMessagesAsync(new LazyGetUserDataDTO {
+                UserId = getCurrUserIdResult.Value!,
+                ElementsPerSection = lazyLoadData.ElementsPerSection,
+                Taken = lazyLoadData.Taken
+            });
             if (!getMessagesResult.IsSuccess) return getMessagesResult.MapFailure<List<MessageDTO>>();
+
 
             var messages = new List<MessageDTO>();
             foreach (var m in getMessagesResult.Value!)
@@ -34,11 +42,11 @@ namespace Custom_Builds.Core.Services.MessageServices
                 if (m.Sender != null)
                 {
                     var roles = await _userManager.GetRolesAsync(m.Sender);
-                    messages.Add(m.toDTO(m.Sender.UserName ?? "unknown", roles.FirstOrDefault() ?? "unknown"));
+                    messages.Add(m.toDTO(m.Sender.UserName ?? "unknown", roles.FirstOrDefault() ?? "unknown", getCurrUserIdResult.Value!));
                 }
                 else
-                {
-                    messages.Add(m.toDTO("unknown", "unknown"));
+                {   
+                    messages.Add(m.toDTO("unknown", "unknown", getCurrUserIdResult.Value!));
                 }
             }
 

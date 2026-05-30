@@ -24,7 +24,7 @@ namespace Custom_Builds.Core.Services.MessageServices
             _userManager = userManager;
         }
 
-        public async Task<Result<MessageDTO>> AddAsync(AddMessageDTO toAdd)
+        public async Task<Result<MessageDTO>> AddAsync(AddMessageDTO toAdd , Guid ChatGroupId)
         {
             // get curr logged in user id
             var getCurrUserId = _getCurrUserService.GetUserId();
@@ -39,7 +39,7 @@ namespace Custom_Builds.Core.Services.MessageServices
                 FileName = toAdd.FileName,
                 MessageType = toAdd.MessageType,
                 SenderId = getCurrUserId.Value!,
-                ChatGroupId = toAdd.ChatGroupId
+                ChatGroupId = ChatGroupId
             };
 
 
@@ -61,7 +61,7 @@ namespace Custom_Builds.Core.Services.MessageServices
                 return Result<MessageDTO>.Failure("User role not found");
             }
 
-            return Result<MessageDTO>.Success(result.Value!.toDTO(CurrUser.UserName ?? "unknown" , role.First()));
+            return Result<MessageDTO>.Success(result.Value!.toDTO(CurrUser.UserName ?? "unknown" , role.First(), getCurrUserId.Value!));
         }
     }
 }

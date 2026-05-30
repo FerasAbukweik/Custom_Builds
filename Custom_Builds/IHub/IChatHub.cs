@@ -6,7 +6,7 @@ namespace custom_Peripherals.IHub
     public interface IChatHub
     {
         Task ReceiveMessageAsync(MessageDTO message);
-        Task UserIsTypingAsync(Guid senderId);
-        Task UserStoppedTypingAsync(Guid senderId);
+        Task UserIsTypingAsync();
+        Task UserStoppedTypingAsync();
     }
 }

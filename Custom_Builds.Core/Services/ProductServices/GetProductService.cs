@@ -22,7 +22,6 @@ namespace Custom_Builds.Core.Services.ProductServices
             return Result<List<ProductDTO>>.Success(result.Value!.Select(p => p.toDTO()).ToList());
 
         }
-
         public async Task<Result<Product>> GetByIdAsync(Guid productId)
         {
             var result = await _productRepository.GetByIdAsync(productId);
@@ -30,7 +29,6 @@ namespace Custom_Builds.Core.Services.ProductServices
 
             return Result<Product>.Success(result.Value!);
         }
-
         Task<Result<ProductDTO>> IGetProductService.GetByIdAsync(Guid productId)
         {
             throw new NotImplementedException();

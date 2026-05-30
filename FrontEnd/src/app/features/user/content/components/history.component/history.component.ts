@@ -26,6 +26,33 @@ export class HistoryComponent implements OnInit {
 
   // computed
   currOrders = computed(() => this.SectionOrders()[this.currentSection() - 1] ?? [])
+  
+  BottomNumbers = computed<number[]>((maxLen: number = 3) => {
+  const numberOfSections = this.SectionOrders().length;
+  const currentSection = this.currentSection();
+
+  let canTakeRight = numberOfSections - currentSection
+  let canTakeLeft = currentSection - 1;
+
+  const isEven = (maxLen%2 == 0 ? 1 : 0);
+  const maxCanTake = Math.trunc(maxLen/2) - isEven;
+
+  let takeRight = Math.min(maxCanTake + isEven , canTakeRight);
+  canTakeRight -= takeRight;
+
+  let takeLeft = Math.min(maxCanTake , canTakeLeft);
+  canTakeLeft -= takeLeft;
+
+  if(takeLeft < maxCanTake) takeRight += Math.min(maxCanTake - takeLeft , canTakeRight);
+  else if(takeRight < maxCanTake + isEven) takeLeft += Math.min(maxCanTake + isEven - takeRight , canTakeLeft);
+  
+
+  let begin = currentSection - takeLeft;
+  const finalLen = 1 + takeRight + takeLeft;
+  const resArr = Array.from({ length: finalLen }, () => begin++);
+
+  return resArr;
+})
 
   // fields
 
@@ -35,33 +62,6 @@ export class HistoryComponent implements OnInit {
 
 
   // methods
-  generateBottomNumbers = (maxLen: number = 3) : number[] => {
-    const numberOfSections = this.SectionOrders().length;
-    const currentSection = this.currentSection();
-
-    let canTakeRight = numberOfSections - currentSection
-    let canTakeLeft = this.currentSection() - 1;
-
-    const isEven = (maxLen%2 == 0 ? 1 : 0);
-    const maxCanTake = Math.trunc(maxLen/2) - isEven;
-
-    let takeRight = Math.min(maxCanTake + isEven , canTakeRight);
-    canTakeRight -= takeRight;
-
-    let takeLeft = Math.min(maxCanTake , canTakeLeft);
-    canTakeLeft -= takeLeft;
-
-    if(takeLeft < maxCanTake) takeRight += Math.min(maxCanTake - takeLeft , canTakeRight);
-    else if(takeRight < maxCanTake + isEven) takeLeft += Math.min(maxCanTake + isEven - takeRight , canTakeLeft);
-    
-
-    let begin = currentSection - takeLeft;
-    const finalLen = 1 + takeRight + takeLeft;
-    const resArr = Array.from({ length: finalLen }, () => begin++);
-
-    return resArr;
-  }
-
 
   // change section
   changeSection(newSection: number){

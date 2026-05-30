@@ -17,7 +17,7 @@ namespace Custom_Builds.Core.Services.ChatGroupServices
             _addChatGroupService = addChatGroupService;
         }
 
-        public async Task<Result<Guid>> GetChatGroupId(Guid userId)
+        public async Task<Result<Guid>> GetChatGroupIdAsync(Guid userId)
         {
             var getIdResult = await _chatGroupRepository.GetUserChatGroupIdAsync(userId);
 
@@ -30,8 +30,6 @@ namespace Custom_Builds.Core.Services.ChatGroupServices
 
                     return Result<Guid>.Success(addResult.Value!.Id);
                 }
-
-                return getIdResult;
             }
 
             return getIdResult;

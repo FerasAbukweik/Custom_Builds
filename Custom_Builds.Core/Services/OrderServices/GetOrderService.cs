@@ -67,9 +67,6 @@ namespace Custom_Builds.Core.Services.OrderServices
             var userOrders = await _orderRepository.GetProcessingOrdersAsync(lazyGetUserOrdersData);
             if(!userOrders.IsSuccess) return userOrders.MapFailure<List<MiniOrderInfoDTO>>();
 
-            if (!userOrders.Value!.Any())
-                return Result<List<MiniOrderInfoDTO>>.Failure("no orders where found", HttpStatusCode.NotFound);
-
             return Result<List<MiniOrderInfoDTO>>.Success(userOrders.Value!);
         }
         public async Task<Result<OrderHistoryDTO>> GetHistorySummaryAsync(Guid? userId)

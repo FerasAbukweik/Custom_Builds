@@ -1,14 +1,11 @@
-using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.extensionMethods;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.CartItemServices;
 using Custom_Builds.Core.ServiceContracts.ICartItemServices;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Immutable;
 
 namespace custom_Peripherals.Controllers
 {

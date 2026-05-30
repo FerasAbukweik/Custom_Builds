@@ -36,7 +36,7 @@ namespace custom_Peripherals.MiddleWare
             }
 
 
-            // using refresh token lifetime for access token so next time we can check both expired access token and refresh token
+            // using refresh token lifetime for access tokens so next time we can check both expired access token and refresh token
             var refreshTokenLife = _configuration.GetValue<double>("JWT:RefreshTokenLife");
             addCookieService.Add("AccessToken", tokens.Value!.AccessToken, refreshTokenLife);
             addCookieService.Add("RefreshToken", tokens.Value!.RefreshToken, refreshTokenLife);

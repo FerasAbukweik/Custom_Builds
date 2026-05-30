@@ -4,6 +4,6 @@ namespace Custom_Builds.Core.ServiceContracts.IChatGroupServices
 {
     public interface IGetChatGroupService
     {
-        Task<Result<Guid>> GetChatGroupId(Guid userId);
+        Task<Result<Guid>> GetChatGroupIdAsync(Guid userId);
     }
 }

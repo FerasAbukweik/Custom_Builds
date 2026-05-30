@@ -31,7 +31,7 @@ namespace Custom_Builds.Core.Domain.Entities
 
 
 
-        public MessageDTO toDTO(string senderName , string role)
+        public MessageDTO toDTO(string senderName , string role , Guid currUserId)
         {
             return new MessageDTO()
             {
@@ -40,7 +40,7 @@ namespace Custom_Builds.Core.Domain.Entities
                 CreatedAt = this.CreatedAt,
                 FileName = this.FileName,
                 MessageType = this.MessageType,
-                SenderId = this.SenderId,
+                IsCurrUserSender = this.SenderId == currUserId,
                 SenderName = senderName,
                 Role = role
             };

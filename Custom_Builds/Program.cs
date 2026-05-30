@@ -1,43 +1,8 @@
 using Custom_Builds.Core.Domain.Identity;
-using Custom_Builds.Core.Domain.RepositoryContracts;
-using Custom_Builds.Core.Domain.RepositryContracts;
-using Custom_Builds.Core.ServiceContracts.CartItemServices;
-using Custom_Builds.Core.ServiceContracts.CookieServices;
-using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
-using Custom_Builds.Core.ServiceContracts.IAccountServices;
-using Custom_Builds.Core.ServiceContracts.ICartItemServices;
-using Custom_Builds.Core.ServiceContracts.IChatGroupServices;
-using Custom_Builds.Core.ServiceContracts.ICookieServices;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
-using Custom_Builds.Core.ServiceContracts.ICustomBuildServices;
-using Custom_Builds.Core.ServiceContracts.IJWTServices;
-using Custom_Builds.Core.ServiceContracts.IMessageServices;
-using Custom_Builds.Core.ServiceContracts.IModificationServices;
-using Custom_Builds.Core.ServiceContracts.IOrderServices;
-using Custom_Builds.Core.ServiceContracts.IPartServices;
-using Custom_Builds.Core.ServiceContracts.IProductServices;
-using Custom_Builds.Core.ServiceContracts.IRefreshTokenServices;
-using Custom_Builds.Core.ServiceContracts.ISectionServices;
-using Custom_Builds.Core.ServiceContracts.ModificationServices;
-using Custom_Builds.Core.ServiceContracts.OrderServices;
-using Custom_Builds.Core.ServiceContracts.PartServices;
-using Custom_Builds.Core.Services.AccountServices;
-using Custom_Builds.Core.Services.CartItemServices;
-using Custom_Builds.Core.Services.ChatGroupServices;
-using Custom_Builds.Core.Services.CookiesServices;
-using Custom_Builds.Core.Services.CurrUserServices;
-using Custom_Builds.Core.Services.CustomBuildServices;
-using Custom_Builds.Core.Services.JWTServices;
-using Custom_Builds.Core.Services.MessageServices;
-using Custom_Builds.Core.Services.ModificationServices;
-using Custom_Builds.Core.Services.OrderServices;
-using Custom_Builds.Core.Services.PartServices;
-using Custom_Builds.Core.Services.ProductServices;
-using Custom_Builds.Core.Services.RefreshTokenServices;
-using Custom_Builds.Core.Services.SectionServices;
+using Custom_Builds.Core.ExtensionMethods;
 using Custom_Builds.Infrastructure.BackgroundServices;
 using Custom_Builds.Infrastructure.DBcontext;
-using Custom_Builds.Infrastructure.Repositories;
+using Custom_Builds.Infrastructure.ExtensionMethods;
 using custom_Peripherals.Hub;
 using custom_Peripherals.MiddleWare;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -140,97 +105,8 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 .AddSignInManager<SignInManager<ApplicationUser>>();
 
 
-// DI --------------------------------------------------------------------------
-
-// JWTServices 
-builder.Services.AddScoped<IJWTService, JWTService>();
-
-// RefreshTokensServices + Reposotory
-builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-builder.Services.AddScoped<IRemoveRefreshTokenService, RemoveRefreshTokenService>();
-builder.Services.AddScoped<IGenerateRefreshTokenService, GenerateRefreshTokenService>();
-builder.Services.AddScoped<IGetRefreshTokenService, GetRefreshTokenService>();
-
-// Part Services + Reposotory
-builder.Services.AddScoped<IPartRepository, PartRepository>();
-builder.Services.AddScoped<IGetPartService, GetPartService>();
-builder.Services.AddScoped<IAddPartService, AddPartService>();
-builder.Services.AddScoped<IEditPartService, EditPartService>();
-builder.Services.AddScoped<IRemovePartService, RemovePartService>();
-
-// Section Services + Reposotory
-builder.Services.AddScoped<ISectionRepository, SectionRepository>();
-builder.Services.AddScoped<IGetSectionService, GetSectionService>();
-builder.Services.AddScoped<IAddSectionService, AddSectionService>();
-builder.Services.AddScoped<IEditSectionService, EditSectionService>();
-builder.Services.AddScoped<IRemoveSectionService, RemoveSectionService>();
-
-// Modification Services + Reposotory
-builder.Services.AddScoped<IModificationsRepository, ModificationsRepository>();
-builder.Services.AddScoped<IAddModificationService, AddModificationService>();
-builder.Services.AddScoped<IEditModificationService, EditModificationService>();
-builder.Services.AddScoped<IRemoveModificationService, RemoveModificationService>();
-builder.Services.AddScoped<IGetModificationService, GetModificationService>();
-
-// Cart Services + Reposotory
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
-builder.Services.AddScoped<IGetCartItemService, GetCartItemService>();
-builder.Services.AddScoped<IAddCartItemService, AddCartItemService>();
-builder.Services.AddScoped<IRemoveCartItemService, RemoveCartItemService>();
-builder.Services.AddScoped<IUpdateCartItemService, UpdateCartItemService>();
-
-// Order Services + Reposotory
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IGetOrderService, GetOrderService>();
-builder.Services.AddScoped<IAddOrderService, AddOrderService>();
-builder.Services.AddScoped<IEditOrderService, EditOrderService>();
-builder.Services.AddScoped<IRemoveOrderService, RemoveOrderService>();
-
-// Product Services + Reposotory
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IAddProductService, AddProductService>();
-builder.Services.AddScoped<IGetProductService, GetProductService>();
-builder.Services.AddScoped<IEditProductService, EditProductService>();
-builder.Services.AddScoped<IRemoveProductService, RemoveProductService>();
-
-// CustomBuild Services + Repository
-builder.Services.AddScoped<ICustomBuildRepository, CustomBuildRepository>();
-builder.Services.AddScoped<IGetCustomBuildService, GetCustomBuildService>();
-builder.Services.AddScoped<IAddCustomBuildService, AddCustomBuildService>();
-builder.Services.AddScoped<IEditCustomBuildService, EditCustomBuildService>();
-builder.Services.AddScoped<IRemoveCustomBuildService, RemoveCustomBuildService>();
-
-// Account Services
-builder.Services.AddScoped<IDeleteUserService, DeleteUserService>();
-builder.Services.AddScoped<ILoginAccountService, LoginAccountService>();
-builder.Services.AddScoped<IRegisterAccountService, RegisterAccountService>();
-builder.Services.AddScoped<ILogoutAccountService, LogoutAccountService>();
-
-// Cookie Services
-builder.Services.AddScoped<IDeleteCookieService, DeleteCookieService>();
-builder.Services.AddScoped<IAddCookieService , AddCookieService>();
-builder.Services.AddScoped<IGetCookieService , GetCookieService>();
-
-// Message services + repository
-builder.Services.AddScoped<IMessageRepository, MessageRepository>();
-builder.Services.AddScoped<IAddMessageService, AddMessageService>();
-builder.Services.AddScoped<IGetMessageService, GetMessageService>();
-
-// Chat group services + repository
-builder.Services.AddScoped<IChatGroupRepository, ChatGroupRepository>();
-builder.Services.AddScoped<IAddChatGroupService, AddChatGroupService>();
-builder.Services.AddScoped<IGetChatGroupService, GetChatGroupService>();
-
-// Current User Services
-builder.Services.AddScoped<IGetCurrUserService, GetCurrUserService>();
-
-// so we can access http context in services
-builder.Services.AddHttpContextAccessor();
-
-// add signalR service
-builder.Services.AddSignalR(options => options.EnableDetailedErrors = true);
-
-// DI --------------------------------------------------------------------------
+builder.Services.addRepositories();
+builder.Services.addApplicationServices();
 
 // Background Services
 builder.Services.AddHostedService<RemoveExpiredRefreshTokens>();
@@ -274,5 +150,3 @@ app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
-
-// ToDo:

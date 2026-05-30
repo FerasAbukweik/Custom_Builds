@@ -5,6 +5,6 @@ namespace Custom_Builds.Core.ServiceContracts.IMessageServices
 {
     public interface IGetMessageService
     {
-        Task<Result<List<MessageDTO>>> GetMessagesAsync(LazyLoadMessagesDTO lazyLoadData);
+        Task<Result<List<MessageDTO>>> GetMessagesAsync(LazyDTO lazyLoadData);
     }
 }

@@ -21,7 +21,7 @@ namespace custom_Peripherals.Controllers
 
         // get messages
         [HttpGet("[action]")]
-        public async Task<ActionResult<List<MessageDTO>>> GetMessages([FromQuery] LazyLoadMessagesDTO lazyLoadData)
+        public async Task<ActionResult<List<MessageDTO>>> GetMessages([FromQuery] LazyDTO lazyLoadData)
         {
             if (!ModelState.IsValid)
             {

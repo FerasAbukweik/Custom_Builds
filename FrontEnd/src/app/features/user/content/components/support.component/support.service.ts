@@ -1,34 +1,27 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { IMessageDTO } from '../../../../../core/DTO/message-dto';
 import { MessagesService } from '../../../../../core/services/api-services/message-service';
-import { ILazyLoadMessagesDTO } from '../../../../../core/DTO/lazy-load-messages-dto';
-import { ChatGroupService } from '../../../../../core/services/api-services/chat-group-service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { IInitChatGroupDataDTO } from '../../../../../core/DTO/init-chat-group-data-dto';
-import { firstValueFrom } from 'rxjs';
+import { ILazyLoadingDTO } from '../../../../../core/DTO/lazy-loading-dto';
 
 @Injectable({ providedIn: 'root' })
 export class SupportService {
   // injections
   private readonly _messageService = inject(MessagesService);
-  private readonly _chatGroupService = inject(ChatGroupService);
   private readonly _destroyRef = inject(DestroyRef);
 
   // signals
   private _isLoading = signal<boolean>(false);
   private _messages = signal<IMessageDTO[]>([]);
-  private _currUserId = signal<string>('');
 
   // fields
   // private
-  private _requestMessagesData: ILazyLoadMessagesDTO = {
+  private _requestMessagesData: ILazyLoadingDTO = {
     ElementsPerSection: 10,
     taken: 0,
-    chatGroupId: '',
   };
   private _isMoreDataAvaiable: boolean = true;
   private readonly _untilDestroyed = takeUntilDestroyed(this._destroyRef);
-  private _chatGroupId!: string;
 
   // getters
   get getIsLoading() {
@@ -39,22 +32,11 @@ export class SupportService {
     return this._messages.asReadonly();
   }
 
-  get getCurrUserId(){
-    return this._currUserId.asReadonly();
+
+  addToTaken(toAdd: number){
+    this._requestMessagesData.taken += toAdd;
   }
 
-  get getChatGroupId(){
-    return this._chatGroupId;
-  }
-
-  // setters
-  setCurrUserId(userId: string){
-    this._currUserId.set(userId);
-  }
-
-  setChatGroupId(chatGroupId: string){
-    this._chatGroupId = chatGroupId
-  }
 
   // methods
   public addMessage = (msg: IMessageDTO) => {
@@ -90,17 +72,4 @@ export class SupportService {
       });
   };
 
-  public getInitialData = async (): Promise<IInitChatGroupDataDTO | null> => {
-    try {
-      const res = await firstValueFrom(this._chatGroupService.GetInitChatGroupData());
-      this._requestMessagesData = {
-        ...this._requestMessagesData,
-        chatGroupId: res.chatGroupId,
-      };
-      return res;
-    } catch (error) {
-      // toDo: show error message
-      return null;
-    }
-  };
 }

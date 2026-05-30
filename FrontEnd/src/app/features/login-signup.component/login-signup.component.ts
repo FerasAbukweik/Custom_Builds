@@ -9,7 +9,6 @@ import { RoleEnums } from '../../core/enums/role-enums';
 import { AccountServices } from '../../core/services/api-services/account-services';
 import { Router } from '@angular/router';
 import { ILoginDTO } from '../../core/DTO/login-dto';
-import { disabled } from '@angular/forms/signals';
 
 const footerExtraPages: IFooterExtraPages[] = [
   { icon: 'fa-google', color: '#34A850', title: 'Google', link: '' },
@@ -128,7 +127,8 @@ export class LoginSignupComponent {
           this.router.navigate(['/']);
         },
         error: (err) => {
-          this.form.setErrors({ server: err?.error ?? 'Unknown server error' });
+          console.log(err);
+          this.form.setErrors({ server: (typeof err.error === 'string' && err.error) || 'Unknown server error' });
         },
       });
 
@@ -150,7 +150,7 @@ export class LoginSignupComponent {
           this.router.navigate(['/']);
         },
         error: (err) => {
-          this.form.setErrors({ server: err?.error ?? 'Unknown server error' });
+          this.form.setErrors({ server: (typeof err.error === 'string' && err.error) || 'Unknown server error' });
         },
       });
 

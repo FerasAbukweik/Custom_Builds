@@ -9,14 +9,14 @@ import { ApiConstrants } from '../../constants/api-constants';
 export class ChatHubService implements OnDestroy {
   // observers
   readonly newMessage$ = new Subject<IMessageDTO>();
-  readonly typingUserId$ = new Subject<string>();
-  readonly stoppedTypingUserId$ = new Subject<string>();
+  readonly typingUserId$ = new Subject<void>();
+  readonly stoppedTypingUserId$ = new Subject<void>();
   
   // fields
   private _hubConnection!: signalR.HubConnection;
   private readonly _hubUrl: string = ApiConstrants.serverUrl + '/hubs/chat';
 
-  startConnection = async (chatGroupId: string) : Promise<boolean> => {
+  startConnection = async () : Promise<boolean> => {
     this._hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(this._hubUrl, {
         withCredentials: true,
@@ -29,7 +29,7 @@ export class ChatHubService implements OnDestroy {
     try{
       await this._hubConnection.start()
 
-      this.joinGroup(chatGroupId)
+      this.joinGroup()
 
       return true;
     }
@@ -44,29 +44,29 @@ export class ChatHubService implements OnDestroy {
       this.newMessage$.next(msg);
     });
 
-    this._hubConnection.on('UserIsTypingAsync', (senderId: string) => {
-      this.typingUserId$.next(senderId);
+    this._hubConnection.on('UserIsTypingAsync', () => {
+      this.typingUserId$.next();
     });
 
-    this._hubConnection.on('UserStoppedTypingAsync', (senderId: string) => {
-      this.stoppedTypingUserId$.next(senderId);
+    this._hubConnection.on('UserStoppedTypingAsync', () => {
+      this.stoppedTypingUserId$.next();
     });
   };
 
-  private joinGroup = (chatGroupId: string) => {
-    return this._hubConnection.invoke('JoinChatGroup', chatGroupId);
+  private joinGroup = () => {
+    return this._hubConnection.invoke('JoinChatGroup');
   };
 
   sendMessage = (dto: ISendMessageDTO) => {
     return this._hubConnection.invoke('SendMessage', dto);
   };
 
-  notifyTyping = (groupId: string) => {
-    return this._hubConnection.invoke('NotifyTyping', groupId);
+  notifyTyping = () => {
+    return this._hubConnection.invoke('NotifyTyping');
   };
 
-  notifyStoppedTyping = (groupId: string) => {
-    return this._hubConnection.invoke('NotifyStoppedTyping', groupId);
+  notifyStoppedTyping = () => {
+    return this._hubConnection.invoke('NotifyStoppedTyping');
   };
 
   stopConnection = () => {
