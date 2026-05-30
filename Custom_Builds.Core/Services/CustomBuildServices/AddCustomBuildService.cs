@@ -4,7 +4,7 @@ using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using System.Net;
 using System.Runtime.CompilerServices;
 
@@ -14,12 +14,12 @@ namespace Custom_Builds.Core.Services.CustomBuildServices
     {
         private readonly IModificationsRepository _modificationsRepository;
         private readonly ICustomBuildRepository _customBuildRepository;
-        private readonly IGetCurrUserService _getCurrUserService;
+        private readonly ICurrTokenService _getCurrUserService;
 
         public AddCustomBuildService(
             IModificationsRepository modificationsRepository,
             ICustomBuildRepository customBuildRepository,
-            IGetCurrUserService getCurrUserService)
+            ICurrTokenService getCurrUserService)
         {
             _modificationsRepository = modificationsRepository;
             _customBuildRepository = customBuildRepository;

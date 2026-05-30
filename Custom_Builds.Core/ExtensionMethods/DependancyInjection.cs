@@ -5,7 +5,7 @@ using Custom_Builds.Core.ServiceContracts.IAccountServices;
 using Custom_Builds.Core.ServiceContracts.ICartItemServices;
 using Custom_Builds.Core.ServiceContracts.IChatGroupServices;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Custom_Builds.Core.ServiceContracts.ICustomBuildServices;
 using Custom_Builds.Core.ServiceContracts.IJWTServices;
 using Custom_Builds.Core.ServiceContracts.IMessageServices;
@@ -22,7 +22,7 @@ using Custom_Builds.Core.Services.AccountServices;
 using Custom_Builds.Core.Services.CartItemServices;
 using Custom_Builds.Core.Services.ChatGroupServices;
 using Custom_Builds.Core.Services.CookiesServices;
-using Custom_Builds.Core.Services.CurrUserServices;
+using Custom_Builds.Core.Services.CurrTokenService;
 using Custom_Builds.Core.Services.CustomBuildServices;
 using Custom_Builds.Core.Services.JWTServices;
 using Custom_Builds.Core.Services.MessageServices;
@@ -110,7 +110,7 @@ namespace Custom_Builds.Core.ExtensionMethods
             services.AddScoped<IGetChatGroupService, GetChatGroupService>();
 
             // Current User services
-            services.AddScoped<IGetCurrUserService, GetCurrUserService>();
+            services.AddScoped<ICurrTokenService, CurrTokenService>();
 
             // so we can access http context in services
             services.AddHttpContextAccessor();

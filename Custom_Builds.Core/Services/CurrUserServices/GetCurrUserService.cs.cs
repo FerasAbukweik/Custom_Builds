@@ -1,18 +1,18 @@
 ﻿using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Microsoft.AspNetCore.Http;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 
-namespace Custom_Builds.Core.Services.CurrUserServices
+namespace Custom_Builds.Core.Services.CurrTokenService
 {
-    public class GetCurrUserService : IGetCurrUserService
+    public class CurrTokenService : ICurrTokenService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public GetCurrUserService(IHttpContextAccessor httpContextAccessor)
+        public CurrTokenService(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
         }

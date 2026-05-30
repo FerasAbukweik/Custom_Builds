@@ -3,7 +3,7 @@ using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Custom_Builds.Core.ServiceContracts.IProductServices;
 using Custom_Builds.Core.ServiceContracts.OrderServices;
 
@@ -13,12 +13,12 @@ namespace Custom_Builds.Core.Services.OrderServices
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IGetProductService _getProductService;
-        private readonly IGetCurrUserService _currUserService;
+        private readonly ICurrTokenService _currUserService;
 
         public AddOrderService(
             IOrderRepository orderRepository,
             IGetProductService getProductService,
-            IGetCurrUserService currUserService)
+            ICurrTokenService currUserService)
         {
             _orderRepository = orderRepository;
             _getProductService = getProductService;

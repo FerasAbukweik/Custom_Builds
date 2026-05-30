@@ -1,6 +1,6 @@
 ﻿using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.ServiceContracts.IChatGroupServices;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Custom_Builds.Core.ServiceContracts.IMessageServices;
 using custom_Peripherals.IHub;
 using Microsoft.AspNetCore.SignalR;
@@ -10,11 +10,11 @@ namespace custom_Peripherals.Hub
     public class ChatHub : Hub<IChatHub>
     {
         private readonly IAddMessageService _addMessageService;
-        private readonly IGetCurrUserService _currUserServices;
+        private readonly ICurrTokenService _currUserServices;
         private readonly IGetChatGroupService _getChatGroupService;
 
         public ChatHub(IAddMessageService addMessageService,
-                       IGetCurrUserService currUserServices,
+                       ICurrTokenService currUserServices,
                        IGetChatGroupService getChatGroupService)
         {
             _addMessageService = addMessageService;

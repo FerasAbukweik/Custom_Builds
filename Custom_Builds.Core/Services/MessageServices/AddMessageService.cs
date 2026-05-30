@@ -3,7 +3,7 @@ using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.Domain.RepositoryContracts;
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Custom_Builds.Core.ServiceContracts.IMessageServices;
 using Microsoft.AspNetCore.Identity;
 
@@ -12,11 +12,11 @@ namespace Custom_Builds.Core.Services.MessageServices
     public class AddMessageService : IAddMessageService
     {
         private readonly IMessageRepository _messageRepository;
-        private readonly IGetCurrUserService _getCurrUserService;
+        private readonly ICurrTokenService _getCurrUserService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public AddMessageService(IMessageRepository messageRepository,
-                                 IGetCurrUserService getCurrUserService,
+                                 ICurrTokenService getCurrUserService,
                                  UserManager<ApplicationUser> userManager)
         {
             _messageRepository = messageRepository;

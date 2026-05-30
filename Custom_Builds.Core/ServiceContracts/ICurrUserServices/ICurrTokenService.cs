@@ -1,8 +1,8 @@
 ﻿using Custom_Builds.Core.Models;
 
-namespace Custom_Builds.Core.ServiceContracts.ICurrUserServices
+namespace Custom_Builds.Core.ServiceContracts.ICurrTokenService
 {
-    public interface IGetCurrUserService
+    public interface ICurrTokenService
     {
         Result<Guid> GetUserId();
         Result<Guid> GetTargetUserId(Guid? suppliedId);

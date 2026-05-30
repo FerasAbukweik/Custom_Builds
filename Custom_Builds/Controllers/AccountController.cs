@@ -6,7 +6,7 @@ using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.extensionMethods;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.IAccountServices;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -26,14 +26,14 @@ namespace custom_Peripherals.Controllers
         private readonly ILoginAccountService _loginAccountService;
         private readonly IDeleteUserService _deleteCurrentUserService;
         private readonly ILogoutAccountService _logoutAccountService;
-        private readonly IGetCurrUserService _getCurrUserService;
+        private readonly ICurrTokenService _getCurrUserService;
 
         public AccountController(
                 IRegisterAccountService registerAccountService,
                 ILoginAccountService loginAccountService,
                 IDeleteUserService deleteCurrentUserService,
                 ILogoutAccountService logoutAccountService,
-                IGetCurrUserService currUserServices)
+                ICurrTokenService currUserServices)
         {
             _registerAccountService = registerAccountService;
             _loginAccountService = loginAccountService;

@@ -3,9 +3,9 @@ using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.IAccountServices;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Custom_Builds.Core.ServiceContracts.IMessageServices;
-using Custom_Builds.Core.Services.CurrUserServices;
+using Custom_Builds.Core.Services.CurrTokenService;
 using Custom_Builds.Core.Services.MessageServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -18,11 +18,11 @@ namespace Custom_Builds.Core.Services.AccountServices
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signinManager;
         private readonly IDeleteCookieService _deleteCookieService;
-        private readonly IGetCurrUserService _getCurrUserService;
+        private readonly ICurrTokenService _getCurrUserService;
         public DeleteUserService(UserManager<ApplicationUser> userManager,
                                         SignInManager<ApplicationUser> signinManager,
                                         IDeleteCookieService deleteCookieService,
-                                        IGetCurrUserService getCurrUserService)
+                                        ICurrTokenService getCurrUserService)
         {
             _userManager = userManager;
             _signinManager = signinManager;

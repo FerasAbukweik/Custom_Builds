@@ -5,7 +5,7 @@ using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.CartItemServices;
 using Custom_Builds.Core.ServiceContracts.CustomBuildServices;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Custom_Builds.Core.ServiceContracts.IProductServices;
 
 namespace Custom_Builds.Core.Services.CartItemServices
@@ -15,13 +15,13 @@ namespace Custom_Builds.Core.Services.CartItemServices
         private readonly ICartItemRepository _cartItemRepository;
         private readonly IGetProductService _getProductService;
         private readonly IAddCustomBuildService _addCustomBuildService;
-        private readonly IGetCurrUserService _getCurrUserService;
+        private readonly ICurrTokenService _getCurrUserService;
         private readonly ICustomBuildRepository _customBuildRepository;
 
         public AddCartItemService(ICartItemRepository cartItemRepository,
                                   IGetProductService getProductService,
                                   IAddCustomBuildService customBuildService,
-                                  IGetCurrUserService getCurrUserService,
+                                  ICurrTokenService getCurrUserService,
                                   ICustomBuildRepository customBuildRepository)
         {
             _cartItemRepository = cartItemRepository;

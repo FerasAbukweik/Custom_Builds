@@ -4,7 +4,7 @@ using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICartItemServices;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Custom_Builds.Core.ServiceContracts.ICustomBuildServices;
 using System.Net;
 
@@ -13,11 +13,11 @@ namespace Custom_Builds.Core.Services.CartItemServices
     public class GetCartItemService : IGetCartItemService
     {
         private readonly ICartItemRepository _cartItemRepository;
-        private readonly IGetCurrUserService _getCurrUserService;
+        private readonly ICurrTokenService _getCurrUserService;
         private readonly IGetCustomBuildService _getCustomBuildService;
 
         public GetCartItemService(ICartItemRepository cartItemRepository,
-                                  IGetCurrUserService getCurrUserService,
+                                  ICurrTokenService getCurrUserService,
                                   IGetCustomBuildService getCustomBuildService)
         {
             _cartItemRepository = cartItemRepository;

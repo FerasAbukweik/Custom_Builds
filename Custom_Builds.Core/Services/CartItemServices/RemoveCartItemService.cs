@@ -1,7 +1,7 @@
 using Custom_Builds.Core.Domain.RepositryContracts;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICartItemServices;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using System.Net;
 
 namespace Custom_Builds.Core.Services.CartItemServices
@@ -9,10 +9,10 @@ namespace Custom_Builds.Core.Services.CartItemServices
     public class RemoveCartItemService : IRemoveCartItemService
     {
         private readonly ICartItemRepository _cartItemRepository;
-        private readonly IGetCurrUserService _getCurrUserService;
+        private readonly ICurrTokenService _getCurrUserService;
 
         public RemoveCartItemService(ICartItemRepository cartItemRepository,
-                                     IGetCurrUserService getCurrUserService)
+                                     ICurrTokenService getCurrUserService)
         {
             _cartItemRepository = cartItemRepository;
             _getCurrUserService = getCurrUserService;

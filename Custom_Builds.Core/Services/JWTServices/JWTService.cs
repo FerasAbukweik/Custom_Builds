@@ -2,9 +2,10 @@
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Custom_Builds.Core.ServiceContracts.IJWTServices;
 using Custom_Builds.Core.ServiceContracts.IRefreshTokenServices;
-using Custom_Builds.Core.Services.CookiesServices;
+using Custom_Builds.Core.Services.CurrTokenService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -18,22 +19,25 @@ namespace Custom_Builds.Core.Services.JWTServices
     public class JWTService : IJWTService
     {
         private readonly IConfiguration _configuration;
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IGetCookieService _getCookieService;
         private readonly IGenerateRefreshTokenService _generateRefreshTokenService;
         private readonly IGetRefreshTokenService _getRefreshTokenService;
+        private readonly ICurrTokenService _tokenService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public JWTService(IConfiguration configuration,
                           IGenerateRefreshTokenService generateRefreshTokenService,
                           UserManager<ApplicationUser> userManager,
                           IGetCookieService getCookieService,
-                          IGetRefreshTokenService getRefreshTokenService)
+                          IGetRefreshTokenService getRefreshTokenService,
+                          ICurrTokenService getCurrUserService)
         {
             _configuration = configuration;
             _generateRefreshTokenService = generateRefreshTokenService;
-            _userManager = userManager;
             _getCookieService = getCookieService;
             _getRefreshTokenService = getRefreshTokenService;
+            _tokenService = getCurrUserService;
+            _userManager = userManager;
         }
 
 
@@ -76,57 +80,36 @@ namespace Custom_Builds.Core.Services.JWTServices
 
             // Get access token
             var getAccessTokenResult = _getCookieService.Get("AccessToken");
-            if (!getAccessTokenResult.IsSuccess)
-            {
-                return Result<AccessAndRefreshTokenDTO>.Failure(getAccessTokenResult.ErrorMessage ?? "Failed to get access token", getAccessTokenResult.StatusCode);
-            }
+            if (!getAccessTokenResult.IsSuccess) return Result<AccessAndRefreshTokenDTO>.Failure("no access token was found" , HttpStatusCode.Unauthorized);
 
             // Get refresh token
             var getRefreshTokenResult = _getCookieService.Get("RefreshToken");
-            if (!getRefreshTokenResult.IsSuccess)
-            {
-                return Result<AccessAndRefreshTokenDTO>.Failure(getRefreshTokenResult.ErrorMessage ?? "Failed to get refresh token", getRefreshTokenResult.StatusCode);
-            }
+            if (!getRefreshTokenResult.IsSuccess) return Result<AccessAndRefreshTokenDTO>.Failure("no refresh token was found", HttpStatusCode.Unauthorized);
 
 
             // check if tokens are valid
             var checkTokensResult = await AreRefreshTokenAndAccessTokenValidAsync(getAccessTokenResult.Value!, getRefreshTokenResult.Value!, validateAccessTokenExpireDate: false);
             if (!checkTokensResult.IsSuccess) return checkTokensResult.MapFailure<AccessAndRefreshTokenDTO>();
 
-            // get access token principal
-            var getPrincipalResult = GetPrincipal(getAccessTokenResult.Value! , validateExpireDate: false);
-            if (!getPrincipalResult.IsSuccess) return getPrincipalResult.MapFailure<AccessAndRefreshTokenDTO>();
-
-            // get user id from principal
-            string? userId = getPrincipalResult.Value!.FindFirstValue(ClaimTypes.NameIdentifier);
-            if(userId == null)
-            {
-                return Result<AccessAndRefreshTokenDTO>.Failure("Bad currUser Id");
-            }
+            var getCurrUserIdResult = _tokenService.GetUserId();
+            if (!getCurrUserIdResult.IsSuccess) return getCurrUserIdResult.MapFailure<AccessAndRefreshTokenDTO>();
 
             // get user
-            ApplicationUser? user = await _userManager.FindByIdAsync(userId);
+            ApplicationUser? user = await _userManager.FindByIdAsync(getCurrUserIdResult.Value!.ToString());
             if(user == null)
             {
                 return Result<AccessAndRefreshTokenDTO>.Failure("User Not Found");
             }
 
-
             // generate new tokens
 
             // generate access token
             var accessTokenResult = await GenerateAccessTokenAsync(user);
-            if (!accessTokenResult.IsSuccess)
-            {
-                return Result<AccessAndRefreshTokenDTO>.Failure(accessTokenResult.ErrorMessage ?? "Failed to generate access token", accessTokenResult.StatusCode);
-            }
+            if (!accessTokenResult.IsSuccess) return accessTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
 
             // generate refresh token
             var refreshTokenResult = await _generateRefreshTokenService.GenerateRefreshTokenAsync(user);
-            if (!refreshTokenResult.IsSuccess)
-            {
-                return Result<AccessAndRefreshTokenDTO>.Failure(refreshTokenResult.ErrorMessage ?? "Failed to generate refresh token", refreshTokenResult.StatusCode);
-            }
+            if (!refreshTokenResult.IsSuccess) return refreshTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
 
 
             // return result
@@ -138,57 +121,12 @@ namespace Custom_Builds.Core.Services.JWTServices
 
             return Result<AccessAndRefreshTokenDTO>.Success(tokens);
         }
-        public Result<ClaimsPrincipal> GetPrincipal(string? accessToken = null , bool validateExpireDate = true)
-        {
-            if (accessToken == null)
-            {
-                var getAccessTokesRes = _getCookieService.Get("AccessToken");
-                if (!getAccessTokesRes.IsSuccess) return Result<ClaimsPrincipal>.Failure("No access token");
-
-                accessToken = getAccessTokesRes.Value!;
-            }
-
-            TokenValidationParameters tokenParams = new TokenValidationParameters()
-            {
-                ValidateAudience = true,
-                ValidAudience = _configuration["JWT:Audience"],
-                ValidateIssuer = true,
-                ValidIssuer = _configuration["JWT:Issuer"],
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]!)),
-
-                ValidateLifetime = validateExpireDate,
-            };
-
-            try
-            {
-                JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-
-                // get access token principal
-                ClaimsPrincipal principal = jwtSecurityTokenHandler.ValidateToken(accessToken, tokenParams, out SecurityToken validToken);
-
-
-                // check if token is valid
-                if (validToken is not JwtSecurityToken jwtSecurityToken ||
-                    !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
-                                                       StringComparison.InvariantCultureIgnoreCase))
-                {
-                    return Result<ClaimsPrincipal>.Failure("Bad Access Token");
-                }
-
-                return Result<ClaimsPrincipal>.Success(principal);
-            }
-            catch (Exception ex)
-            {
-                return Result<ClaimsPrincipal>.Failure("Bad Access Token");
-            }
-        }
         public Result IsValidJWTSecurityToken(string? accessToken = null , bool validateExpireDate = true)
         {
             if(accessToken == null)
             {
                 var getAccessTokesRes = _getCookieService.Get("AccessToken");
-                if (!getAccessTokesRes.IsSuccess) return Result.Failure("No access token");
+                if (!getAccessTokesRes.IsSuccess) return Result.Failure("No access token" , HttpStatusCode.Unauthorized);
 
                 accessToken = getAccessTokesRes.Value!;
             }
@@ -216,14 +154,14 @@ namespace Custom_Builds.Core.Services.JWTServices
                     !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
                                                        StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return Result.Failure("Bad Access Token");
+                    return Result.Failure("Bad Access Token" , HttpStatusCode.Unauthorized);
                 }
 
                 return Result.Success();
             }
             catch (Exception ex)
             {
-                return Result.Failure("Bad Access Token");
+                return Result.Failure("Bad Access Token" , HttpStatusCode.Unauthorized);
             }
             
         }
@@ -232,7 +170,7 @@ namespace Custom_Builds.Core.Services.JWTServices
             if (accessToken == null)
             {
                 var getAccessTokesRes = _getCookieService.Get("AccessToken");
-                if (!getAccessTokesRes.IsSuccess) return Result.Failure("No access token");
+                if (!getAccessTokesRes.IsSuccess) return Result.Failure("No access token" , HttpStatusCode.Unauthorized);
 
                 accessToken = getAccessTokesRes.Value!;
             }
@@ -240,7 +178,7 @@ namespace Custom_Builds.Core.Services.JWTServices
             if (refreshToken == null)
             {
                 var getRefreshTokenRes = _getCookieService.Get("RefreshToken");
-                if (!getRefreshTokenRes.IsSuccess) return Result.Failure("No refresh token");
+                if (!getRefreshTokenRes.IsSuccess) return Result.Failure("No refresh token" , HttpStatusCode.Unauthorized);
 
                 refreshToken = getRefreshTokenRes.Value!;
             }
@@ -252,46 +190,21 @@ namespace Custom_Builds.Core.Services.JWTServices
 
             // get refresh token object so we can access its expire date and user id
             var refTokenResult = await _getRefreshTokenService.GetFromRefreshTokenString(refreshToken);
+            if (!refTokenResult.IsSuccess) return refTokenResult;
 
-            // this to collect possible errors
-            Result result = Result.Success();
-            result.ErrorMessage = "";
-
-            // collect possible errors
-            if (!refTokenResult.IsSuccess)
+            if (refTokenResult.Value!.ExpierDate <= DateTime.UtcNow)
             {
-                result.ErrorMessage += "No Refresh Token Was Found";
-                result.StatusCode = HttpStatusCode.Unauthorized;
-                result.IsSuccess = false;
-            }
-            else if (refTokenResult.Value!.ExpierDate <= DateTime.UtcNow)
-            {
-                if (result.ErrorMessage != "") result.ErrorMessage += " | ";
-                result.ErrorMessage += "Expiered Refresh Token";
-                result.StatusCode = HttpStatusCode.Unauthorized;
-                result.IsSuccess = false;
-            }
-
-            if (!result.IsSuccess)
-            {
-                return result;
-            }
+                return Result.Failure("Expiered Refresh Token" , HttpStatusCode.Unauthorized);
+            }    
 
 
-            // get access token principal so we can access its userId
-            var getPrincipalResult = GetPrincipal(accessToken , validateExpireDate : false);
-            if (!getPrincipalResult.IsSuccess) return getPrincipalResult;
 
-            // get user id from principal
-            if (!Guid.TryParse(getPrincipalResult.Value!.FindFirstValue(ClaimTypes.NameIdentifier) , out Guid claimsUserId))
-            {
-                return Result.Failure("Invalid Token");
-            }
+            var getUserIdResult = _tokenService.GetUserId();
+            if(!getUserIdResult.IsSuccess) return getUserIdResult;
 
 
             // check if access token and refresh token belong to the same user
-            // User is virtual so we can access it via lazy loading without .including
-            if (refTokenResult.Value!.UserId != claimsUserId)
+            if (refTokenResult.Value!.UserId != getUserIdResult.Value!)
             {
                 return Result.Failure("Invalid Token", HttpStatusCode.Unauthorized);
             }

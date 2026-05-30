@@ -3,7 +3,7 @@ using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.extensionMethods;
 using Custom_Builds.Core.Models;
-using Custom_Builds.Core.ServiceContracts.ICurrUserServices;
+using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Custom_Builds.Core.ServiceContracts.IOrderServices;
 using Custom_Builds.Core.ServiceContracts.OrderServices;
 using Microsoft.AspNetCore.Authorization;
