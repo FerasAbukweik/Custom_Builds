@@ -21,7 +21,6 @@ namespace Custom_Builds.Core.Services.AccountServices
         private readonly IConfiguration _configuration;
         private readonly IAddCookieService _addCookieService;
         private readonly IGenerateRefreshTokenService _generateRefreshTokenService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public RegisterAccountService(UserManager<ApplicationUser> userManager,
                                       IJWTService jwtService,
@@ -29,8 +28,7 @@ namespace Custom_Builds.Core.Services.AccountServices
                                       SignInManager<ApplicationUser> signinManager,
                                       IConfiguration configuration,
                                       IAddCookieService addCookieService,
-                                      IGenerateRefreshTokenService generateRefreshTokenService,
-                                      IHttpContextAccessor httpContextAccessor)
+                                      IGenerateRefreshTokenService generateRefreshTokenService)
         {
             _userManager = userManager;
             _jwtService = jwtService;
@@ -39,19 +37,11 @@ namespace Custom_Builds.Core.Services.AccountServices
             _configuration = configuration;
             _addCookieService = addCookieService;
             _generateRefreshTokenService = generateRefreshTokenService;
-            _httpContextAccessor = httpContextAccessor;
         }
 
 
         public async Task<Result> RegisterAsync(RegisterDTO registerInfo)
         {
-            // resposne so we can send new tokens to cookies
-            HttpResponse? response = _httpContextAccessor.HttpContext?.Response;
-            if (response == null)
-            {
-                return Result.Failure("Http Response is null", HttpStatusCode.InternalServerError);
-            }
-
             // check if email already exists
             if (await _userManager.FindByEmailAsync(registerInfo.Email) != null)
             {
@@ -77,7 +67,7 @@ namespace Custom_Builds.Core.Services.AccountServices
 
 
             // if role doesnt exist create new one
-            if (await _roleManager.FindByNameAsync(registerInfo.role.ToString()) == null)
+            if (!await _roleManager.RoleExistsAsync(registerInfo.role.ToString()))
             {
                 ApplicationRole newRole = new ApplicationRole() 
                 {
@@ -95,7 +85,7 @@ namespace Custom_Builds.Core.Services.AccountServices
             // generate Tokens
 
             // generate access token
-            var accessTokenResult = await _jwtService.GenerateAccessToken(newUser);
+            var accessTokenResult = await _jwtService.GenerateAccessTokenAsync(newUser);
             if (!accessTokenResult.IsSuccess) return accessTokenResult;
 
             // generate refresh token
@@ -108,11 +98,11 @@ namespace Custom_Builds.Core.Services.AccountServices
             // use RefreshToken lifetime for AccessToken
             // so we can require both expiered Date accessToken and valid refresh token for more security
             // add access token to cookies
-            Result addAccessTokenResult = _addCookieService.Add("AccessToken", accessTokenResult.Value!, Double.Parse(_configuration["JWT:RefreshTokenLife"]!));
+            Result addAccessTokenResult = _addCookieService.Add("AccessToken", accessTokenResult.Value!, _configuration.GetValue<double>("JWT:RefreshTokenLife"));
             if (!addAccessTokenResult.IsSuccess) return addAccessTokenResult;
 
             // add refresh token to cookies
-            Result addRefreshTokenResult = _addCookieService.Add("RefreshToken", refreshTokenResult.Value!.RefreshTokenString, Double.Parse(_configuration["JWT:RefreshTokenLife"]!));
+            Result addRefreshTokenResult = _addCookieService.Add("RefreshToken", refreshTokenResult.Value!.RefreshTokenString, _configuration.GetValue<double>("JWT:RefreshTokenLife"));
             if (!addRefreshTokenResult.IsSuccess) return addRefreshTokenResult;
 
             // add identity tokens to cookies

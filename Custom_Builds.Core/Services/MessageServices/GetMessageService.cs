@@ -11,11 +11,11 @@ namespace Custom_Builds.Core.Services.MessageServices
     public class GetMessageService : IGetMessageService
     {
         private readonly IMessageRepository _messageRepository;
-        private readonly ICurrTokenService _getCurrUserService;
+        private readonly IGetCurrUserService _getCurrUserService;
         private readonly UserManager<ApplicationUser> _userManager;
         
         public GetMessageService(IMessageRepository messageRepository,
-                                 ICurrTokenService getCurrUserService,
+                                 IGetCurrUserService getCurrUserService,
                                  UserManager<ApplicationUser> userManager)
         {
             _messageRepository = messageRepository;

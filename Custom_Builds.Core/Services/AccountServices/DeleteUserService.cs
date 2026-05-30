@@ -18,11 +18,11 @@ namespace Custom_Builds.Core.Services.AccountServices
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signinManager;
         private readonly IDeleteCookieService _deleteCookieService;
-        private readonly ICurrTokenService _getCurrUserService;
+        private readonly IGetCurrUserService _getCurrUserService;
         public DeleteUserService(UserManager<ApplicationUser> userManager,
                                         SignInManager<ApplicationUser> signinManager,
                                         IDeleteCookieService deleteCookieService,
-                                        ICurrTokenService getCurrUserService)
+                                        IGetCurrUserService getCurrUserService)
         {
             _userManager = userManager;
             _signinManager = signinManager;

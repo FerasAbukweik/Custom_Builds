@@ -22,7 +22,7 @@ namespace Custom_Builds.Core.Services.JWTServices
         private readonly IGetCookieService _getCookieService;
         private readonly IGenerateRefreshTokenService _generateRefreshTokenService;
         private readonly IGetRefreshTokenService _getRefreshTokenService;
-        private readonly ICurrTokenService _tokenService;
+        private readonly IGetCurrUserService _getCurrUserService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public JWTService(IConfiguration configuration,
@@ -30,13 +30,13 @@ namespace Custom_Builds.Core.Services.JWTServices
                           UserManager<ApplicationUser> userManager,
                           IGetCookieService getCookieService,
                           IGetRefreshTokenService getRefreshTokenService,
-                          ICurrTokenService getCurrUserService)
+                          IGetCurrUserService getCurrUserService)
         {
             _configuration = configuration;
             _generateRefreshTokenService = generateRefreshTokenService;
             _getCookieService = getCookieService;
             _getRefreshTokenService = getRefreshTokenService;
-            _tokenService = getCurrUserService;
+            _getCurrUserService = getCurrUserService;
             _userManager = userManager;
         }
 
@@ -91,7 +91,7 @@ namespace Custom_Builds.Core.Services.JWTServices
             var checkTokensResult = await AreRefreshTokenAndAccessTokenValidAsync(getAccessTokenResult.Value!, getRefreshTokenResult.Value!, validateAccessTokenExpireDate: false);
             if (!checkTokensResult.IsSuccess) return checkTokensResult.MapFailure<AccessAndRefreshTokenDTO>();
 
-            var getCurrUserIdResult = _tokenService.GetUserId();
+            var getCurrUserIdResult = _getCurrUserService.GetUserId();
             if (!getCurrUserIdResult.IsSuccess) return getCurrUserIdResult.MapFailure<AccessAndRefreshTokenDTO>();
 
             // get user
@@ -199,7 +199,7 @@ namespace Custom_Builds.Core.Services.JWTServices
 
 
 
-            var getUserIdResult = _tokenService.GetUserId();
+            var getUserIdResult = _getCurrUserService.GetUserId();
             if(!getUserIdResult.IsSuccess) return getUserIdResult;
 
 

@@ -11,10 +11,10 @@ namespace Custom_Builds.Core.Services.OrderServices
     public class GetOrderService : IGetOrderService
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly ICurrTokenService _getCurrUserService;
+        private readonly IGetCurrUserService _getCurrUserService;
 
         public GetOrderService(IOrderRepository orderRepository,
-                               ICurrTokenService getCurrUserService)
+                               IGetCurrUserService getCurrUserService)
         {
             _orderRepository = orderRepository;
             _getCurrUserService = getCurrUserService;

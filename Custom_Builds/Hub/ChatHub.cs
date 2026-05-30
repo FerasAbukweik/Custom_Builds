@@ -10,11 +10,11 @@ namespace custom_Peripherals.Hub
     public class ChatHub : Hub<IChatHub>
     {
         private readonly IAddMessageService _addMessageService;
-        private readonly ICurrTokenService _currUserServices;
+        private readonly IGetCurrUserService _currUserServices;
         private readonly IGetChatGroupService _getChatGroupService;
 
         public ChatHub(IAddMessageService addMessageService,
-                       ICurrTokenService currUserServices,
+                       IGetCurrUserService currUserServices,
                        IGetChatGroupService getChatGroupService)
         {
             _addMessageService = addMessageService;

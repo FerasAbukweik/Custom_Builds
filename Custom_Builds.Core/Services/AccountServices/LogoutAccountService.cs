@@ -12,32 +12,17 @@ namespace Custom_Builds.Core.Services.AccountServices
     {
         private readonly SignInManager<ApplicationUser> _signinManager;
         private readonly IDeleteCookieService _deleteCookieService;
-        private readonly IGetCookieService _getCookieService;
-        private readonly IRemoveRefreshTokenService _removeRefreshTokenService;
 
         public LogoutAccountService(SignInManager<ApplicationUser> signinManager,
-                                    IDeleteCookieService deleteCookieService,
-                                    IGetCookieService getCookieService,
-                                    IRemoveRefreshTokenService removeRefreshTokenService)
+                                    IDeleteCookieService deleteCookieService)
         {
             _signinManager = signinManager;
             _deleteCookieService = deleteCookieService;
-            _getCookieService = getCookieService;
-            _removeRefreshTokenService = removeRefreshTokenService;
         }
 
 
         public async Task<Result> LogoutAsync()
         {
-            // if user have refresh token in cookies, remove it from database
-            var getRefreshTokenResult = _getCookieService.Get("RefreshToken");
-            if (getRefreshTokenResult.IsSuccess)
-            {
-                var removeRefreshTokenResult = await _removeRefreshTokenService.RemoveByRefreshTokenStringAsync(getRefreshTokenResult.Value!);
-                if (!removeRefreshTokenResult.IsSuccess) return removeRefreshTokenResult;
-            }   
-
-
             // remove identity tokens from cookies
             await _signinManager.SignOutAsync();
 

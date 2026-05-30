@@ -8,11 +8,11 @@ using System.Security.Claims;
 
 namespace Custom_Builds.Core.Services.CurrTokenService
 {
-    public class CurrTokenService : ICurrTokenService
+    public class GetCurrUserService : IGetCurrUserService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CurrTokenService(IHttpContextAccessor httpContextAccessor)
+        public GetCurrUserService(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
         }

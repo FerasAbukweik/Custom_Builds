@@ -21,15 +21,13 @@ namespace Custom_Builds.Core.Services.AccountServices
         private readonly IConfiguration _configuration;
         private readonly IAddCookieService _addCookieService;
         private readonly IGenerateRefreshTokenService _generateRefreshTokenService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public LoginAccountService(UserManager<ApplicationUser> userManager,
                                    SignInManager<ApplicationUser> signinManager,
                                    IJWTService jwtService,
                                    IConfiguration configuration,
                                    IAddCookieService addCookieService,
-                                   IGenerateRefreshTokenService generateRefreshTokenService,
-                                   IHttpContextAccessor httpContextAccessor)
+                                   IGenerateRefreshTokenService generateRefreshTokenService)
         {
             _userManager = userManager;
             _signinManager = signinManager;
@@ -37,7 +35,6 @@ namespace Custom_Builds.Core.Services.AccountServices
             _configuration = configuration;
             _addCookieService = addCookieService;
             _generateRefreshTokenService = generateRefreshTokenService;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Result> LoginAsync(LoginDTO loginInfo)
@@ -60,7 +57,7 @@ namespace Custom_Builds.Core.Services.AccountServices
             // generate Tokens
 
             // generate accessToken
-            var accessTokenResult = await _jwtService.GenerateAccessToken(user);
+            var accessTokenResult = await _jwtService.GenerateAccessTokenAsync(user);
             if (!accessTokenResult.IsSuccess) return accessTokenResult;
 
             // generate refreshToken
@@ -72,10 +69,10 @@ namespace Custom_Builds.Core.Services.AccountServices
 
             // use RefreshToken lifetime for AccessToken
             // so we can require both expiered Date accessToken and valid refresh token for more security
-            Result addAccessResult =  _addCookieService.Add("AccessToken", accessTokenResult.Value!, Double.Parse(_configuration["JWT:RefreshTokenLife"]!));
+            Result addAccessResult =  _addCookieService.Add("AccessToken", accessTokenResult.Value!, _configuration.GetValue<double>("JWT:RefreshTokenLife"));
             if (!addAccessResult.IsSuccess) return addAccessResult;
 
-            Result addRefreshResult = _addCookieService.Add("RefreshToken", refreshTokenResult.Value!.RefreshTokenString, Double.Parse(_configuration["JWT:RefreshTokenLife"]!));
+            Result addRefreshResult = _addCookieService.Add("RefreshToken", refreshTokenResult.Value!.RefreshTokenString, _configuration.GetValue<double>("JWT:RefreshTokenLife"));
             if (!addRefreshResult.IsSuccess) return addRefreshResult;
 
             // add identity tokens to browser cookies
