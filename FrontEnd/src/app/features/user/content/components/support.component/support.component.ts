@@ -130,6 +130,7 @@ export class SupportComponent implements OnInit {
     this._chatService.newMessage$.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
       next: (msg) => {
         this._supportService.addMessage(msg as IMessageDTO);
+        this._supportService.addToTaken(1);
         this._scrollToBottom();
       },
     });
@@ -167,7 +168,6 @@ export class SupportComponent implements OnInit {
     };
 
     this._chatService.sendMessage(toSendMessage);
-    this._supportService.addToTaken(1);
     this.messageInput.set('');
   };
 
