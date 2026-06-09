@@ -63,7 +63,7 @@ namespace custom_Peripherals.Controllers
                 return BadRequest(ModelState.CollectErrors());
             }
 
-            var result = await _getOrderService.GetProcessingOrdersAsync(lazyGetOrdersData);
+            var result = await _getOrderService.LazyGetProcessingOrdersAsync(lazyGetOrdersData);
 
             return result.ToActionResult();
         }
@@ -78,7 +78,7 @@ namespace custom_Peripherals.Controllers
             }
 
 
-            var result = await _getOrderService.GetCompletedOrdersAsync(lazyGetOrdersData);
+            var result = await _getOrderService.LazyGetCompletedOrdersAsync(lazyGetOrdersData);
 
             return result.ToActionResult();
         }
@@ -87,7 +87,7 @@ namespace custom_Peripherals.Controllers
         [HttpGet("[action]")]
         public async Task<ActionResult<int>> GetProcessingOrdersCount([FromQuery] Guid? userId)
         {
-            var result = await _getOrderService.GetProcessingOrdersCountAsync(userId);
+            var result = await _getOrderService.GetProcessingOrdersCountAsync();
 
             return result.ToActionResult();
         }
@@ -96,7 +96,7 @@ namespace custom_Peripherals.Controllers
         [HttpGet("[action]")]
         public async Task<ActionResult<OrderHistoryDTO>> GetHistorySummary([FromQuery] Guid? userId)
         {
-            var result = await _getOrderService.GetHistorySummaryAsync(userId);
+            var result = await _getOrderService.GetHistorySummaryAsync();
 
             return result.ToActionResult();
         }

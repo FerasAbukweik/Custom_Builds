@@ -4,12 +4,15 @@ import { LoadingComponent } from "../loading/loading.component";
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { IsVisableDirective } from '../../directives/is-visable.directive'; 
 
 @Component({
   selector: 'app-live-chatting',
-  imports: [LoadingComponent , CommonModule , FormsModule],
+  imports: [LoadingComponent , CommonModule , FormsModule , IsVisableDirective],
   templateUrl: './live-chatting.component.html',
-  styleUrl: './live-chatting.component.css',
+  host: {
+    class: 'w-full h-full'
+  }
 })
 export class LiveChattingComponent {
   // input
@@ -22,8 +25,8 @@ export class LiveChattingComponent {
 
   // output
   lazyLoadMessages = output<void>();
-  handleSendMessage = output<string>();
   handleIsTyping = output<boolean>();
+  handleSendMessage = output<string>();
 
   // signals
   messageInput = signal<string>("");
@@ -55,6 +58,8 @@ export class LiveChattingComponent {
 
 
     effect(()=>{
+      const currentMessages = this.messages(); // track changes in messages
+
       const container = this.myScrollContainer().nativeElement;
 
       const oldScrollHeight = container.scrollHeight;
@@ -80,4 +85,13 @@ export class LiveChattingComponent {
     }, delay);
   };
 
+
+  sendMessage(message: string , emptyInput: boolean){
+    if(emptyInput){
+      this.messageInput.set("");
+    }
+    this.handleSendMessage.emit(message);
+
+    this._scrollToBottom();
+  }
 }

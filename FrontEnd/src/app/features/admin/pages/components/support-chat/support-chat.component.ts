@@ -3,7 +3,7 @@ import { LiveChattingComponent } from "../../../../../shared/components/live-cha
 
 @Component({
   selector: 'app-support-chat.component',
-  imports: [LiveChattingComponent],
+  imports: [],
   templateUrl: './support-chat.component.html',
 })
 export class SupportChatComponent {

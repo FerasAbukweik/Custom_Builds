@@ -27,7 +27,7 @@ namespace Custom_Builds.Core.Services.OrderServices
 
             return Result<Order>.Success(result.Value!);
         }
-        public async Task<Result<List<HistoryOrderDTO>>> GetCompletedOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData)
+        public async Task<Result<List<HistoryOrderDTO>>> LazyGetCompletedOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData)
         {
             var getCurrUserIdRes = _getCurrUserService.GetUserId();
             if (!getCurrUserIdRes.IsSuccess) getCurrUserIdRes.MapFailure<List<MiniOrderInfoDTO>>();
@@ -42,19 +42,18 @@ namespace Custom_Builds.Core.Services.OrderServices
 
             return Result<List<HistoryOrderDTO>>.Success(result.Value!);
         }
-        public async Task<Result<int>> GetProcessingOrdersCountAsync(Guid? userId)
+        public async Task<Result<int>> GetProcessingOrdersCountAsync()
         {
-            var getTargetUserIdRes = _getCurrUserService.GetTargetUserId(userId);
-            if (!getTargetUserIdRes.IsSuccess) getTargetUserIdRes.MapFailure<int>();
+            var getCurrentUserIdRes = _getCurrUserService.GetUserId();
+            if (!getCurrentUserIdRes.IsSuccess) getCurrentUserIdRes.MapFailure<int>();
 
-            userId = getTargetUserIdRes.Value!;
 
-            var getSumRes = await _orderRepository.GetProcessingOrdersCountAsync(userId!.Value);
+            var getSumRes = await _orderRepository.GetProcessingOrdersCountAsync(getCurrentUserIdRes.Value!);
 
 
             return getSumRes;
         }
-        public async Task<Result<List<MiniOrderInfoDTO>>> GetProcessingOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData)
+        public async Task<Result<List<MiniOrderInfoDTO>>> LazyGetProcessingOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData)
         {
             var getCurrUserIdRes = _getCurrUserService.GetUserId();
             if (!getCurrUserIdRes.IsSuccess) getCurrUserIdRes.MapFailure<List<MiniOrderInfoDTO>>();
@@ -69,14 +68,12 @@ namespace Custom_Builds.Core.Services.OrderServices
 
             return Result<List<MiniOrderInfoDTO>>.Success(userOrders.Value!);
         }
-        public async Task<Result<OrderHistoryDTO>> GetHistorySummaryAsync(Guid? userId)
+        public async Task<Result<OrderHistoryDTO>> GetHistorySummaryAsync()
         {
-            var getTargetUserIdRes = _getCurrUserService.GetTargetUserId(userId);
+            var getTargetUserIdRes = _getCurrUserService.GetUserId();
             if (!getTargetUserIdRes.IsSuccess) getTargetUserIdRes.MapFailure<int>();
 
-            userId = getTargetUserIdRes.Value!;
-
-            var getDataRes = await _orderRepository.GetHistorySummaryAsync(userId!.Value);
+            var getDataRes = await _orderRepository.GetHistorySummaryAsync(getTargetUserIdRes.Value!);
 
 
             return getDataRes;

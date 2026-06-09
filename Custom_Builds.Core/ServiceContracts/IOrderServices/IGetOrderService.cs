@@ -7,9 +7,9 @@ namespace Custom_Builds.Core.ServiceContracts.IOrderServices
     public interface IGetOrderService
     {
         Task<Result<Order>> GetByIdAsync(Guid orderId);
-        Task<Result<List<MiniOrderInfoDTO>>> GetProcessingOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData);
-        Task<Result<List<HistoryOrderDTO>>> GetCompletedOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData);
-        Task<Result<int>> GetProcessingOrdersCountAsync(Guid? userId);
-        Task<Result<OrderHistoryDTO>> GetHistorySummaryAsync(Guid? userId);
+        Task<Result<List<MiniOrderInfoDTO>>> LazyGetProcessingOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData);
+        Task<Result<List<HistoryOrderDTO>>> LazyGetCompletedOrdersAsync(LazyGetUserDataDTO lazyGetUserOrdersData);
+        Task<Result<int>> GetProcessingOrdersCountAsync();
+        Task<Result<OrderHistoryDTO>> GetHistorySummaryAsync();
     }
 }

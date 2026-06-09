@@ -25,17 +25,22 @@ namespace Custom_Builds.Core.Services.CartItemServices
             _getCustomBuildService = getCustomBuildService;
         }
 
-        public async Task<Result<List<CartItemDTO>>> LazyGetAllCartItemsAsync(LazyGetUserDataDTO getData)
+        public async Task<Result<List<CartItemDTO>>> LazyGetAllCartItemsAsync(LazyDTO lazyData)
         {
             // get target userId to insure
-            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(getData.UserId);
+            var getTargetUserIdResult = _getCurrUserService.GetUserId();
             if (!getTargetUserIdResult.IsSuccess) getTargetUserIdResult.MapFailure<CartItemDTO>();
 
             // add target user id to the request
-            getData.UserId = getTargetUserIdResult.Value!;
+            LazyGetUserDataDTO reqData = new LazyGetUserDataDTO
+            {
+                Taken = lazyData.Taken,
+                ElementsPerSection = lazyData.ElementsPerSection,
+                UserId = getTargetUserIdResult.Value
+            };
 
             // get target user cart items -- with include product so we can access product price  
-            var result = await _cartItemRepository.LazyGetCartItems(getData);
+            var result = await _cartItemRepository.LazyGetCartItems(reqData);
             if (!result.IsSuccess) return result.MapFailure<List<CartItemDTO>>();
 
 
@@ -66,22 +71,22 @@ namespace Custom_Builds.Core.Services.CartItemServices
         }
         public async Task<Result<CartItemDTO>> GetByIdAsync(Guid cartItemId)
         {
-            // get target user id
-            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(cartItemId);
-            if (!getTargetUserIdResult.IsSuccess) getTargetUserIdResult.MapFailure<CartItemDTO>();
+            // get current user id
+            var getCurrUserIdResult = _getCurrUserService.GetUserId();
+            if (!getCurrUserIdResult.IsSuccess) getCurrUserIdResult.MapFailure<CartItemDTO>();
 
             // get cart item
             var getCartItemResult = await _cartItemRepository.GetByIdAsync(cartItemId);
             if (!getCartItemResult.IsSuccess) return getCartItemResult.MapFailure<CartItemDTO>();
 
-            // check if target user is the owner of the item
-            if(getCartItemResult.Value!.UserId == getTargetUserIdResult.Value!)
+            // check if current user is the owner of the item
+            if(getCartItemResult.Value!.UserId == getCurrUserIdResult.Value!)
             {
                 return Result<CartItemDTO>.Success(getCartItemResult.Value!.toDTO());
             }
             else
             {
-                return Result<CartItemDTO>.Failure("Target user isnt the owner of the item");
+                return Result<CartItemDTO>.Failure("current user isnt the owner of the item");
             }
         }
         public async Task<Result<CartSummaryDTO>> GetCurrUserSummaryAsync()

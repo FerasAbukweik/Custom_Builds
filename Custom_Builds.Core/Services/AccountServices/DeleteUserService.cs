@@ -29,14 +29,14 @@ namespace Custom_Builds.Core.Services.AccountServices
             _deleteCookieService = deleteCookieService;
             _getCurrUserService = getCurrUserService;
         }
-        public async Task<Result> DeleteUserAsync(Guid? id)
+        public async Task<Result> DeleteUserAsync()
         {
             // get target user id
-            var getTargetUserIdRes = _getCurrUserService.GetTargetUserId(id);
-            if (!getTargetUserIdRes.IsSuccess) return getTargetUserIdRes;
+            var getUserIdRes = _getCurrUserService.GetUserId();
+            if (!getUserIdRes.IsSuccess) return getUserIdRes;
 
             // get user object so we can delete it using _userManager.DeleteAsync(user) and check if its an admin
-            ApplicationUser? user = await _userManager.FindByIdAsync(getTargetUserIdRes.Value!.ToString());
+            ApplicationUser? user = await _userManager.FindByIdAsync(getUserIdRes.Value!.ToString());
             if (user == null)
             {
                 return Result.Failure("User wasnt found", HttpStatusCode.NotFound);

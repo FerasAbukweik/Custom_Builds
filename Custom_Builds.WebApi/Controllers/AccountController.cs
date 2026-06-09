@@ -1,20 +1,10 @@
-﻿using Custom_Builds.Core.Domain.Identity;
-using Custom_Builds.Core.Domain.RepositryContracts;
-using Custom_Builds.Core.Domain.TokenEntities;
-using Custom_Builds.Core.DTO;
-using Custom_Builds.Core.Enums;
+﻿using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.extensionMethods;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.IAccountServices;
 using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
-using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace custom_Peripherals.Controllers
 {
@@ -80,16 +70,8 @@ namespace custom_Peripherals.Controllers
         [HttpDelete("[action]/{toDelUserID}")]
         public async Task<IActionResult> DeleteUser([FromRoute]Guid? toDelUserID)
         {
-            
-            var getTargetUserIdResult = _getCurrUserService.GetTargetUserId(toDelUserID);
-            if (!getTargetUserIdResult.IsSuccess)
-            {
-                // convert to Result so its guranteed we return ActionResult and not ActionResult<Data>
-                return ((Result)getTargetUserIdResult).ToActionResult();
-            }
-
             // delete the user
-            Result result = await _deleteCurrentUserService.DeleteUserAsync(getTargetUserIdResult!.Value);
+            Result result = await _deleteCurrentUserService.DeleteUserAsync();
 
             return result.ToActionResult();
         }

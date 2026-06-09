@@ -17,36 +17,6 @@ namespace Custom_Builds.Core.Services.CurrTokenService
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Result<Guid> GetTargetUserId(Guid? suppliedId)
-        {
-            // if no id is supplied, return current user id
-            if (suppliedId == null)
-            {
-                // get curr user id and check if success
-                var getCurrUserIdResult = GetUserId();
-                if (!getCurrUserIdResult.IsSuccess)
-                {
-                    return Result<Guid>.Failure("Cannot get current user id");
-                }
-
-                // return current user id
-                return Result<Guid>.Success(getCurrUserIdResult.Value!);
-            }
-            else
-            {
-                // if value is supplied and its not admin , forbid the action
-                var isAdminRes = IsAdmin();
-                if (!isAdminRes.IsSuccess) return isAdminRes.MapFailure<Guid>();
-
-                if (!isAdminRes.Value)
-                {
-                    return Result<Guid>.Failure("Only admin can delete other users" , HttpStatusCode.Forbidden);
-                }
-            }
-
-            // this if admin and id is supplied, return the supplied id
-            return Result<Guid>.Success(suppliedId.Value);
-        }
         public Result<Guid> GetUserId()
         {
             // get current user id from claim
