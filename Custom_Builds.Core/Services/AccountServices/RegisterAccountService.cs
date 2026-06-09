@@ -95,7 +95,7 @@ namespace Custom_Builds.Core.Services.AccountServices
             // generate Tokens
 
             // generate access token
-            var accessTokenResult = await _jwtService.GenerateAccessToken(newUser);
+            var accessTokenResult = await _jwtService.GenerateAccessTokenAsync(newUser);
             if (!accessTokenResult.IsSuccess) return accessTokenResult;
 
             // generate refresh token

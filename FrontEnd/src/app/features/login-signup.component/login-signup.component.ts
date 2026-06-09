@@ -9,6 +9,7 @@ import { RoleEnums } from '../../core/enums/role-enums';
 import { AccountServices } from '../../core/services/api-services/account-services';
 import { Router } from '@angular/router';
 import { ILoginDTO } from '../../core/DTO/login-dto';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 const footerExtraPages: IFooterExtraPages[] = [
   { icon: 'fa-google', color: '#34A850', title: 'Google', link: '' },
@@ -28,9 +29,9 @@ const footerExtraPages: IFooterExtraPages[] = [
 })
 export class LoginSignupComponent {
   // inject services
-  private readonly accountServices = inject(AccountServices);
-  private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly _accountServices = inject(AccountServices);
+  private readonly _router = inject(Router);
+  private readonly _destroyRef = inject(DestroyRef);
 
   // so we can access it in the html
   readonly footerExtraPages = footerExtraPages;
@@ -122,17 +123,15 @@ export class LoginSignupComponent {
         Password: this.form.value.password!,
       };
 
-      const sub = this.accountServices.login(loginData).subscribe({
+      this._accountServices.login(loginData).pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
         next: () => {
-          this.router.navigate(['/']);
+          this._router.navigate(['/']);
         },
         error: (err) => {
           console.log(err);
           this.form.setErrors({ server: (typeof err.error === 'string' && err.error) || 'Unknown server error' });
         },
       });
-
-      this.destroyRef.onDestroy(() => sub.unsubscribe());
     }
 
     // signup
@@ -145,16 +144,14 @@ export class LoginSignupComponent {
         Role: RoleEnums.User,
       };
 
-      const sub = this.accountServices.register(signupData).subscribe({
+      this._accountServices.register(signupData).pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
         next: () => {
-          this.router.navigate(['/']);
+          this._router.navigate(['/']);
         },
         error: (err) => {
           this.form.setErrors({ server: (typeof err.error === 'string' && err.error) || 'Unknown server error' });
         },
       });
-
-      this.destroyRef.onDestroy(() => sub.unsubscribe());
     }
   }
 }

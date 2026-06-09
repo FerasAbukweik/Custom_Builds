@@ -17,7 +17,6 @@ export class HomeService {
     // fields
 
     // private
-    private readonly _untilDestroyed = takeUntilDestroyed(this._destroyRef);
     private _isMoreDataAvaiable = true;
     private readonly _requestData: ILazyLoadingDTO = {
         ElementsPerSection: 10,
@@ -46,14 +45,12 @@ export class HomeService {
         if(this._isLoading() || !this._isMoreDataAvaiable) return;
         this._isLoading.set(true);
 
-        this._productService.getAll(this._requestData).pipe(this._untilDestroyed).subscribe({
+        this._productService.getAll(this._requestData).pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
             next: (res) => {
-                const newProducts = res as IProductDTO[];
+                this._products.update(curr => [...curr , ...res]);
 
-                this._products.update(curr => [...curr , ...newProducts]);
-
-                this._requestData.taken += newProducts.length;
-                this._isMoreDataAvaiable = newProducts.length > 0;
+                this._requestData.taken += res.length;
+                this._isMoreDataAvaiable = res.length > 0;
                 this._isLoading.set(false);
             },
             error: (err) => {

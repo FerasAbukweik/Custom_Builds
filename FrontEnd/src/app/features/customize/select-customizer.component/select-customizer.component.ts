@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { IOption } from './select-customizer.model';
 import { TopNavComponent } from '../../../layouts/top-nav.component/top-nav.component';
-import { ControllerCustomizerComponent } from './components/controller-customizer.component/controller-customizer.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-select-customizer',
-  imports: [TopNavComponent, ControllerCustomizerComponent],
+  imports: [TopNavComponent, RouterLink],
   templateUrl: './select-customizer.component.html',
 })
 export class SelectCustomizerComponent {

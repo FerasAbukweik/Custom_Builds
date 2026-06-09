@@ -118,7 +118,7 @@ builder.Services.AddCors(Options =>
     Options.AddPolicy("AllowExternalFrontEnd", policy => 
     {
         policy
-        .WithOrigins(["http://localhost:4200"])
+        .WithOrigins(["https://localhost:4200" , "http://localhost:4200"])
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials();
@@ -126,6 +126,8 @@ builder.Services.AddCors(Options =>
 });
 
 var app = builder.Build();
+
+app.UseHttpsRedirection();
 
 if (builder.Environment.IsDevelopment())
 {

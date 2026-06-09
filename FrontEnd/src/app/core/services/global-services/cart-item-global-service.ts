@@ -34,7 +34,6 @@ export class CartItemGlobalService {
     taken: 0,
     ElementsPerSection: 10,
   };
-  private readonly untilDestroyed = takeUntilDestroyed(this.destroyRef);
 
   // getters
   get getCartItems() {
@@ -68,10 +67,10 @@ export class CartItemGlobalService {
   updateSummaryInfo = () => {
     this.cartItemService
       .GetSummaryInfo()
-      .pipe(this.untilDestroyed)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.summaryInfo.set(res as ICartSummaryInfo);
+          this.summaryInfo.set(res);
         },
         error: (err) => {
           // toDo: show error message
@@ -90,12 +89,12 @@ export class CartItemGlobalService {
 
     this.cartItemService
       .GetCartItems(this.requestData)
-      .pipe(this.untilDestroyed)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.cartItems.update((curr) => [...curr, ...(res as IMiniCartItemDTO[])]);
+          this.cartItems.update((curr) => [...curr, ...(res)]);
 
-          const itemsLen = (res as IMiniCartItemDTO[]).length;
+          const itemsLen = (res).length;
 
           this.requestData.taken += itemsLen;
           this.isMoreDataAvailable = itemsLen > 0;
@@ -116,7 +115,7 @@ export class CartItemGlobalService {
   updateItemsQuantity = async (newQuantities: INewQuantities): Promise<boolean> => {
     try {
       await firstValueFrom(
-        this.cartItemService.updateQuantity(newQuantities).pipe(this.untilDestroyed),
+        this.cartItemService.updateQuantity(newQuantities).pipe(takeUntilDestroyed(this.destroyRef)),
       );
       return true;
     } catch (error) {
@@ -156,7 +155,7 @@ export class CartItemGlobalService {
 
     return await firstValueFrom(
       this.cartItemService.remove(id).pipe(
-        this.untilDestroyed,
+        takeUntilDestroyed(this.destroyRef),
         map(() => {
           this.requestData.taken--;
           this.isDeleteing.set(false);

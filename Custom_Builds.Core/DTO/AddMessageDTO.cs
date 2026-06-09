@@ -13,5 +13,6 @@ namespace Custom_Builds.Core.DTO
         [Required(ErrorMessage = "{0} Is reqired")]
         public MessageTypeEnum MessageType { get; set; }
         public string? FileName { get; set; }
+        public Guid? ChatGroupId { get; set; }
     }
 }

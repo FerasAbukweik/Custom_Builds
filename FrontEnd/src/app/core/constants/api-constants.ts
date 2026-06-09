@@ -1,4 +1,4 @@
 export abstract class ApiConstrants {
-  public static apiUrl = 'http://localhost:5199/api';
-  public static serverUrl = 'http://localhost:5199';
+  public static serverUrl = 'https://localhost:7199';
+  public static apiUrl = this.serverUrl + '/api';
 }

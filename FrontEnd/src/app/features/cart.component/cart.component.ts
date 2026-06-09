@@ -8,7 +8,7 @@ import { debounceTime, tap } from 'rxjs';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { INewQuantities } from './cart.model';
 import { IsVisableDirective } from '../../shared/directives/is-visable.directive';
-import { LoadingComponent } from '../../shared/components/loading/loading.component/loading.component';
+import { LoadingComponent } from '../../shared/components/loading/loading.component';
 import { ICartSummaryInfo } from '../../core/DTO/cart-summary-info-dto';
 import { CartItemGlobalService } from '../../core/services/global-services/cart-item-global-service';
 

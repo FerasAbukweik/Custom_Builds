@@ -24,11 +24,16 @@ namespace Custom_Builds.Core.Services.MessageServices
             _userManager = userManager;
         }
 
-        public async Task<Result<MessageDTO>> AddAsync(AddMessageDTO toAdd , Guid ChatGroupId)
+        public async Task<Result<MessageDTO>> AddAsync(AddMessageDTO toAdd)
         {
             // get curr logged in user id
             var getCurrUserId = _getCurrUserService.GetUserId();
             if (!getCurrUserId.IsSuccess) return getCurrUserId.MapFailure<MessageDTO>();
+
+            if(toAdd.ChatGroupId == null)
+            {
+                return Result<MessageDTO>.Failure("Chat group id is required");
+            }
 
             // new message
             Message newMessage = new Message()
@@ -39,9 +44,8 @@ namespace Custom_Builds.Core.Services.MessageServices
                 FileName = toAdd.FileName,
                 MessageType = toAdd.MessageType,
                 SenderId = getCurrUserId.Value!,
-                ChatGroupId = ChatGroupId
+                ChatGroupId = toAdd.ChatGroupId!.Value
             };
-
 
             // add message to DB
             var result = await _messageRepository.Add(newMessage);

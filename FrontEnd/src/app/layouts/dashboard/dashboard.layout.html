@@ -1,0 +1,29 @@
+<div
+  [class]="
+    `w-73.75 shrink-0 transition-all duration-300 max-[650px]:fixed bg-primary h-full z-40 ${
+      isSideBarShown ? 'ml-0 opacity-100' : '-ml-73.75 opacity-0'
+    }`
+  "
+>
+  <aside dashboardSideBar [pagesData]="pagesData()"></aside>
+</div>
+
+<div class="flex flex-col flex-1 min-w-0 h-full relative">
+
+  <div class="w-full shrink-0 transition-all relative z-30">
+    <nav userTopNav [leftNavItems]="pagesData()"></nav>
+  </div>
+
+  <main class="flex-1 min-w-0 overflow-y-auto w-full transition-all duration-300">
+    <router-outlet />
+  </main>
+
+</div>
+
+<div
+  class="absolute top-2 left-0 z-50 bg-primary w-16 h-12"
+>
+  <img src="logo-image.png" alt="logo" class="w-12 aspect-square object-cover cursor-pointer ml-5"
+    (click)="dashboardService.toggleShowSideBar()"
+   />
+</div>

@@ -9,8 +9,8 @@ import { ApiConstrants } from '../../constants/api-constants';
 export class ChatHubService implements OnDestroy {
   // observers
   readonly newMessage$ = new Subject<IMessageDTO>();
-  readonly typingUserId$ = new Subject<void>();
-  readonly stoppedTypingUserId$ = new Subject<void>();
+  readonly typingUserId$ = new Subject<string>();
+  readonly stoppedTypingUserId$ = new Subject<string>();
   
   // fields
   private _hubConnection!: signalR.HubConnection;
@@ -44,29 +44,29 @@ export class ChatHubService implements OnDestroy {
       this.newMessage$.next(msg);
     });
 
-    this._hubConnection.on('UserIsTypingAsync', () => {
-      this.typingUserId$.next();
+    this._hubConnection.on('UserIsTypingAsync', (chatGroupId: string) => {
+      this.typingUserId$.next(chatGroupId);
     });
 
-    this._hubConnection.on('UserStoppedTypingAsync', () => {
-      this.stoppedTypingUserId$.next();
+    this._hubConnection.on('UserStoppedTypingAsync', (chatGroupId: string) => {
+      this.stoppedTypingUserId$.next(chatGroupId);
     });
   };
 
-  private joinGroup = () => {
-    return this._hubConnection.invoke('JoinChatGroup');
+  private joinGroup = (groupId: string | null = null) => {
+    return this._hubConnection.invoke('JoinChatGroup' , groupId);
   };
 
   sendMessage = (dto: ISendMessageDTO) => {
     return this._hubConnection.invoke('SendMessage', dto);
   };
 
-  notifyTyping = () => {
-    return this._hubConnection.invoke('NotifyTyping');
+  notifyTyping = (groupId: string | null = null) => {
+    return this._hubConnection.invoke('NotifyTyping' , groupId);
   };
 
-  notifyStoppedTyping = () => {
-    return this._hubConnection.invoke('NotifyStoppedTyping');
+  notifyStoppedTyping = (groupId: string | null = null) => {
+    return this._hubConnection.invoke('NotifyStoppedTyping' , groupId);
   };
 
   stopConnection = () => {

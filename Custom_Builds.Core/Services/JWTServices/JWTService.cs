@@ -2,10 +2,8 @@
 using Custom_Builds.Core.DTO;
 using Custom_Builds.Core.Models;
 using Custom_Builds.Core.ServiceContracts.ICookieServices;
-using Custom_Builds.Core.ServiceContracts.ICurrTokenService;
 using Custom_Builds.Core.ServiceContracts.IJWTServices;
 using Custom_Builds.Core.ServiceContracts.IRefreshTokenServices;
-using Custom_Builds.Core.Services.CurrTokenService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -22,21 +20,18 @@ namespace Custom_Builds.Core.Services.JWTServices
         private readonly IGetCookieService _getCookieService;
         private readonly IGenerateRefreshTokenService _generateRefreshTokenService;
         private readonly IGetRefreshTokenService _getRefreshTokenService;
-        private readonly ICurrTokenService _tokenService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public JWTService(IConfiguration configuration,
                           IGenerateRefreshTokenService generateRefreshTokenService,
                           UserManager<ApplicationUser> userManager,
                           IGetCookieService getCookieService,
-                          IGetRefreshTokenService getRefreshTokenService,
-                          ICurrTokenService getCurrUserService)
+                          IGetRefreshTokenService getRefreshTokenService)
         {
             _configuration = configuration;
             _generateRefreshTokenService = generateRefreshTokenService;
             _getCookieService = getCookieService;
             _getRefreshTokenService = getRefreshTokenService;
-            _tokenService = getCurrUserService;
             _userManager = userManager;
         }
 
@@ -91,11 +86,14 @@ namespace Custom_Builds.Core.Services.JWTServices
             var checkTokensResult = await AreRefreshTokenAndAccessTokenValidAsync(getAccessTokenResult.Value!, getRefreshTokenResult.Value!, validateAccessTokenExpireDate: false);
             if (!checkTokensResult.IsSuccess) return checkTokensResult.MapFailure<AccessAndRefreshTokenDTO>();
 
-            var getCurrUserIdResult = _tokenService.GetUserId();
-            if (!getCurrUserIdResult.IsSuccess) return getCurrUserIdResult.MapFailure<AccessAndRefreshTokenDTO>();
+            var getUserClaims = GetTokenClaims(getAccessTokenResult.Value!);
+            if (!getUserClaims.IsSuccess) return getUserClaims.MapFailure<AccessAndRefreshTokenDTO>();
+
+            var userId = getUserClaims.Value!.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Result<AccessAndRefreshTokenDTO>.Failure("failed to get userId from claims");
 
             // get user
-            ApplicationUser? user = await _userManager.FindByIdAsync(getCurrUserIdResult.Value!.ToString());
+            ApplicationUser? user = await _userManager.FindByIdAsync(userId);
             if(user == null)
             {
                 return Result<AccessAndRefreshTokenDTO>.Failure("User Not Found");
@@ -195,21 +193,41 @@ namespace Custom_Builds.Core.Services.JWTServices
             if (refTokenResult.Value!.ExpierDate <= DateTime.UtcNow)
             {
                 return Result.Failure("Expiered Refresh Token" , HttpStatusCode.Unauthorized);
-            }    
+            }
 
 
 
-            var getUserIdResult = _tokenService.GetUserId();
-            if(!getUserIdResult.IsSuccess) return getUserIdResult;
+            var getUserClaims = GetTokenClaims(accessToken);
+            if (!getUserClaims.IsSuccess) return getUserClaims.MapFailure<AccessAndRefreshTokenDTO>();
+
+            var userId = getUserClaims.Value!.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Result<AccessAndRefreshTokenDTO>.Failure("failed to get userId from claims");
 
 
             // check if access token and refresh token belong to the same user
-            if (refTokenResult.Value!.UserId != getUserIdResult.Value!)
+            if (refTokenResult.Value!.UserId.ToString() != userId)
             {
                 return Result.Failure("Invalid Token", HttpStatusCode.Unauthorized);
             }
 
             return Result.Success();
+        }
+        private Result<Claim[]> GetTokenClaims(string? accessToken = null)
+        {
+            if (accessToken == null)
+            {
+                var getAccessTokesRes = _getCookieService.Get("AccessToken");
+                if (!getAccessTokesRes.IsSuccess) return Result<Claim[]>.Failure("No access token", HttpStatusCode.Unauthorized);
+
+                accessToken = getAccessTokesRes.Value!;
+            }
+            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+
+            if (!jwtSecurityTokenHandler.CanReadToken(accessToken))
+                return Result<Claim[]>.Failure("Invalid access token", HttpStatusCode.Unauthorized);
+
+            var jwtSecurityToken = jwtSecurityTokenHandler.ReadJwtToken(accessToken);
+            return Result<Claim[]>.Success(jwtSecurityToken.Claims.ToArray());
         }
     }
 }

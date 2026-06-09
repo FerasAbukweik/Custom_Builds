@@ -10,11 +10,10 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(
       routes,
-      withComponentInputBinding()
+      withComponentInputBinding(),
+      // withRouterConfig({paramsInheritanceStrategy: 'always'})
     ),
     provideZonelessChangeDetection(),
     provideHttpClient(withInterceptors([globalInterceptor]))
   ]
-
-
 };

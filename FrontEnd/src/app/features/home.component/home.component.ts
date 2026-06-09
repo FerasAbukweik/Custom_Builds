@@ -7,8 +7,8 @@ import { ProductCardComponent } from './components/product-card.component/produc
 import { TopNavComponent } from '../../layouts/top-nav.component/top-nav.component';
 import { HomeService } from './home.service';
 import { IProductDTO } from '../../core/DTO/product-dto';
-import { IsVisableDirective } from "../../shared/directives/is-visable.directive";
-import { LoadingComponent } from "../../shared/components/loading/loading.component/loading.component";
+import { IsVisableDirective } from '../../shared/directives/is-visable.directive';
+import { LoadingComponent } from '../../shared/components/loading/loading.component';
 
 const whyChooseUs: IWhyChooseUs[] = [
   {
@@ -34,10 +34,16 @@ const whyChooseUs: IWhyChooseUs[] = [
   },
 ];
 
-
 @Component({
   selector: 'app-home',
-  imports: [FooterComponent, RouterLink, ProductCardComponent, TopNavComponent, IsVisableDirective, LoadingComponent],
+  imports: [
+    FooterComponent,
+    RouterLink,
+    ProductCardComponent,
+    TopNavComponent,
+    IsVisableDirective,
+    LoadingComponent,
+  ],
   templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit {

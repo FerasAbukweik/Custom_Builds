@@ -1,0 +1,1 @@
+export type stateCardData = {name: string, value: string}[];

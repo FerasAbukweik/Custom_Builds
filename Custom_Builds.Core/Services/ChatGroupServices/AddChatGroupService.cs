@@ -38,7 +38,8 @@ namespace Custom_Builds.Core.Services.ChatGroupServices
             {
                 Content = "Welcome to your new chat group! Feel free to ask any questions or share your thoughts here. We're here to help you with anything you need. Enjoy your chat experience!",
                 MessageType = MessageTypeEnum.Text,
-            }, toAdd.Id);
+                ChatGroupId = toAdd.Id
+            });
 
             return Result<ChatGroupDTO>.Success(AddResult.Value!.toDTO());
         }

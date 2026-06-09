@@ -1,10 +1,10 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { CustomizerService } from '../../../../../customizer.service';
 
 @Component({
   selector: 'aside[customizerSideBar]',
-  imports: [CommonModule],
+  imports: [CommonModule , CurrencyPipe],
   templateUrl: './customizer-sidebar.component.html',
   host: {
     class:
@@ -24,6 +24,7 @@ export class CustomizerSidebarComponent implements OnInit {
   currentPartSections = computed(
     () => this.customizeData()?.find((part) => part.id === this.activePartId())?.sections ?? [],
   );
+  totalPrice = this._customizerService.getTotalPrice;
 
 
 
