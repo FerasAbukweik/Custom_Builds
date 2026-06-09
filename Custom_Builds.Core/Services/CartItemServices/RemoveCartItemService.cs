@@ -9,10 +9,10 @@ namespace Custom_Builds.Core.Services.CartItemServices
     public class RemoveCartItemService : IRemoveCartItemService
     {
         private readonly ICartItemRepository _cartItemRepository;
-        private readonly ICurrTokenService _getCurrUserService;
+        private readonly IGetCurrUserService _getCurrUserService;
 
         public RemoveCartItemService(ICartItemRepository cartItemRepository,
-                                     ICurrTokenService getCurrUserService)
+                                     IGetCurrUserService getCurrUserService)
         {
             _cartItemRepository = cartItemRepository;
             _getCurrUserService = getCurrUserService;

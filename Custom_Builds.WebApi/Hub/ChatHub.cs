@@ -12,13 +12,13 @@ namespace custom_Peripherals.Hub
     public class ChatHub : Hub<IChatHub>
     {
         private readonly IAddMessageService _addMessageService;
-        private readonly ICurrTokenService _currUserServices;
+        private readonly IGetCurrUserService _currUserServices;
         private readonly IGetChatGroupService _getChatGroupService;
                                             //ConnectionId , chatGroupId -- users and admins should be typing in one chat max
         private static readonly ConcurrentDictionary<string, Guid> _usersTyping = new();
 
         public ChatHub(IAddMessageService addMessageService,
-                       ICurrTokenService currUserServices,
+                       IGetCurrUserService currUserServices,
                        IGetChatGroupService getChatGroupService)
         {
             _addMessageService = addMessageService;

@@ -13,12 +13,12 @@ namespace Custom_Builds.Core.Services.OrderServices
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IGetProductService _getProductService;
-        private readonly ICurrTokenService _currUserService;
+        private readonly IGetCurrUserService _currUserService;
 
         public AddOrderService(
             IOrderRepository orderRepository,
             IGetProductService getProductService,
-            ICurrTokenService currUserService)
+            IGetCurrUserService currUserService)
         {
             _orderRepository = orderRepository;
             _getProductService = getProductService;

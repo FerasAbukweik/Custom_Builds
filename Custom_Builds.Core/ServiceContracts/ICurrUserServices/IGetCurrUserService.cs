@@ -2,7 +2,7 @@
 
 namespace Custom_Builds.Core.ServiceContracts.ICurrTokenService
 {
-    public interface ICurrTokenService
+    public interface IGetCurrUserService
     {
         Result<Guid> GetUserId();
         Result<Guid> GetTargetUserId(Guid? suppliedId);

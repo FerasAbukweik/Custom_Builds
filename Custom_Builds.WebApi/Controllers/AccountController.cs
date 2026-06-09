@@ -26,14 +26,14 @@ namespace custom_Peripherals.Controllers
         private readonly ILoginAccountService _loginAccountService;
         private readonly IDeleteUserService _deleteCurrentUserService;
         private readonly ILogoutAccountService _logoutAccountService;
-        private readonly ICurrTokenService _getCurrUserService;
+        private readonly IGetCurrUserService _getCurrUserService;
 
         public AccountController(
                 IRegisterAccountService registerAccountService,
                 ILoginAccountService loginAccountService,
                 IDeleteUserService deleteCurrentUserService,
                 ILogoutAccountService logoutAccountService,
-                ICurrTokenService currUserServices)
+                IGetCurrUserService currUserServices)
         {
             _registerAccountService = registerAccountService;
             _loginAccountService = loginAccountService;

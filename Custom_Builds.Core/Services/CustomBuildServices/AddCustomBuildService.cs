@@ -14,12 +14,12 @@ namespace Custom_Builds.Core.Services.CustomBuildServices
     {
         private readonly IModificationsRepository _modificationsRepository;
         private readonly ICustomBuildRepository _customBuildRepository;
-        private readonly ICurrTokenService _getCurrUserService;
+        private readonly IGetCurrUserService _getCurrUserService;
 
         public AddCustomBuildService(
             IModificationsRepository modificationsRepository,
             ICustomBuildRepository customBuildRepository,
-            ICurrTokenService getCurrUserService)
+            IGetCurrUserService getCurrUserService)
         {
             _modificationsRepository = modificationsRepository;
             _customBuildRepository = customBuildRepository;

@@ -13,11 +13,11 @@ namespace Custom_Builds.Core.Services.CartItemServices
     public class GetCartItemService : IGetCartItemService
     {
         private readonly ICartItemRepository _cartItemRepository;
-        private readonly ICurrTokenService _getCurrUserService;
+        private readonly IGetCurrUserService _getCurrUserService;
         private readonly IGetCustomBuildService _getCustomBuildService;
 
         public GetCartItemService(ICartItemRepository cartItemRepository,
-                                  ICurrTokenService getCurrUserService,
+                                  IGetCurrUserService getCurrUserService,
                                   IGetCustomBuildService getCustomBuildService)
         {
             _cartItemRepository = cartItemRepository;

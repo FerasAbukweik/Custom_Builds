@@ -110,7 +110,7 @@ namespace Custom_Builds.Core.ExtensionMethods
             services.AddScoped<IGetChatGroupService, GetChatGroupService>();
 
             // Current User services
-            services.AddScoped<ICurrTokenService, CurrTokenService>();
+            services.AddScoped<IGetCurrUserService, GetCurrUserService>();
 
             // so we can access http context in services
             services.AddHttpContextAccessor();
