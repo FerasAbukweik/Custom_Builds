@@ -1,5 +1,5 @@
-import { Component, inject, input, OnInit } from '@angular/core';
-import { projectName } from '../../../../../core/constants/constants';
+import { Component, inject, input } from '@angular/core';
+import { projectName } from '../../../../core/constants/constants'; 
 import { ISideBarData } from '../../dashboard.model';
 import { RouterModule } from '@angular/router';
 import { DashboardService } from '../../dashboard.service';

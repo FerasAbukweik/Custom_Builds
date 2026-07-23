@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { CustomizerService } from '../features/customize/customizer.service';
-import { DashboardService } from './layouts/dashboard/dashboard.service';
+import { DashboardService } from '../layouts/dashboard/dashboard.service';
 import { loginSignupGuard } from '../core/guard/login-signup-guard';
 import { globalGuard } from '../core/guard/global-guard';
 
@@ -41,7 +41,7 @@ export const routes: Routes = [
       {
         path: 'user',
         loadComponent: () =>
-          import('./layouts/dashboard/dashboard.layout').then((x) => x.DashboardLayout),
+          import('.././layouts/dashboard/dashboard.layout').then((x) => x.DashboardLayout),
         loadChildren: () => import('../features/user/user.routes').then((x) => x.routes),
         providers: [DashboardService],
         data: {
@@ -56,7 +56,7 @@ export const routes: Routes = [
       {
         path: 'admin',
         loadComponent: () =>
-          import('./layouts/dashboard/dashboard.layout').then((x) => x.DashboardLayout),
+          import('.././layouts/dashboard/dashboard.layout').then((x) => x.DashboardLayout),
         loadChildren: () => import('../features/admin/admin.routes').then((x) => x.routes),
         providers: [DashboardService],
         data: {

@@ -1,8 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { UserContentWrapper } from '../../wrappers/user-content.wrapper/user-content.wrapper';
 import { OrderReviewComponent } from './components/order-review.component/order-review.component';
-import { LoadingComponent } from '../../../../../app/shared/components/loading/loading.component';
-import { IsVisableDirective } from '../../../../../app/shared/directives/is-visable.directive';
+import { LoadingComponent } from '../../../../../shared/components/loading/loading.component';
+import { IsVisableDirective } from '../../../../../shared/directives/is-visable.directive'; 
 import { MyOrdersService } from './my-orders.service';
 
 @Component({

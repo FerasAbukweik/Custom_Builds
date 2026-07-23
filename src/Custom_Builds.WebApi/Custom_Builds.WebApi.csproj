@@ -26,8 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Custom_Build.Infrastructure\Custom_Builds.Infrastructure.csproj" />
-    <ProjectReference Include="..\Custom_Builds.Core\Custom_Builds.Core.csproj" />
+    <ProjectReference Include="..\Custom_Builds.Infrastructure\Custom_Builds.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

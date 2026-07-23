@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { StateDataComponent } from '../../../../../../app/shared/components/stateData/state-data.component';
+import { StateDataComponent } from '../../../../../../shared/components/stateData/state-data.component'; 
 import { stateCardData } from '../../../../../../core/interceptors/state-card-data';
-import { OrdersTableComponent } from '../../../../../../app/shared/components/orders-table/orders-table.component';
 
 @Component({
   selector: 'app-orders-management.component',

@@ -1,10 +1,10 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserContentWrapper } from '../../wrappers/user-content.wrapper/user-content.wrapper';
 import { HistoryService } from './history.service';
 import { stateCardData } from '../../../../../core/interceptors/state-card-data';
-import { StateDataComponent } from '../../../../../app/shared/components/stateData/state-data.component';
-import { OrdersTableComponent } from '../../../../../app/shared/components/orders-table/orders-table.component';
+import { StateDataComponent } from '../../../../../shared/components/stateData/state-data.component'; 
+import { OrdersTableComponent } from '../../../../../shared/components/orders-table/orders-table.component'; 
 
 @Component({
   selector: 'app-history',

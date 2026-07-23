@@ -1,6 +1,6 @@
 import { Component, computed, input, output } from '@angular/core';
-import { IHistoryOrderDTO } from '../../../../core/DTO/History-orders-dto';
-import { OrderStateEnum } from '../../../../core/enums/order-status-enum';
+import { IHistoryOrderDTO } from '../../../core/DTO/History-orders-dto'; 
+import { OrderStateEnum } from '../../../core/enums/order-status-enum'; 
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { LoadingComponent } from '../loading/loading.component';
 

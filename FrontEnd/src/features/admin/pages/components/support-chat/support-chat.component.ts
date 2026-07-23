@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { LiveChattingComponent } from '../../../../../app/shared/components/live-chatting/live-chatting.component';
+import { LiveChattingComponent } from '../../../../../shared/components/live-chatting/live-chatting.component'; 
 
 @Component({
   selector: 'app-support-chat.component',

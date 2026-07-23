@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { projectName } from '../../../core/constants/constants';
+import { projectName } from '../../core/constants/constants'; 
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { ILeftNavItem, IRightNavItem } from '../../../features/interfaces/top-nav/top-nav.model';
+import { ILeftNavItem, IRightNavItem } from '../../features/interfaces/top-nav/top-nav.model'; 
 import { LogoComponent } from '../logo.component/logo.component';
 
 @Component({

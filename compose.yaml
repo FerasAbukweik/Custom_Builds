@@ -1,0 +1,86 @@
+﻿services:
+  custom-builds-api:
+    container_name: Custom_Builds.api
+    build:
+      context: .
+      dockerfile: src/Custom_Builds.WebApi/Dockerfile
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - Jwt__Key=${JWT_KEY}
+      - ConnectionStrings__Default=Server=custom-builds-sqlserver;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
+      - ConnectionStrings__Redis=custom-builds-redis:6379
+      - ASPNETCORE_URLS=https://+:8081;http://+:8080
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=${CertPassword}
+      - CloudinarySettings__CloudName=${CloudName}
+      - CloudinarySettings__ApiKey=${ApiKey}
+      - CloudinarySettings__ApiSecret=${ApiSecret}
+      - Serilog__WriteTo__2__Args__serverUrl=http://custom-builds-seq:80
+    volumes:
+      - ./https:/https:ro
+    depends_on:
+      custom-builds-sqlserver:
+        condition: service_healthy
+      custom-builds-redis:
+        condition: service_healthy
+      custom-builds-seq:
+        condition: service_started
+
+  custom-builds-sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: Custom_Builds.sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${SA_PASSWORD}", "-Q", "SELECT 1", "-No"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  custom-builds-redis:
+    image: redis:7-alpine
+    container_name: Custom_Builds.redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  
+  custom-builds-seq:
+    image: datalust/seq:latest
+    container_name: Custom_Builds.seq
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=${SeqPassword}
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
+
+  angular:
+    container_name: angular
+    build:
+      context: ./FrontEnd
+      dockerfile: Dockerfile
+    ports:
+      - "4000:443"
+    volumes:
+      - ./FrontEnd/ssl:/etc/nginx/ssl:ro
+
+volumes:
+  sqlserver_data:
+  redis_data:
+  seq_data:

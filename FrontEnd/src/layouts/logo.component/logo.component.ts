@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { projectName } from '../../../core/constants/constants';
+import { projectName } from '../../core/constants/constants'; 
 
 @Component({
   selector: 'app-logo',

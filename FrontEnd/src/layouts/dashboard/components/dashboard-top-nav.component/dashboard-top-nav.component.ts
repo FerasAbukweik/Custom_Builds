@@ -1,5 +1,5 @@
 import { Component, inject, input } from '@angular/core';
-import { IRightNavItem } from '../../../../../core/interfaces/top-nav.model';
+import { IRightNavItem } from '../../../../core/interfaces/top-nav.model'; 
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { DashboardService } from '../../dashboard.service';
