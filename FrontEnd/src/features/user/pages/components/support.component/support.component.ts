@@ -1,6 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { SupportService } from './support.service';
+import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { MessagesService } from '../../../../../core/services/client-services/messages-service';
 import { LiveChattingComponent } from '../../../../../shared/components/live-chatting/live-chatting.component';
+import { MessagesSignalRService } from '../../../../../core/services/client-services/messaegs-signalR-service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 const quickActions = [
   'Where is my order?',
@@ -18,15 +20,14 @@ const quickActions = [
     class: 'flex flex-col h-full bg-dark-deep-blue overflow-hidden',
   },
 })
-export class SupportComponent implements OnInit {
+export class SupportComponent implements OnInit, OnDestroy {
   // injections
-  private readonly _supportService = inject(SupportService);
+  protected readonly messagesService = inject(MessagesService);
+  protected readonly messagesSignalRService = inject(MessagesSignalRService);
+  private readonly _destroyRef = inject(DestroyRef);
 
-  // signals
-  messages = this._supportService.getMessages;
-  isLoading = this._supportService.getIsLoading;
-  isTyping = this._supportService.getIsTyping;
-  isSignalRConnected = this._supportService.getIsSignalRConnected;
+  //signals
+  protected isTyping = signal<boolean>(false);
 
   // fields
 
@@ -37,15 +38,47 @@ export class SupportComponent implements OnInit {
 
   // init
   async ngOnInit() {
-    this._supportService.init();
+    this.messagesSignalRService.startConnection();
+
+    this._handleStoppedTyping();
+    this._handleTyping();
   }
 
-  // handle send message
-  handleSendMessage = this._supportService.handleSendMessage;
+  ngOnDestroy() {
+    this.messagesSignalRService.stopConnection();
+  }
 
-  // handle is typing
-  handleIsTyping = this._supportService.handleIsTyping;
+  // handle user is typing
+  private _handleTyping = () => {
+    this.messagesSignalRService.someoneIsTyping$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: () => {
+          this.isTyping.set(true);
+        },
+      });
+  };
 
-  // lazy Load Messages
-  lazyLoadMessages = this._supportService.lazyGetMessages;
+  // handle stpped typing
+  private _handleStoppedTyping = () => {
+    this.messagesSignalRService.noOneIsTyping$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: () => {
+          this.isTyping.set(false);
+        },
+      });
+  };
+
+  // manage is typing
+  handleTyping = (isTyping: boolean) => {
+    if (isTyping) this.messagesSignalRService.notifyStoppedTyping();
+    else this.messagesSignalRService.notifyTyping();
+  };
+
+  // handel send message
+  handleSendMessage = (content: string) => {
+    this.handleTyping(false);
+    this.messagesSignalRService.sendMessage(content);
+  };
 }

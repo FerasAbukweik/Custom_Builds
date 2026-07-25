@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { CustomizerService } from '../features/customize/customizer.service';
 import { DashboardService } from '../layouts/dashboard/dashboard.service';
 import { loginSignupGuard } from '../core/guard/login-signup-guard';
 import { globalGuard } from '../core/guard/global-guard';
@@ -10,7 +9,7 @@ export const routes: Routes = [
     pathMatch: 'full',
     canMatch: [loginSignupGuard],
     loadComponent: () =>
-      import('../features/login-signup.component/login-signup.component').then(
+      import('../features/login-signup/login-signup.component').then(
         (x) => x.LoginSignupComponent,
       ),
   },
@@ -22,20 +21,18 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: () =>
-          import('../features/home.component/home.component').then((x) => x.HomeComponent),
+          import('../features/home/home.component').then((x) => x.HomeComponent),
         pathMatch: 'full',
       },
 
       {
         path: 'cart',
-        loadComponent: () =>
-          import('../features/cart.component/cart.component').then((x) => x.CartComponent),
+        loadComponent: () => import('../features/cart/cart.component').then((x) => x.CartComponent),
       },
 
       {
         path: 'customizer',
         loadChildren: () => import('../features/customize/customize.routes').then((x) => x.routes),
-        providers: [CustomizerService],
       },
 
       {
@@ -79,5 +76,5 @@ export const routes: Routes = [
     ],
   },
 
-  { path: '**', redirectTo: 'not-found' },
+  { path: '**', redirectTo: '/' },
 ];

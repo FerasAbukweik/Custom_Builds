@@ -13,13 +13,14 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<ChatGroup?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            return await dbContext.ChatGroups.SingleOrDefaultAsync(cg => cg.UserId == userId, cancellationToken);
+            return await dbContext.ChatGroups.AsNoTracking().SingleOrDefaultAsync(cg => cg.UserId == userId, cancellationToken);
         }
 
         public async Task<Guid?> GetUserChatGroupIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return
                 await dbContext.ChatGroups
+                    .AsNoTracking()
                     .Where(cg => cg.UserId == userId)
                     .Select(g => g.Id)
                     .SingleOrDefaultAsync(cancellationToken);

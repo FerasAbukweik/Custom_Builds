@@ -11,4 +11,6 @@ public interface ICookieService
     Result SetTokens(AccessAndRefreshTokenDTO tokens);
     Result<AccessAndRefreshTokenDTO> GetTokens();
     Result<AccessAndRefreshTokenDTO> RemoveTokens();
+    Result<string> GetRefreshToken();
+    Result<string> GetAccessToken();
 }

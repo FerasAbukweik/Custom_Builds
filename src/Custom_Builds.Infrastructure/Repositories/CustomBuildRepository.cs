@@ -27,7 +27,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             Expression<Func<CustomBuild, object?>>[]? includes = null,
             CancellationToken cancellationToken = default)
         {
-            var query = dbContext.CustomBuilds.AsQueryable();
+            var query = dbContext.CustomBuilds.AsNoTracking().AsQueryable();
 
             if (includes != null)
             {
@@ -41,7 +41,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<CustomBuild?> RemoveByIdAsync(Guid customBuildId, CancellationToken cancellationToken = default)
         {
-            CustomBuild? toDel = await dbContext.CustomBuilds.FirstOrDefaultAsync(c => c.Id == customBuildId, cancellationToken);
+            CustomBuild? toDel = await GetByIdAsync(customBuildId,[] ,cancellationToken);
             if (toDel == null) return null;
 
             dbContext.CustomBuilds.Remove(toDel);
@@ -53,7 +53,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             Expression<Func<CustomBuild, object?>>[]? includes = null)
         {
 
-            var query = dbContext.CustomBuilds.AsQueryable();
+            var query = dbContext.CustomBuilds.AsNoTracking().AsQueryable();
 
             if (includes != null)
             {
@@ -70,6 +70,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         public async Task<Result<decimal>> GetPriceAsync(Guid customBuildId, CancellationToken cancellationToken = default)
         {
             var priceSum = await dbContext.CustomBuilds
+                .AsNoTracking()
                 .Where(cb => cb.Id == customBuildId)
                 .SelectMany(cb => cb.Modifications)
                 .SumAsync(m => m.Price, cancellationToken);

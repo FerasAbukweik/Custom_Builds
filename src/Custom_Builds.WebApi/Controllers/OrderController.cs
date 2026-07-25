@@ -16,6 +16,7 @@ namespace custom_Peripherals.Controllers
         ) : ApplicationControllerBase
     {
         // add order
+        // converts all items in cart to a single order
         [HttpPost("[action]")]
         public async Task<IActionResult> Add(CancellationToken cancellationToken = default)
         {

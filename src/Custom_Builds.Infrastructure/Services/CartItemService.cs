@@ -98,7 +98,13 @@ public class CartItemService(
         CancellationToken cancellationToken = default)
     {
         // get user cart items
-        var cartItems = await cartItemRepository.LazyGetCartItemsAsync(lazyData, userId, cancellationToken);
+        var cartItems = await cartItemRepository.FilterAsync(
+            ci => ci.UserId == userId,
+            [ci => ci.Product, ci => ci.CustomBuild],
+            lazyData.Taken,
+            lazyData.SectionSize,
+            cancellationToken
+            );
 
         return Result<IReadOnlyList<CartItemDTO>>.Success(cartItems.Select(ci => ci.ToDTO()).ToList());
     }
@@ -106,8 +112,16 @@ public class CartItemService(
     public async Task<Result<CartSummaryDTO>> GetSummaryAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var summary = await cartItemRepository.GetSummaryInfoAsync(userId, cancellationToken);
+        
+        // if no orders where found to create the summary return default summary
         if(summary == null)
-            return  Result<CartSummaryDTO>.Failure("No info found");
+            return  Result<CartSummaryDTO>.Success(new CartSummaryDTO()
+            {
+                TotalOrders = 0,
+                TotalPrice = 0,
+                ShippingCost = 0,
+                Tax = 0
+            });
 
         return Result<CartSummaryDTO>.Success(summary);
     }
@@ -141,7 +155,7 @@ public class CartItemService(
     }
     
     public async Task<Result<IReadOnlyList<CartItemDTO>>> UpdateQuantitiesAsync(
-        IReadOnlyList<Id_Quantity_DTO_ts> needsUpdate,
+        IReadOnlyList<Id_Quantity_DTO> needsUpdate,
         Guid currUserId,
         CancellationToken cancellationToken = default)
     {
@@ -149,7 +163,7 @@ public class CartItemService(
         var ids = needsUpdate.Select(nu => nu.ItemId);
 
         // get items needed to be updated
-        var items = await cartItemRepository.FilterAsync(ci => ids.Contains(ci.Id), [], cancellationToken);
+        var items = await cartItemRepository.FilterAsync(ci => ids.Contains(ci.Id), [],null,null, cancellationToken);
         
         if(items.Count != needsUpdate.Count)
             return Result<IReadOnlyList<CartItemDTO>>.Failure("some cart items were not found");

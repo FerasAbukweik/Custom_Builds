@@ -3,13 +3,14 @@ using Custom_Builds.Core.Common;
 using Custom_Builds.Core.Constants;
 using Custom_Builds.Core.DTO.Tokens;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
+using Microsoft.Extensions.Options;
 
 namespace custom_Peripherals.Services;
 
 public class CookiesService(
     IHttpContextAccessor httpContextAccessor,
-    IConfiguration configuration
-    ) : ICookieService
+    IConfiguration configuration,
+    IOptions<CookieKeys> cookieKeys) : ICookieService
 {
     public Result Set(string key, string value, double lifeTimeInMinutes)
     {
@@ -58,24 +59,24 @@ public class CookiesService(
     public Result SetTokens(AccessAndRefreshTokenDTO tokens)
     {
         // add access token to response cookies
-        var addAccessTokenResult = Set(CookieConst.AccessToken, tokens.AccessToken, 
-            configuration.GetValue<double>("AccessTokenLife"));
+        var addAccessTokenResult = Set(cookieKeys.Value.AccessToken, tokens.AccessToken, 
+            configuration.GetValue<double>("JWT:AccessTokenLife"));
 
         if (!addAccessTokenResult.IsSuccess) return addAccessTokenResult;
         
         // add refresh token to response cookies
-        return Set(CookieConst.RefreshToken, tokens.RefreshToken, 
-            configuration.GetValue<double>("RefreshTokenLife"));
+        return Set(cookieKeys.Value.RefreshToken, tokens.RefreshToken, 
+            configuration.GetValue<double>("JWT:RefreshTokenLife"));
     }
     public Result<AccessAndRefreshTokenDTO> GetTokens()
     {
         // Get access token
-        var getAccessTokenResult = Get("AccessToken");
+        var getAccessTokenResult = Get(cookieKeys.Value.AccessToken);
         if (!getAccessTokenResult.IsSuccess)
             return Result<AccessAndRefreshTokenDTO>.Failure("no access token was found" , HttpStatusCode.Unauthorized);
     
         // Get refresh token
-        var getRefreshTokenResult = Get("RefreshToken");
+        var getRefreshTokenResult = Get(cookieKeys.Value.RefreshToken);
         if (!getRefreshTokenResult.IsSuccess)
             return Result<AccessAndRefreshTokenDTO>.Failure("no refresh token was found", HttpStatusCode.Unauthorized);
 
@@ -87,10 +88,10 @@ public class CookiesService(
     }
     public Result<AccessAndRefreshTokenDTO> RemoveTokens()
     {
-        var removeAccessTokenResult = Remove(CookieConst.AccessToken);
+        var removeAccessTokenResult = Remove(cookieKeys.Value.AccessToken);
         if (!removeAccessTokenResult.IsSuccess) return removeAccessTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
         
-        var removeRefreshTokenResult = Remove(CookieConst.RefreshToken);
+        var removeRefreshTokenResult = Remove(cookieKeys.Value.RefreshToken);
         if(!removeRefreshTokenResult.IsSuccess) return removeRefreshTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
 
         return Result<AccessAndRefreshTokenDTO>.Success(new AccessAndRefreshTokenDTO()
@@ -98,5 +99,15 @@ public class CookiesService(
             AccessToken = removeAccessTokenResult.Value!,
             RefreshToken = removeRefreshTokenResult.Value!
         });
+    }
+
+    public Result<string> GetRefreshToken()
+    {
+        return Get(cookieKeys.Value.RefreshToken);
+    }
+    
+    public Result<string> GetAccessToken()
+    {
+        return Get(cookieKeys.Value.AccessToken);
     }
 }

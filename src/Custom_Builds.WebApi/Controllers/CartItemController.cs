@@ -31,13 +31,13 @@ namespace custom_Peripherals.Controllers
 
         // add custom build
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddCustomBuild([FromBody] CustomBuildAddDTO toCustomBuildAdd, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> AddCustomBuild([FromBody] CustomBuildAddDTO toAddCustomBuild, CancellationToken cancellationToken = default)
         {
             // get currUser id
             var getCurrUserId = User.GetId();
             if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult();
             
-            Result result = await cartItemService.AddCustomBuildAsync(toCustomBuildAdd, getCurrUserId.Value!, cancellationToken);
+            Result result = await cartItemService.AddCustomBuildAsync(toAddCustomBuild, getCurrUserId.Value!, cancellationToken);
 
             return result.ToActionResult();
         }
@@ -73,7 +73,7 @@ namespace custom_Peripherals.Controllers
 
         // update quantities
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateQuantity(IReadOnlyList<Id_Quantity_DTO_ts> needsUpdate, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateQuantity(IReadOnlyList<Id_Quantity_DTO> needsUpdate, CancellationToken cancellationToken = default)
         {
             // get currUser id
             var getCurrUserId = User.GetId();

@@ -6,10 +6,7 @@ using Custom_Builds.Core.DTO.Tokens;
 namespace Custom_Builds.Core.Interfaces.ServiceContracts;
 
 public interface ITokensService
-{
-    Task<Result<AccessAndRefreshTokenDTO>> UpdateTokensAsync(string refreshTokenString,
-        CancellationToken cancellationToken = default);
-
-    Task<Result<AccessAndRefreshTokenDTO>> GenerateTokens(ApplicationUser user,
+{ 
+        Task<Result<AccessAndRefreshTokenDTO>> GenerateTokens(ApplicationUser user,
         CancellationToken cancellationToken = default);
 }

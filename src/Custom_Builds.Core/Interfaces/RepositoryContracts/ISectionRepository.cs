@@ -17,10 +17,6 @@ namespace Custom_Builds.Core.Interfaces.RepositoryContracts
             Expression<Func<Section, bool>> extraChecks,
             Expression<Func<Section, object?>>[]? includes = null,
             CancellationToken cancellationToken = default);
-        Task<Section?> AddModificationAsync(
-            Guid sectionId,
-            Modification modification,
-            CancellationToken cancellationToken = default);
         Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

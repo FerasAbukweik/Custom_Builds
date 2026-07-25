@@ -1,16 +1,11 @@
 <div class="flex flex-col h-full w-full relative min-h-0 overflow-hidden">
-  @if(isLoading() && messages().length > 0){
+  @if (isLoading()) {
     <div class="absolute top-12 left-1/2 -translate-x-1/2 z-10">
-      <app-loading class="scale-100"/>
+      <app-loading class="scale-100" />
     </div>
   }
-  <div 
-    #myScrollContainer 
-    class="flex-1 overflow-y-auto p-6 space-y-6 min-h-0 w-full"
-  >
-    @if (!isLoading() && messages().length > 0) {
-      <div class="w-full h-0" (appIsVisable)="lazyLoadMessages.emit()"></div>
-    }
+  <div #myScrollContainer class="flex-1 overflow-y-auto p-6 space-y-6 min-h-0 w-full">
+    <div class="w-full h-0" (appIsVisable)="lazyLoadMessages.emit()"></div>
 
     @for (msg of messages(); track msg.id) {
       <div
@@ -19,7 +14,9 @@
       >
         <div
           class="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold shadow-lg border border-dark-blue-gray transition-transform hover:rotate-12 shrink-0"
-          [ngClass]="msg.isCurrUserSender ? 'bg-dark-gray overflow-hidden' : 'bg-secondary text-white'"
+          [ngClass]="
+            msg.isCurrUserSender ? 'bg-dark-gray overflow-hidden' : 'bg-secondary text-white'
+          "
         >
           {{ msg.isCurrUserSender ? '' : 'M' }}
           @if (msg.isCurrUserSender) {
@@ -37,17 +34,26 @@
           "
         >
           <div class="flex items-center justify-between gap-4 mb-1">
-            <span class="text-xs font-bold text-light-steel-blue" [ngClass]="{ 'text-white/80': msg.isCurrUserSender }">
+            <span
+              class="text-xs font-bold text-light-steel-blue"
+              [ngClass]="{ 'text-white/80': msg.isCurrUserSender }"
+            >
               {{ msg.senderName }}
             </span>
             @if (!msg.isCurrUserSender && msg.role) {
-              <span class="text-[10px] text-dark-gray font-medium opacity-60">• {{ msg.role }}</span>
+              <span class="text-[10px] text-dark-gray font-medium opacity-60"
+                >• {{ msg.role }}</span
+              >
             }
           </div>
 
           @if (msg.messageType === 1) {
-            <div class="flex items-center gap-3 bg-dark-deep-blue/50 p-3 rounded-lg border border-dark-blue-gray group cursor-pointer hover:bg-dark-deep-blue transition-colors">
-              <div class="bg-secondary/20 p-2 rounded text-secondary group-hover:scale-110 transition-transform">
+            <div
+              class="flex items-center gap-3 bg-dark-deep-blue/50 p-3 rounded-lg border border-dark-blue-gray group cursor-pointer hover:bg-dark-deep-blue transition-colors"
+            >
+              <div
+                class="bg-secondary/20 p-2 rounded text-secondary group-hover:scale-110 transition-transform"
+              >
                 <i class="fa-solid fa-file-code text-xl"></i>
               </div>
               <div class="flex-1 min-w-0">
@@ -57,51 +63,60 @@
               <i class="fa-solid fa-download text-soft-gray text-xs group-hover:text-secondary"></i>
             </div>
           } @else {
-            <p class="text-sm leading-relaxed" [ngClass]="msg.isCurrUserSender ? 'text-white' : 'text-off-white'">
+            <p
+              class="text-sm leading-relaxed"
+              [ngClass]="msg.isCurrUserSender ? 'text-white' : 'text-off-white'"
+            >
               {{ msg.content }}
             </p>
           }
 
           <span class="text-[12px] mt-2 block text-right text-white/60">
-            {{ msg.createdAt | date:"dd/MM/yyyy hh:mm a" }}
+            {{ msg.createdAt | date: 'dd/MM/yyyy hh:mm a' }}
           </span>
         </div>
       </div>
+    } @empty {
+      <div class="w-full h-full felx items-center justify-center font-bold text-xl text-center">
+        No Messages Found
+      </div>
     }
 
-    @if(isTyping()){
+    @if (isTyping()) {
       <div class="flex items-center gap-3 text-dark-gray py-2 ml-14">
         <div class="flex gap-1">
           <span class="w-1.5 h-1.5 bg-secondary/50 rounded-full animate-bounce"></span>
-          <span class="w-1.5 h-1.5 bg-secondary/50 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-          <span class="w-1.5 h-1.5 bg-secondary/50 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+          <span
+            class="w-1.5 h-1.5 bg-secondary/50 rounded-full animate-bounce [animation-delay:0.2s]"
+          ></span>
+          <span
+            class="w-1.5 h-1.5 bg-secondary/50 rounded-full animate-bounce [animation-delay:0.4s]"
+          ></span>
         </div>
         <span class="text-xs italic font-medium">typing...</span>
       </div>
     }
   </div>
 
-  @if(isLoading() && messages().length === 0) {
-    <div class="absolute inset-0 flex justify-center items-center bg-deep-blue/50 backdrop-blur-sm">
-      <app-loading class="scale-125"/>
-    </div>
-  }
-
   <div class="p-6 pt-0 shrink-0 w-full bg-inherit">
     <div class="flex gap-3 mb-4 overflow-x-auto pb-2 scrollbar-none">
       @for (action of quickActions(); track $index) {
         <button
           class="whitespace-nowrap px-4 py-2 bg-deep-blue hover:bg-secondary/20 text-soft-gray hover:text-secondary text-xs font-bold rounded-full border border-dark-blue-gray transition-all shadow-md cursor-pointer active:scale-95"
-          (click)="sendMessage(action , false)"
+          (click)="sendMessage(action, false)"
         >
           {{ action }}
         </button>
       }
     </div>
 
-    <div class="relative bg-deep-blue rounded-2xl p-2 flex items-center gap-2 shadow-2xl border border-dark-blue-gray focus-within:border-secondary/50 transition-colors">
+    <div
+      class="relative bg-deep-blue rounded-2xl p-2 flex items-center gap-2 shadow-2xl border border-dark-blue-gray focus-within:border-secondary/50 transition-colors"
+    >
       <div class="flex items-center pl-2">
-        <button class="p-2 text-soft-gray hover:text-secondary transition-all rounded-full hover:bg-dark-blue-gray cursor-pointer">
+        <button
+          class="p-2 text-soft-gray hover:text-secondary transition-all rounded-full hover:bg-dark-blue-gray cursor-pointer"
+        >
           <i class="fa-solid fa-plus"></i>
         </button>
       </div>
@@ -109,24 +124,27 @@
       <input
         [(ngModel)]="messageInput"
         (ngModelChange)="handleIsTyping.emit(!!messageInput())"
-        (keydown.enter)="sendMessage(messageInput() , true)"
+        (keydown.enter)="sendMessage(messageInput(), true)"
         type="text"
         class="flex-1 bg-transparent border-none text-off-white p-2 pr-24 placeholder-dark-gray outline-none text-sm"
         placeholder="Type your message here..."
       />
 
       <button
-        [class]="'text-white pl-4 pr-5 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2 absolute right-2 top-1/2 -translate-y-1/2 group ' + 
-                 (!isSignalRConnected() || isLoading()
-                   ? 'bg-gray-500 opacity-50 cursor-not-allowed scale-100' 
-                   : 'bg-secondary hover:bg-blue-600 active:scale-90 cursor-pointer')"
-        (click)="sendMessage(messageInput() , true)"
+        [class]="
+          'text-white pl-4 pr-5 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2 absolute right-2 top-1/2 -translate-y-1/2 group ' +
+          (!isSignalRConnected() || isLoading()
+            ? 'bg-gray-500 opacity-50 cursor-not-allowed scale-100'
+            : 'bg-secondary hover:bg-blue-600 active:scale-90 cursor-pointer')
+        "
+        (click)="sendMessage(messageInput(), true)"
         [disabled]="!isSignalRConnected() || isLoading()"
       >
         <span class="font-bold text-[11px] uppercase tracking-wider">Send</span>
-        <i class="fa-solid fa-paper-plane text-[11px] group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+        <i
+          class="fa-solid fa-paper-plane text-[11px] group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"
+        ></i>
       </button>
     </div>
   </div>
-
 </div>

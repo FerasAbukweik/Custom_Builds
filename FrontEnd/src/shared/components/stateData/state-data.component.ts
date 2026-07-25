@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { stateCardData } from '../../../core/interceptors/state-card-data'; 
+import { stateCardData } from '../../../core/interfaces/state-card-data';
 
 @Component({
   selector: 'app-state-data',

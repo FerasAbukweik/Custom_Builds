@@ -1,20 +1,16 @@
 import { inject } from '@angular/core';
 import { CanMatchFn, Router } from '@angular/router';
-import { AccountServices } from '../services/api-services/account-services';
-import { map } from 'rxjs';
+import { AuthApiService } from '../services/api-services/auth-api-service';
 
 export const loginSignupGuard: CanMatchFn = () => {
-  const accountServices = inject(AccountServices);
+  const authService = inject(AuthApiService);
   const router = inject(Router);
 
-  accountServices
-    .checkToken()
-    .pipe(
-      map(() => {
-        router.navigate(['/']);
-      }),
-    )
-    .subscribe();
+  authService.isAuthenticated().subscribe({
+    next: () => {
+      router.navigateByUrl('/');
+    },
+  });
 
   return true;
 };

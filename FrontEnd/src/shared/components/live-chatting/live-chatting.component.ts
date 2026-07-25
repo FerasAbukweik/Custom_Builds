@@ -1,10 +1,20 @@
-import { Component, effect, ElementRef, input, output, signal, viewChild } from '@angular/core';
-import { IMessageDTO } from '../../../core/DTO/message-dto'; 
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { IMessageDTO } from '../../../core/DTO/message-dto';
 import { LoadingComponent } from '../loading/loading.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { IsVisableDirective } from '../../directives/is-visable.directive';
+import { MessagesSignalRService } from '../../../core/services/client-services/messaegs-signalR-service';
 
 @Component({
   selector: 'app-live-chatting',
@@ -15,6 +25,10 @@ import { IsVisableDirective } from '../../directives/is-visable.directive';
   },
 })
 export class LiveChattingComponent {
+  // DI
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _messagesSignalRService = inject(MessagesSignalRService);
+
   // input
   messages = input.required<IMessageDTO[]>();
   isLoading = input.required<boolean>();
@@ -35,54 +49,73 @@ export class LiveChattingComponent {
 
   // methods
 
+  // constructor
   constructor() {
+    // manage page scroll
     let firstCheck = true;
+    let secondCheck = true;
 
-    const sub = toObservable(this.isLoading).subscribe({
-      next: (isLoading) => {
-        if (!isLoading) {
-          if (firstCheck) {
-            firstCheck = false;
-          } else {
-            this._scrollToBottom();
-            sub.unsubscribe();
+    toObservable(this.isLoading)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: (isLoading) => {
+          if (!isLoading) {
+            // if first time finished loading dont do anything (the initial value)
+            if (firstCheck) firstCheck = false;
+            else {
+              // if second time (first time fitching messages) scroll to bottom
+              if (secondCheck) {
+                this._scrollToBottom();
+                secondCheck = false;
+              } else {
+                // else stay in place
+                this._stayInPlace();
+              }
+            }
           }
-        }
-      },
-    });
+        },
+      });
 
-    effect(() => {
-      const currentMessages = this.messages(); // track changes in messages
-
-      const container = this.myScrollContainer().nativeElement;
-
-      const oldScrollHeight = container.scrollHeight;
-      const oldScrollTop = container.scrollTop;
-
-      setTimeout(() => {
-        const newScrollHeight = container.scrollHeight;
-        const heightDifference = newScrollHeight - oldScrollHeight;
-
-        container.scrollTop = oldScrollTop + heightDifference;
-      }, 0);
-    });
+    // when receive a message scroll to bottom
+    this._messagesSignalRService.receiveMessage$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: () => {
+          this._scrollToBottom();
+        },
+      });
   }
 
-  // scroll to bottom
-  private _scrollToBottom = (delay: number = 0) => {
+  private _scrollToBottom(timeOut: number = 0) {
     setTimeout(() => {
-      this.myScrollContainer().nativeElement.scrollTo(
-        0,
-        this.myScrollContainer().nativeElement.scrollHeight,
-      );
-    }, delay);
-  };
+      const div = this.myScrollContainer().nativeElement;
+      div.scrollTo({
+        top: div.scrollHeight,
+        behavior: 'smooth',
+      });
+    }, timeOut);
+  }
 
-  sendMessage(message: string, emptyInput: boolean) {
-    if (emptyInput) {
-      this.messageInput.set('');
-    }
+  private _stayInPlace() {
+    const div = this.myScrollContainer().nativeElement;
+
+    const oldScrollHeight = div.scrollHeight;
+    const oldScrollTop = div.scrollTop;
+
+    setTimeout(() => {
+      const newScrollHeight = div.scrollHeight;
+      const heightDifference = newScrollHeight - oldScrollHeight;
+
+      div.scrollTop = oldScrollTop + heightDifference;
+    }, 0);
+  }
+
+  sendMessage(message: string, isUserMessage: boolean) {
+    if (isUserMessage && !this.messageInput()) return;
+
     this.handleSendMessage.emit(message);
+    
+    if (isUserMessage) this.messageInput.set('');
 
     this._scrollToBottom();
   }

@@ -14,11 +14,11 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<RefreshToken?> GetFromTokenStringAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
-            return await dbContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.RefreshTokenString == refreshToken, cancellationToken);
+            return await dbContext.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(rt => rt.RefreshTokenString == refreshToken, cancellationToken);
         }
         public async Task<RefreshToken?> GetFromIdAsync(Guid refreshTokenId, CancellationToken cancellationToken = default)
         {
-            return await dbContext.RefreshTokens.FindAsync([refreshTokenId], cancellationToken);
+            return await dbContext.RefreshTokens.AsNoTracking().SingleOrDefaultAsync(rt => rt.Id == refreshTokenId, cancellationToken);
         }
         public async Task<RefreshToken?> RemoveByIdAsync(Guid tokenId, CancellationToken cancellationToken = default)
         {
@@ -35,7 +35,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             Expression<Func<RefreshToken, object?>>[]? includes = null,
             CancellationToken cancellationToken = default)
         {
-            var query = dbContext.RefreshTokens.AsQueryable();
+            var query = dbContext.RefreshTokens.AsNoTracking().AsQueryable();
 
             if (includes != null)
             {

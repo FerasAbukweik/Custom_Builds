@@ -19,7 +19,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             CancellationToken cancellationToken = default)
         {
 
-            var query = dbContext.Messages.AsQueryable();
+            var query = dbContext.Messages.AsNoTracking().AsQueryable();
 
             if (includes != null)
             {
@@ -41,6 +41,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             CancellationToken cancellationToken = default)
         {
             return await dbContext.Messages
+                .AsNoTracking()
                 .Where(m => m.ChatGroup!.UserId == userId)
                 .Include(m => m.Sender)
                 .OrderByDescending(m => m.CreatedAt)
@@ -51,7 +52,7 @@ namespace Custom_Builds.Infrastructure.Repositories
 
         public async Task<Message?> GetByIdAsync(Guid messageId, Expression<Func<Message, object?>>[]? include = null, CancellationToken cancellationToken = default)
         {
-            var query = dbContext.Messages.AsQueryable();
+            var query = dbContext.Messages.AsNoTracking().AsQueryable();
 
             if (include != null)
             {

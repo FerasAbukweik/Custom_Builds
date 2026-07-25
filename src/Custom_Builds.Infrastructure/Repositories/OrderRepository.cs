@@ -18,11 +18,11 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<int> CountAsync(Expression<Func<Order, bool>> checks , CancellationToken cancellationToken = default)
         {
-            return await dbContext.Orders.CountAsync(checks ,cancellationToken);
+            return await dbContext.Orders.AsNoTracking().CountAsync(checks ,cancellationToken);
         }
         public async Task<OrderHistoryDTO?> GetHistorySummaryAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            return await dbContext.Orders.Where(o => (
+            return await dbContext.Orders.AsNoTracking().Where(o => (
             o.UserId == userId &&
            (o.OrderStatus == OrderStateEnum.Completed ||
             o.OrderStatus == OrderStateEnum.Returned ||
@@ -38,7 +38,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<Order?> UpdateOrderStatus(Guid orderId, OrderStateEnum newStatus, CancellationToken cancellationToken = default)
         {
-            var toEdit = await dbContext.Orders.FindAsync([orderId], cancellationToken);
+            var toEdit = await dbContext.Orders.AsNoTracking().SingleOrDefaultAsync(o => o.Id == orderId, cancellationToken);
 
             if (toEdit == null) return null;
 
@@ -56,7 +56,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             bool isCompleted,
             CancellationToken cancellationToken = default)
         {
-            var query = dbContext.Orders.Where(o => o.UserId == userId);
+            var query = dbContext.Orders.AsNoTracking().Where(o => o.UserId == userId);
 
             var completedStatuses = new[] 
             { 
@@ -88,7 +88,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<Order?> RemoveByIdAsync(Guid orderId, CancellationToken cancellationToken = default)
         {
-            Order? toDel = await dbContext.Orders.FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
+            Order? toDel = await GetByIdAsync(orderId, cancellationToken);
 
             if (toDel == null) return null;
 
@@ -101,7 +101,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             Expression<Func<Order, object?>>[]? includes = null,
             CancellationToken cancellationToken = default)
         {
-            var query = dbContext.Orders.AsQueryable();
+            var query = dbContext.Orders.AsNoTracking().AsQueryable();
 
             if (includes != null)
             {

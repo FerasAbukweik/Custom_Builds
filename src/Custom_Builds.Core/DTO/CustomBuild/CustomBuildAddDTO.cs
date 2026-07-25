@@ -7,7 +7,7 @@ namespace Custom_Builds.Core.DTO.CustomBuild
     {
 
         [Required]
-        public required List<Guid> ModificationIds { get; set; }
+        public required IReadOnlyList<Guid> ModificationIds { get; set; }
 
         [Required]
         public required CustomBuildTypeEnum CustomBuildType { get; set; }

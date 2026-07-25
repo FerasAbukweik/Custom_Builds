@@ -23,7 +23,6 @@ builder.Services
     .AddCore()
     .AddInfrastructure()
     .AddWepApi(builder.Configuration);
-    
 
 
 var app = builder.Build();

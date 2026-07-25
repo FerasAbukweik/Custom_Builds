@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace custom_Peripherals.Controllers;
 
-public class AuthController(IAccountService accountService) : ApplicationControllerBase
+public class AuthController(
+    IAuthService authService,
+    ICookieService cookieService) : ApplicationControllerBase
 {
     // check token
-    [HttpGet("[action]")]
+    [HttpPost("[action]")]
     [Authorize]
     public IActionResult IsAuthenticated()
     {
@@ -21,13 +23,13 @@ public class AuthController(IAccountService accountService) : ApplicationControl
     [HttpPost("[action]")]
     public async Task<IActionResult> Login([FromBody]LoginDTO loginInfo)
     {
-        Result result = await accountService.LoginAsync(loginInfo);
+        Result result = await authService.LoginAsync(loginInfo);
 
         return result.ToActionResult();
     }
     
     // logout
-    [HttpDelete("[action]")]
+    [HttpPost("[action]")]
     [Authorize]
     public ActionResult Logout(CancellationToken cancellationToken = default)
     {
@@ -35,8 +37,20 @@ public class AuthController(IAccountService accountService) : ApplicationControl
         var getCurrUserId = User.GetId();
         if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult();
             
-        accountService.Logout(getCurrUserId.Value!);
+        authService.Logout(getCurrUserId.Value!);
 
         return Ok();
+    }
+    
+    // update tokens
+    [HttpPost("[action]")]
+    public async Task<IActionResult> UpdateTokens(CancellationToken cancellationToken = default)
+    {
+        var getRefreshTokenResult = cookieService.GetRefreshToken();
+        if (!getRefreshTokenResult.IsSuccess) return ((Result)getRefreshTokenResult).ToActionResult();
+        
+        Result result = await authService.UpdateTokensAsync(getRefreshTokenResult.Value!, cancellationToken);
+
+        return result.ToActionResult();
     }
 }

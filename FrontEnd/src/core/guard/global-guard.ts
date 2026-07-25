@@ -1,19 +1,15 @@
 import { inject } from '@angular/core';
 import { CanMatchFn, Router } from '@angular/router';
-import { AccountServices } from '../services/api-services/account-services';
-import { catchError, map, of } from 'rxjs';
+import { AuthService } from '../services/client-services/auth-service';
 
-export const globalGuard: CanMatchFn = () => {
-  const accountServices = inject(AccountServices);
+export const globalGuard: CanMatchFn = async () => {
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  return accountServices.checkToken().pipe(
-    map(() => {
-      return true;
-    }),
-    catchError((err) => {
-      router.navigate(['login-signup']);
-      return of(false);
-    }),
-  );
+  if (!(await authService.isAuthenticatedAsync())) {
+    router.navigateByUrl('/login-signup');
+    // return false;
+  }
+
+  return true;
 };

@@ -17,7 +17,7 @@ public class OrderService(
 {
     public async Task<Result<OrderDTO>> AddOrderFromCartItemsAsync(Guid currUserId, CancellationToken cancellationToken = default)
     {
-        var cartItems = await cartItemRepository.FilterAsync(ci => ci.UserId == currUserId,[],cancellationToken);
+        var cartItems = await cartItemRepository.FilterAsync(ci => ci.UserId == currUserId,null,null,null,cancellationToken);
 
         if (cartItems.Count == 0)
         {
@@ -62,8 +62,12 @@ public class OrderService(
     public async Task<Result<OrderHistoryDTO>> GetOrderHistoryAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var result = await orderRepository.GetHistorySummaryAsync(userId, cancellationToken);
-        if(result == null)
-            return Result<OrderHistoryDTO>.Failure("history summary not found");
+        if (result == null)
+            return Result<OrderHistoryDTO>.Success(new OrderHistoryDTO()
+            {
+                TotalPrice = 0,
+                Count = 0
+            });
         
         return Result<OrderHistoryDTO>.Success(result); 
     }

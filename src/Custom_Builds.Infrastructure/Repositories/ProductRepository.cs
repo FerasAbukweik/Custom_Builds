@@ -28,7 +28,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<Product?> GetByIdAsync(Guid productId, CancellationToken cancellationToken = default)
         {
-            return await dbContext.Products.FindAsync([productId], cancellationToken);
+            return await dbContext.Products.AsNoTracking().SingleOrDefaultAsync(p => p.Id == productId, cancellationToken);
         }
         public async Task<Product?> RemoveByIdAsync(Guid productId, CancellationToken cancellationToken = default)
         {
@@ -45,7 +45,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             Expression<Func<Product, object?>>[]? includes = null,
             CancellationToken cancellationToken = default)
         {
-            var query = dbContext.Products.AsQueryable();
+            var query = dbContext.Products.AsNoTracking().AsQueryable();
 
             if (includes != null)
             {
@@ -62,6 +62,8 @@ namespace Custom_Builds.Infrastructure.Repositories
             CancellationToken cancellationToken = default)
         {
             return await dbContext.Products
+                .AsNoTracking()
+                .OrderBy(p => p.Id)
                 .Skip(reqData.Taken)
                 .Take(reqData.SectionSize)
                 .ToListAsync(cancellationToken);

@@ -17,7 +17,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<CartItem?> GetByIdAsync(Guid cartItemId, CancellationToken cancellationToken = default)
         {
-            return await dbContext.CartItems.FindAsync([cartItemId], cancellationToken);
+            return await dbContext.CartItems.AsNoTracking().SingleOrDefaultAsync(ci => ci.Id == cartItemId, cancellationToken);
         }
         public async Task<CartItem?> RemoveByIdAsync(Guid cartItemId, CancellationToken cancellationToken = default)
         {
@@ -30,6 +30,8 @@ namespace Custom_Builds.Infrastructure.Repositories
         public async Task<List<CartItem>> FilterAsync(
             Expression<Func<CartItem, bool>> extraChecks,
             Expression<Func<CartItem, object?>>[]? includes = null,
+            int? skip = null,
+            int? take = null,
             CancellationToken cancellationToken = default)
         {
             var query = dbContext.CartItems.AsQueryable();
@@ -42,25 +44,22 @@ namespace Custom_Builds.Infrastructure.Repositories
                 }
             }
 
-            return await query.Where(extraChecks).ToListAsync(cancellationToken);
+            query = query.Where(extraChecks);
+            
+            if (skip != null) query = query.Skip(skip.Value);
+            if(take != null) query = query.Take(take.Value);
+            
+            return await query.AsNoTracking().ToListAsync(cancellationToken);
         }
         public void UpdateRange(List<CartItem> newItems)
         {
             dbContext.CartItems.UpdateRange(newItems);
         }
-        public async Task<List<CartItem>> LazyGetCartItemsAsync(LazyDTO reqData, Guid userId, CancellationToken cancellationToken = default)
-        {
-            return await dbContext.CartItems
-                .Include(ci => ci.Product)
-                .Where(ci => ci.UserId == userId)
-                .OrderBy(o => o.CreatedAt)
-                .Skip(reqData.Taken)
-                .Take(reqData.SectionSize)
-                .ToListAsync(cancellationToken);
-        }
+
         public async Task<CartSummaryDTO?> GetSummaryInfoAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await dbContext.CartItems
+                .AsNoTracking()
                 .Where(ci => ci.UserId == userId)
                 .GroupBy(ci => 1)
                 .Select(g => new CartSummaryDTO
@@ -70,13 +69,14 @@ namespace Custom_Builds.Infrastructure.Repositories
                         (ci.Product != null ? ci.Product.Price : 0) * ci.Quantity +
                         (ci.CustomBuild != null ? ci.CustomBuild.Modifications.Sum(m => m.Price) : 0) * ci.Quantity
                     )
-                }).FirstOrDefaultAsync(cancellationToken);
+                }).SingleOrDefaultAsync(cancellationToken);
         }
-        public async Task<IReadOnlyList<CartItem>> UpdateQuantitiesAsync(IReadOnlyList<Id_Quantity_DTO_ts> needsUpdate, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<CartItem>> UpdateQuantitiesAsync(IReadOnlyList<Id_Quantity_DTO> needsUpdate, CancellationToken cancellationToken = default)
         {
             var needsUpdateIds = needsUpdate.Select(nu => nu.ItemId);
             var toUpdate = await dbContext.CartItems.Where(ci => needsUpdateIds.Contains(ci.Id)).ToListAsync(cancellationToken);
 
+            // convert array to dictionary for faster access to data 
             var dic = needsUpdate.ToDictionary(
                 x => x.ItemId,
                 x => x.NewQuantity

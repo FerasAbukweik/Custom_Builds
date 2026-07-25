@@ -44,7 +44,7 @@ namespace Custom_Builds.Core.Domain.Entities
         // DTO
         
         // convert cartItem object to dto
-        // requires including product or customBuild based on item type 
+        // requires including product and customBuild 
         public CartItemDTO ToDTO()
         {
             return new CartItemDTO()
@@ -67,7 +67,9 @@ namespace Custom_Builds.Core.Domain.Entities
                     OrderTypeEnum.Custom => "Custom Build",
                     _ => throw new Exception("unhandled order type")
                 },
-                Specs = CustomBuild?.Modifications.Select(m =>m.Name).ToList() ?? ["Custom Build"]
+                Specs = CustomBuild?.Modifications != null
+                    ? ["CustomBuild", .. CustomBuild.Modifications.Select(m => m.Name)]
+                    : ["Product"]
             };
         }
     }

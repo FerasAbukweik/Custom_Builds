@@ -14,7 +14,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             Expression<Func<Modification, object?>>[]? includes,
             CancellationToken  cancellationToken = default)
         {
-            var query = dbContext.Modifications.AsQueryable();
+            var query = dbContext.Modifications.AsNoTracking().AsQueryable();
 
             if (includes != null)
             {
@@ -46,7 +46,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<Modification?> RemoveByIdAsync(Guid modificationId, CancellationToken cancellationToken = default)
         {
-            Modification? toDel = await dbContext.Modifications.FirstOrDefaultAsync(m => m.Id == modificationId, cancellationToken);
+            Modification? toDel = await GetByIdAsync(modificationId,[] ,cancellationToken);
 
             if (toDel == null) return null;
 
@@ -59,7 +59,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             CancellationToken cancellationToken = default)
         {
 
-            var query = dbContext.Modifications.AsQueryable();
+            var query = dbContext.Modifications.AsNoTracking().AsQueryable();
 
             if (includes != null)
             {
@@ -74,12 +74,12 @@ namespace Custom_Builds.Infrastructure.Repositories
 
         public async Task<int> CountAsync(Expression<Func<Modification, bool>> extraChecks, CancellationToken cancellationToken = default)
         {
-            return await dbContext.Modifications.CountAsync(extraChecks, cancellationToken);
+            return await dbContext.Modifications.AsNoTracking().CountAsync(extraChecks, cancellationToken);
         }
 
         public async Task<decimal> GetModificationsPriceAsync(IReadOnlyList<Guid> modificationIds, CancellationToken cancellationToken = default)
         {
-            return await dbContext.Modifications.Where(m => modificationIds.Contains(m.Id)).SumAsync(m => m.Price, cancellationToken);
+            return await dbContext.Modifications.AsNoTracking().Where(m => modificationIds.Contains(m.Id)).SumAsync(m => m.Price, cancellationToken);
         }
 
         public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)

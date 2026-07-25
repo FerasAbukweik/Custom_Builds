@@ -5,7 +5,7 @@ export interface IMiniCartItemDTO {
   orderType: OrderTypeEnum;
   customBuildId: string;
   productId: string;
-  Price: number;
+  price: number;
   quantity: number;
   title: string;
   specs: string[];

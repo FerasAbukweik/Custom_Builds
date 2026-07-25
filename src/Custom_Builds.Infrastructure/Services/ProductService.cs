@@ -35,12 +35,11 @@ public class ProductService(
 
         return Result<ProductDTO>.Success(newProduct.toDTO());
     }
-    public async Task<Result<List<ProductDTO>>> GetAllAsync(LazyDTO reqData, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<ProductDTO>>> LazyGetAllAsync(LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
-        var result = await productRepository.LazyGetAllProductsAsync(reqData, cancellationToken);
+        var result = await productRepository.LazyGetAllProductsAsync(lazyData, cancellationToken);
 
-        return Result<List<ProductDTO>>.Success(result.Select(p => p.toDTO()).ToList());
-
+        return Result<IReadOnlyList<ProductDTO>>.Success(result.Select(p => p.toDTO()).ToList());
     }
     public async Task<Result<ProductDTO>> GetByIdAsync(Guid productId, CancellationToken cancellationToken = default)
     {

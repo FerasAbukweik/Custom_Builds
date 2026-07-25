@@ -2,7 +2,8 @@ using System.Net;
 using Custom_Builds.Core.Common;
 using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.DTO.Account;
-using Custom_Builds.Core.DTO.Auth;
+using Custom_Builds.Core.Enums;
+using Custom_Builds.Core.Interfaces.RepositoryContracts;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,8 @@ public class AccountService(
     ICookieService cookieService,
     ITokensService tokensService,
     ILogger<AccountService> logger,
-    IChatGroupService chatGroupService) : IAccountService
+    IChatGroupService chatGroupService,
+    IUsersRepository usersRepository) : IAccountService
 {
     public async Task<Result<ApplicationUser>> DeleteUserAsync(Guid userId)
     {
@@ -42,44 +44,12 @@ public class AccountService(
             nameof(AccountService), nameof(DeleteUserAsync), userId);
         return Result<ApplicationUser>.Success(userToDel);
     }
-    public async Task<Result> LoginAsync(LoginDTO loginInfo) 
-    {
-        // find user by email
-        ApplicationUser? user = await userManager.FindByEmailAsync(loginInfo.Email);
-        if (user == null || !await userManager.CheckPasswordAsync(user, loginInfo.Password))
-        {
-            logger.LogWarning("{serviceName}.{methodName} failed login attempt for email: {email}",
-                nameof(AccountService), nameof(LoginAsync), loginInfo.Email);
-            return Result.Failure("Wrong Email or Password" , HttpStatusCode.Unauthorized);
-        }
-
-        // generate Tokens
-        var generateTokensResult = await tokensService.GenerateTokens(user);
-        if (!generateTokensResult.IsSuccess) return generateTokensResult;
-        
-        // store tokens in cookies response
-        var storeTokensResult = cookieService.SetTokens(generateTokensResult.Value!);
-        if (!storeTokensResult.IsSuccess) return storeTokensResult;
-
-        logger.LogInformation("{serviceName}.{methodName} user with id: {userId} logged in",
-            nameof(AccountService), nameof(LoginAsync), user.Id);
-        
-        return Result.Success();
-    }
-    public void Logout(Guid userId)
-    {
-        cookieService.RemoveTokens();
-        
-        logger.LogWarning("{serviceName}.{methodName} user with id: {userId} logged out",
-            nameof(AccountService), nameof(Logout), userId);
-    }
     public async Task<Result> RegisterAsync(RegisterDTO registerInfo, CancellationToken cancellationToken = default)
     {
         // check if email already exists
-        if (await userManager.FindByEmailAsync(registerInfo.Email) != null)
-        {
-            return Result.Failure("Email already used");
-        }
+        var doesUserExistResult = await DoesUserExist(registerInfo, cancellationToken);
+        if (doesUserExistResult.IsSuccess)
+            return Result.Failure(doesUserExistResult.Value!);
 
         // new user to add
         ApplicationUser newUser = new ApplicationUser()
@@ -93,17 +63,17 @@ public class AccountService(
         var addUserResult = await userManager.CreateAsync(newUser, registerInfo.Password);
         if (!addUserResult.Succeeded)
         {
-            string errors = string.Join(" | ", addUserResult.Errors);
+            string errors = string.Join(" | ", addUserResult.Errors.Select(e => e.Description));
             logger.LogError("{serviceName}.{methodName} failed to create user\nErrors: {errors}",
                 nameof(AccountService), nameof(RegisterAsync), errors);
             return Result.Failure(errors);
         }
 
         // add user to his role
-        var addToRoleResult = await userManager.AddToRoleAsync(newUser, registerInfo.role.ToString());
+        var addToRoleResult = await userManager.AddToRoleAsync(newUser, nameof(RolesEnum.User));
         if (!addToRoleResult.Succeeded)
         {
-            string errors = string.Join(" | ", addToRoleResult.Errors);
+            string errors = string.Join(" | ", addToRoleResult.Errors.Select(e => e.Description));
             logger.LogError("{serviceName}.{methodName} failed adding user to role\nErrors: {errors}",
                 nameof(AccountService), nameof(RegisterAsync), errors);
             return Result.Failure(errors);
@@ -123,5 +93,48 @@ public class AccountService(
         if(!storeTokensResult.IsSuccess) return  storeTokensResult;
 
         return Result.Success();
+    }
+    
+    
+    
+    private async Task<Result<string>> DoesUserExist(RegisterDTO toUserCreate, CancellationToken cancellationToken = default)
+    {
+        // check if user already Exists
+        var existingUsers = await usersRepository.FilterAsync((u =>
+                (u.UserName!.ToLower() == toUserCreate.UserName.ToLower() || 
+                 u.Email!.ToLower() == toUserCreate.Email.ToLower() || 
+                 u.PhoneNumber == toUserCreate.PhoneNumber)
+            ),cancellationToken: cancellationToken);
+
+        // if user already exist generate error message and return failure
+        if (existingUsers.Any())
+        {
+            bool isEmailUsed = false , isPhoneUsed = false , isUserNameUsed = false;
+
+            // see what is used
+            foreach (var user in existingUsers)
+            {
+                if (user.UserName == toUserCreate.UserName) isUserNameUsed = true;
+                if (user.Email == toUserCreate.Email) isEmailUsed = true;
+                if (user.PhoneNumber == toUserCreate.PhoneNumber) isPhoneUsed = true;
+                
+                if(isEmailUsed && isPhoneUsed && isUserNameUsed) break;
+            }
+ 
+            // collect used fields in list
+            var usedFields = new List<string>();
+            if (isEmailUsed) usedFields.Add("Email");
+            if (isPhoneUsed) usedFields.Add("Phone number");
+            if (isUserNameUsed) usedFields.Add("Username");
+
+            // generate error message
+            string fieldsText = string.Join(",\n", usedFields);
+            string verb = usedFields.Count == 1 ? "\nis already used." : "\nare already used.";
+            string errorMessage = $"{fieldsText} {verb}";
+
+            return Result<string>.Success(errorMessage);
+        }
+
+        return Result<string>.Failure("");
     }
 }

@@ -58,11 +58,17 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("AddedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid?>("CustomBuildId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("OrderPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("OrderType")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("ProductId")
                         .HasColumnType("uniqueidentifier");
@@ -73,9 +79,6 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("orderType")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CustomBuildId");
@@ -84,7 +87,7 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Cart");
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.ChatGroup", b =>
@@ -110,15 +113,15 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("CustomBuildType")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatorId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("CustomBuilds");
                 });
@@ -134,16 +137,10 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varchar(250)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("FileName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("MessageType")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("SenderId")
                         .HasColumnType("uniqueidentifier");
@@ -164,26 +161,27 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varchar(150)");
 
                     b.Property<string>("Icon")
-                        .HasColumnType("varchar(max)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("varchar(max)");
+                    b.Property<Guid>("SectionId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Value")
-                        .HasColumnType("varchar(max)");
+                        .HasColumnType("varchar(150)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SectionId");
 
                     b.ToTable("Modifications");
                 });
@@ -197,14 +195,36 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("CustomBuildId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("OrderStatus")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.OrderItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CustomBuildId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("OrderType")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("OrderedPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid?>("ProductId")
                         .HasColumnType("uniqueidentifier");
@@ -212,25 +232,17 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomBuildId");
+                    b.HasIndex("CustomBuildId")
+                        .IsUnique()
+                        .HasFilter("[CustomBuildId] IS NOT NULL");
+
+                    b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Orders");
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Part", b =>
@@ -241,11 +253,11 @@ namespace Custom_Builds.Infrastructure.Migrations
 
                     b.Property<string>("Icon")
                         .IsRequired()
-                        .HasColumnType("varchar(max)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varchar(50)");
 
                     b.HasKey("Id");
 
@@ -258,20 +270,50 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("varchar(500)");
+
+                    b.PrimitiveCollection<string>("Images")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.PrimitiveCollection<string>("images")
+                    b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RefreshTokenString")
+                        .IsRequired()
+                        .HasColumnType("varchar(250)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RefreshTokenString")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Section", b =>
@@ -280,11 +322,16 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("PartId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PartId");
 
                     b.ToTable("Sections");
                 });
@@ -315,6 +362,22 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("7c9e31d4-82f5-4e1b-a639-2d14e08f5193"),
+                            ConcurrencyStamp = "4b8f19e2-36c7-4d9a-8b15-20e8d3fa91a4",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = new Guid("a1d7f40e-5c82-411a-96e3-2b8f9e01d43c"),
+                            ConcurrencyStamp = "e82c19a4-67d1-4b3f-b982-14d20f5a89e6",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Identity.ApplicationUser", b =>
@@ -381,32 +444,6 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Custom_Builds.Core.Domain.TokenEntities.RefreshToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ExpierDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("RefreshTokenString")
-                        .IsRequired()
-                        .HasColumnType("varchar(1000)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RefreshTokenString")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -512,36 +549,6 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ModificationSection", b =>
-                {
-                    b.Property<Guid>("ModificationsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SectionsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ModificationsId", "SectionsId");
-
-                    b.HasIndex("SectionsId");
-
-                    b.ToTable("Sections_Modifications_ManyToMany", (string)null);
-                });
-
-            modelBuilder.Entity("PartSection", b =>
-                {
-                    b.Property<Guid>("PartsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SectionsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("PartsId", "SectionsId");
-
-                    b.HasIndex("SectionsId");
-
-                    b.ToTable("Section_Parts_ManyToMany", (string)null);
-                });
-
             modelBuilder.Entity("ApplicationUserChatGroup", b =>
                 {
                     b.HasOne("Custom_Builds.Core.Domain.Entities.ChatGroup", null)
@@ -610,12 +617,13 @@ namespace Custom_Builds.Infrastructure.Migrations
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.CustomBuild", b =>
                 {
-                    b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "Creator")
+                    b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "User")
                         .WithMany("CustomBuilds")
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("Creator");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Message", b =>
@@ -637,32 +645,54 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Modification", b =>
+                {
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.Section", "Section")
+                        .WithMany("Modifications")
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Section");
+                });
+
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Order", b =>
                 {
-                    b.HasOne("Custom_Builds.Core.Domain.Entities.CustomBuild", "CustomBuild")
-                        .WithMany("orders")
-                        .HasForeignKey("CustomBuildId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Custom_Builds.Core.Domain.Entities.Product", "Product")
-                        .WithMany("Orders")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CustomBuild");
-
-                    b.Navigation("Product");
-
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Custom_Builds.Core.Domain.TokenEntities.RefreshToken", b =>
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.OrderItem", b =>
+                {
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.CustomBuild", "CustomBuild")
+                        .WithOne("OrderItem")
+                        .HasForeignKey("Custom_Builds.Core.Domain.Entities.OrderItem", "CustomBuildId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.Order", "Order")
+                        .WithMany("OrderedItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.Product", "Product")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CustomBuild");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "User")
                         .WithMany("refreshTokens")
@@ -671,6 +701,17 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Section", b =>
+                {
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.Part", "Part")
+                        .WithMany("Sections")
+                        .HasForeignKey("PartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Part");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -724,36 +765,6 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ModificationSection", b =>
-                {
-                    b.HasOne("Custom_Builds.Core.Domain.Entities.Modification", null)
-                        .WithMany()
-                        .HasForeignKey("ModificationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Custom_Builds.Core.Domain.Entities.Section", null)
-                        .WithMany()
-                        .HasForeignKey("SectionsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("PartSection", b =>
-                {
-                    b.HasOne("Custom_Builds.Core.Domain.Entities.Part", null)
-                        .WithMany()
-                        .HasForeignKey("PartsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Custom_Builds.Core.Domain.Entities.Section", null)
-                        .WithMany()
-                        .HasForeignKey("SectionsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.ChatGroup", b =>
                 {
                     b.Navigation("Messages");
@@ -763,14 +774,29 @@ namespace Custom_Builds.Infrastructure.Migrations
                 {
                     b.Navigation("CartItems");
 
-                    b.Navigation("orders");
+                    b.Navigation("OrderItem");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Order", b =>
+                {
+                    b.Navigation("OrderedItems");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Part", b =>
+                {
+                    b.Navigation("Sections");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Product", b =>
                 {
                     b.Navigation("CartItems");
 
-                    b.Navigation("Orders");
+                    b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Section", b =>
+                {
+                    b.Navigation("Modifications");
                 });
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Identity.ApplicationUser", b =>

@@ -3,11 +3,12 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';
-import { provideRouter, withComponentInputBinding, withRouterConfig } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { globalInterceptor } from '../core/interceptors/global-interceptor';
+import { contentTypeInterceptor } from '../core/interceptors/content-type0interceptor';
+import { authInterceptor } from '../core/interceptors/auth-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +19,6 @@ export const appConfig: ApplicationConfig = {
       // withRouterConfig({paramsInheritanceStrategy: 'always'})
     ),
     provideZonelessChangeDetection(),
-    provideHttpClient(withInterceptors([globalInterceptor])),
+    provideHttpClient(withInterceptors([contentTypeInterceptor, authInterceptor])),
   ],
 };

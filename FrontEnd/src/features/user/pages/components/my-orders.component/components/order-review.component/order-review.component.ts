@@ -1,8 +1,15 @@
 import { Component, input } from '@angular/core';
-import { IStep } from './order-review.model';
 import { IOrderDTO } from '../../../../../../../core/DTO/mini-order-dto';
 import { CommonModule, DatePipe } from '@angular/common';
 import { OrderStateEnum } from '../../../../../../../core/enums/order-status-enum';
+import { IStep } from './order-review.model';
+
+const steps: IStep[] = [
+  { id: 1, label: 'DESIGN CONFIRMED', date: 'Oct 10', status: 'completed', icon: 'fa-check' },
+  { id: 2, label: 'IN ASSEMBLY', date: 'In Progress', status: 'current', icon: 'fa-tools' },
+  { id: 3, label: 'TESTING', date: 'Pending', status: 'upcoming', icon: 'fa-microchip' },
+  { id: 4, label: 'SHIPPED', date: 'Pending', status: 'upcoming', icon: 'fa-truck' },
+];
 
 @Component({
   selector: 'app-order-review',
@@ -17,13 +24,8 @@ export class OrderReviewComponent {
   // inputs
   order = input.required<IOrderDTO>();
 
-  // data
-  steps: IStep[] = [
-    { id: 1, label: 'DESIGN CONFIRMED', date: 'Oct 10', status: 'completed', icon: 'fa-check' },
-    { id: 2, label: 'IN ASSEMBLY', date: 'In Progress', status: 'current', icon: 'fa-tools' },
-    { id: 3, label: 'TESTING', date: 'Pending', status: 'upcoming', icon: 'fa-microchip' },
-    { id: 4, label: 'SHIPPED', date: 'Pending', status: 'upcoming', icon: 'fa-truck' },
-  ];
+  // protected
+  protected steps = steps;
 
   // methods
   isStepActive(stepId: number): boolean {

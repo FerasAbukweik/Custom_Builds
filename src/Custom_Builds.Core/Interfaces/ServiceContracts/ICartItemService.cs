@@ -27,7 +27,7 @@ public interface ICartItemService
     Task<Result> RemoveByIdAsync(Guid cartItemId, Guid currUserId, CancellationToken cancellationToken = default);
 
     Task<Result<IReadOnlyList<CartItemDTO>>> UpdateQuantitiesAsync(
-        IReadOnlyList<Id_Quantity_DTO_ts> needsUpdate,
+        IReadOnlyList<Id_Quantity_DTO> needsUpdate,
         Guid currUserId,
         CancellationToken cancellationToken = default);
 }

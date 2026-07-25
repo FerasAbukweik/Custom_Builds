@@ -25,7 +25,7 @@ public class OrderItemsRepository(ApplicationDbContext dbContext) : IOrderItemsR
         int? take = null,
         CancellationToken cancellationToken = default)
     {
-        var query = dbContext.OrderItems.AsQueryable();
+        var query = dbContext.OrderItems.AsNoTracking().AsQueryable();
 
         if (include != null)
         {
@@ -45,12 +45,12 @@ public class OrderItemsRepository(ApplicationDbContext dbContext) : IOrderItemsR
 
     public Task<int> CountAsync(Expression<Func<OrderItem, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        return dbContext.OrderItems.CountAsync(predicate, cancellationToken);
+        return dbContext.OrderItems.AsNoTracking().CountAsync(predicate, cancellationToken);
     }
 
     public async Task<OrderItem?> GetByIdAsync(Guid orderItemId,Expression<Func<OrderItem, object?>>[]? include, CancellationToken cancellationToken = default)
     {
-        var query =  dbContext.OrderItems.AsQueryable();
+        var query = dbContext.OrderItems.AsNoTracking().AsQueryable();
 
         if (include != null)
         {

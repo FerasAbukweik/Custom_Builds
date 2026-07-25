@@ -3,17 +3,26 @@ import { CustomBuildTypeEnum } from '../../../core/enums/custom-build-type-enum'
 
 export const routes: Routes = [
   {
-    path: 'controller',
+    path: '',
     loadComponent: () =>
-      import('./components/controller-customizer.component/controller-customizer.component').then(
-        (x) => x.ControllerCustomizerComponent,
+      import('.././customizers/layout/customizer.layout/customizer.layout').then(
+        (x) => x.CustomizerLayout,
       ),
-    data: {
-      currPage: CustomBuildTypeEnum.Controller,
-    },
-  },
-  {
-    path: '**',
-    redirectTo: '',
+    children: [
+      {
+        path: 'controller',
+        loadComponent: () =>
+          import('./components/controller-customizer.component/controller-customizer.component').then(
+            (x) => x.ControllerCustomizerComponent,
+          ),
+        data: {
+          currPage: CustomBuildTypeEnum.Controller,
+        },
+      },
+      {
+        path: '**',
+        redirectTo: '',
+      },
+    ],
   },
 ];

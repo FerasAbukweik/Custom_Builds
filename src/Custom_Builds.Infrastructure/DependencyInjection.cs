@@ -26,6 +26,7 @@ namespace Custom_Builds.Infrastructure
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IChatGroupService, ChatGroupService>();
             services.AddScoped<IOrderItemsService, OrderItemsService>();
+            services.AddScoped<IAuthService, AuthService>();
             
             
             // add repositories
@@ -40,6 +41,7 @@ namespace Custom_Builds.Infrastructure
             services.AddScoped<IPartRepository, PartRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IOrderItemsRepository, OrderItemsRepository>();
+            services.AddScoped<IUsersRepository, UsersRepository>();
             
             // Background Services
             services.AddHostedService<RemoveExpiredRefreshTokens>();

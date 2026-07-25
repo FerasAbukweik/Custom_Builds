@@ -1,4 +1,4 @@
-export interface IOrderHistoryDTO{
-    count: number;
-    totalPrice: number;
+export interface IOrderHistorySummaryDTO {
+  count: number;
+  totalPrice: number;
 }

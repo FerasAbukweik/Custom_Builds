@@ -1,11 +1,12 @@
 using System.Text;
+using Custom_Builds.Core.Constants;
 using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
 using Custom_Builds.Infrastructure.DBcontext;
-using Custom_Builds.Infrastructure.Services;
 using custom_Peripherals.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace custom_Peripherals;
@@ -34,13 +35,9 @@ public static class WepApiDependencyInjection
                     // get access token from cookies
                     OnMessageReceived = context =>
                     {
-                        // Authorization only supplied when generating new tokens via UseAutoRegenerateTokens middleware
-                        if (context.Request.Headers.ContainsKey("Authorization"))
-                        {
-                            return Task.CompletedTask;
-                        }
-
-                        if (context.Request.Cookies.TryGetValue("AccessToken", out string? token))
+                        var cookieKeys = context.HttpContext.RequestServices.GetRequiredService<IOptions<CookieKeys>>();
+                        
+                        if (context.Request.Cookies.TryGetValue(cookieKeys.Value.AccessToken, out var token))
                         {
                             context.Token = token;
                         }
@@ -56,7 +53,9 @@ public static class WepApiDependencyInjection
             options.UseSqlServer(configuration.GetConnectionString("default")
             )
         );
-        
+
+
+        services.Configure<CookieKeys>(configuration.GetSection("CookieKeys"));
         
         // add identity
         services.AddIdentityCore<ApplicationUser>(options =>
@@ -78,7 +77,7 @@ public static class WepApiDependencyInjection
             Options.AddPolicy("AllowExternalFrontEnd", policy => 
             {
                 policy
-                    .WithOrigins(["https://localhost:4200" , "http://localhost:4200"])
+                    .WithOrigins("https://localhost:4000", "https://localhost:4200")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

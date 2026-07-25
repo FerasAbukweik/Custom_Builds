@@ -1,5 +1,6 @@
 ﻿using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.Domain.Identity;
+using Custom_Builds.Core.Enums;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,25 @@ namespace Custom_Builds.Infrastructure.DBcontext
         {
             base.OnModelCreating(builder);
 
+            
+            // add roles
+
+            builder.Entity<ApplicationRole>().HasData(
+                new ApplicationRole()
+                {
+                    Id = Guid.Parse("7c9e31d4-82f5-4e1b-a639-2d14e08f5193"),
+                    Name = nameof(RolesEnum.Admin),
+                    NormalizedName = nameof(RolesEnum.Admin).ToUpper(),
+                    ConcurrencyStamp = "4b8f19e2-36c7-4d9a-8b15-20e8d3fa91a4"
+                },
+                new ApplicationRole()
+                {
+                    Id = Guid.Parse("a1d7f40e-5c82-411a-96e3-2b8f9e01d43c"),
+                    Name = nameof(RolesEnum.User),
+                    NormalizedName = nameof(RolesEnum.User).ToUpper(),
+                    ConcurrencyStamp = "e82c19a4-67d1-4b3f-b982-14d20f5a89e6"
+                }
+            );
             
             // refresh token relations -----------------------------------------
             builder.Entity<RefreshToken>()
@@ -105,7 +125,7 @@ namespace Custom_Builds.Infrastructure.DBcontext
                 .HasOne(cb => cb.User)
                 .WithMany(u => u.CustomBuilds)
                 .HasForeignKey(cb => cb.UserId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
             
             
             

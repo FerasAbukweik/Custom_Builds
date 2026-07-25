@@ -1,8 +1,8 @@
 import { Component, inject, input } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { DashboardSideBarComponent } from './components/dashboard-side-bar.component/dashboard-side-bar.component';
+import { DashboardSideBarComponent } from './components/dashboard-side-bar/dashboard-side-bar.component';
 import { DashboardService } from './dashboard.service';
-import { DashboardTopNavComponent } from './components/dashboard-top-nav.component/dashboard-top-nav.component';
+import { DashboardTopNavComponent } from './components/dashboard-top-nav/dashboard-top-nav.component';
 import { ISideBarData } from './dashboard.model';
 
 @Component({

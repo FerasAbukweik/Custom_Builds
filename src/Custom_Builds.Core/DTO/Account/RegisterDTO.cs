@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Custom_Builds.Core.Constants;
-using Custom_Builds.Core.Enums;
 
 namespace Custom_Builds.Core.DTO.Account
 {
@@ -20,6 +19,5 @@ namespace Custom_Builds.Core.DTO.Account
         [Required]
         [RegularExpression(ValidationConstants.PasswordRegex , ErrorMessage = "Wrong Password Format")]
         public required string Password { get; set; }
-        public RolesEnum role { get; set; } = RolesEnum.User;
     }
 }

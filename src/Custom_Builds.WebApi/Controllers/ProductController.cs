@@ -11,12 +11,11 @@ namespace custom_Peripherals.Controllers
         IProductService productService
         ) : ApplicationControllerBase
     {
-
         [Authorize]
         [HttpGet("[action]")]
-        public async Task<ActionResult<List<ProductDTO>>> GetAll([FromQuery] LazyDTO reqData)
+        public async Task<ActionResult<IReadOnlyList<ProductDTO>>> GetAll([FromQuery] LazyDTO lazyData)
         {
-            var result = await productService.GetAllAsync(reqData);
+            var result = await productService.LazyGetAllAsync(lazyData);
 
             return result.ToActionResult();
         }

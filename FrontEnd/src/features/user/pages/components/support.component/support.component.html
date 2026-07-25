@@ -1,2 +1,10 @@
-<app-live-chatting (handleSendMessage)="handleSendMessage($event)" (handleIsTyping)="handleIsTyping($event)" (lazyLoadMessages)="lazyLoadMessages()" 
-[isLoading]="isLoading()" [isTyping]="isTyping()" [messages]="messages()" [isSignalRConnected]="isSignalRConnected()" [quickActions]="quickActions"/>
+<app-live-chatting
+  [isLoading]="messagesService.getIsLoading()"
+  [isTyping]="isTyping()"
+  [messages]="messagesService.getMessages()"
+  [isSignalRConnected]=" messagesSignalRService.getIsConnected()"
+  [quickActions]="quickActions"
+  (handleSendMessage)="handleSendMessage($event)"
+  (lazyLoadMessages)="messagesService.lazyGetMessages()"
+  (handleIsTyping)="handleTyping($event)"
+/>

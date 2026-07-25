@@ -3,11 +3,18 @@
   [subText]="'Review and manage your past custom builds and purchases.'"
 >
   <section class="flex flex-col gap-8 max-h-max overflow-y-scroll">
-    <app-state-data [statCardData]="statCardData"/>
+    <app-state-data [statCardData]="statCardData()" />
 
     <div class="bg-deep-blue border border-dark-blue-gray rounded-xl shadow-xl mb-8">
-      <app-orders-table [isLoading]="isLoading()" [currOrders]="currOrders()" [currentSection]="currentSection()" [numberOfSections]="numberOfSections()" [allOrdersCount]="ordersCount()"
-                        (changeSectionOutput)="changeSection($event)" (invokeAction)="buyAgain($event)" />
+      <app-orders-table
+        [isLoading]="historyService.getIsLoading()"
+        [currOrders]="historyService.getCurrOrders()"
+        [currentSection]="historyService.getCurrentSection()"
+        [numberOfSections]="historyService.getNumberOfSections()"
+        [allOrdersCount]="historyService.getSummary().count"
+        (changeSectionOutput)="historyService.changeSection($event)"
+        (invokeAction)="historyService.buyAgain($event)"
+      />
     </div>
   </section>
 </app-user-content-wrapper>

@@ -1,1 +1,0 @@
-export type INewQuantities = Record<string , number>;

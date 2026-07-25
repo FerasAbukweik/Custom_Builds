@@ -10,7 +10,7 @@ namespace custom_Peripherals.Hub
 {
     public class ChatHub(
         IMessageService messageService,
-        IChatGroupService getChatGroupService,
+        IChatGroupService chatGroupService,
         IHttpContextAccessor httpContextAccessor
         ) : Hub<IChatHub>
     {
@@ -79,7 +79,7 @@ namespace custom_Peripherals.Hub
             var currUserId = GetUserId();
             if (currUserId == null) return null;
 
-            var getCurrUserChatGroupIdResult = await getChatGroupService.GetChatGroupIdAsync(currUserId.Value);
+            var getCurrUserChatGroupIdResult = await chatGroupService.GetChatGroupIdAsync(currUserId.Value);
             if (!getCurrUserChatGroupIdResult.IsSuccess) return null;
 
             return getCurrUserChatGroupIdResult.Value;

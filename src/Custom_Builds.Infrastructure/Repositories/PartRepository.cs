@@ -26,13 +26,13 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<Part?> GetByIdAsync(Guid partId, CancellationToken cancellationToken = default)
         {
-            var part = await dbContext.Parts.FindAsync([partId], cancellationToken);
+            var part = await dbContext.Parts.AsNoTracking().SingleOrDefaultAsync(p => p.Id == partId, cancellationToken);
 
             return part;
         }
         public async Task<Part?> RemoveByIdAsync(Guid partId, CancellationToken cancellationToken = default)
         {
-            Part? toDel = await dbContext.Parts.FindAsync([partId], cancellationToken);
+            Part? toDel = await GetByIdAsync(partId, cancellationToken);
 
             if (toDel == null) return null;
 
@@ -45,7 +45,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             Expression<Func<Part, object>>[]? includes = null,
             CancellationToken cancellationToken = default)
         {
-            var query = dbContext.Parts.AsQueryable();
+            var query = dbContext.Parts.AsNoTracking().AsQueryable();
 
             if (includes != null)
             {
@@ -61,6 +61,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         public async Task<IReadOnlyList<Part>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return await dbContext.Parts
+                .AsNoTracking()
                 .Include(p => p.Sections)
                 .ThenInclude(s => s.Modifications)
                 .ToListAsync(cancellationToken);

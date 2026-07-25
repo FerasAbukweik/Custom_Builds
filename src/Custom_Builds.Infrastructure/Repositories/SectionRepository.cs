@@ -15,7 +15,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<Section?> EditByIdAsync(SectionEditDTO newData, CancellationToken cancellationToken = default)
         {
-            Section? toEdit = await GetByIdAsync(newData.Id, [], cancellationToken);
+            Section? toEdit = await dbContext.Sections.SingleOrDefaultAsync(s => s.Id == newData.Id, cancellationToken);
 
             if (toEdit == null) return null;
 
@@ -28,7 +28,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             Expression<Func<Section, object?>>[]? includes,
             CancellationToken cancellationToken = default)
         {
-            var query = dbContext.Sections.AsQueryable();
+            var query = dbContext.Sections.AsNoTracking().AsQueryable();
 
             if (includes != null)
             {
@@ -55,7 +55,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             Expression<Func<Section, object?>>[]? includes = null,
             CancellationToken cancellationToken = default)
         {
-            var query = dbContext.Sections.AsQueryable();
+            var query = dbContext.Sections.AsNoTracking().AsQueryable();
 
             if (includes != null)
             {
@@ -66,25 +66,10 @@ namespace Custom_Builds.Infrastructure.Repositories
             }
 
             return await query.Where(extraChecks).ToListAsync(cancellationToken);
-        }
-        public async Task<Section?> AddModificationAsync(
-            Guid sectionId,
-            Modification modification,
-            CancellationToken cancellationToken = default)
-        {
-            Section? toEdit = await dbContext.Sections
-                .Include(s => s.Modifications)
-                .SingleOrDefaultAsync(s => s.Id == sectionId, cancellationToken);
-
-            if (toEdit == null) return null;
-
-            toEdit.Modifications.Add(modification);
-
-            return toEdit;
-        }
+        } 
         public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
-             {
-                 return await dbContext.SaveChangesAsync(cancellationToken) > 0;
-             }
+        { 
+            return await dbContext.SaveChangesAsync(cancellationToken) > 0;
+        }
     }
 }

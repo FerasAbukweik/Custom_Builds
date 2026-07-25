@@ -7,7 +7,7 @@ namespace Custom_Builds.Core.Interfaces.ServiceContracts;
 public interface IProductService
 {
     Task<Result<ProductDTO>> AddAsync(ProductAddDTO_DB toAdd, CancellationToken cancellationToken = default);
-    Task<Result<List<ProductDTO>>> GetAllAsync(LazyDTO reqData, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<ProductDTO>>> LazyGetAllAsync(LazyDTO lazyData, CancellationToken cancellationToken = default);
     Task<Result<ProductDTO>> GetByIdAsync(Guid productId, CancellationToken cancellationToken = default);
     Task<Result<ProductDTO>> RemoveByIdAsync(Guid productId, CancellationToken cancellationToken = default);
 }
