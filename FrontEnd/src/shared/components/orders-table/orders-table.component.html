@@ -1,132 +1,123 @@
 <div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
+  <table class="w-full text-left border-collapse">
     <thead>
-    <tr
+      <tr
         class="border-b border-dark-blue-gray bg-dark-deep-blue/50 text-xs font-bold text-light-steel-blue uppercase tracking-wider"
-    >
-        <th class="p-6">Order & Date</th>
-        <th class="p-6">Items</th>
+      >
+        <th class="p-6">Ordered At</th>
+        <th class="p-6">Order Id</th>
         <th class="p-6">Status</th>
         <th class="p-6">Total</th>
         <th class="p-6 text-right">Actions</th>
-    </tr>
+      </tr>
     </thead>
     <tbody class="divide-y divide-dark-blue-gray">
-    @if(!isLoading()){
+      @if (!isLoading()) {
         @for (order of currOrders(); track order.id) {
-        <tr
+          <tr
             class="hover:bg-dark-deep-blue/30 transition-colors group border-b border-dark-blue-gray"
-        >
+          >
             <td class="p-6">
-            <div
-                class="font-bold text-off-white group-hover:text-secondary transition-colors"
-            >
-                {{ order.title }}
-            </div>
-            <div class="text-sm text-dark-gray mt-1">{{ order.deliveryDate | date }}</div>
+              <div
+                class="font-bold text-off-white whitespace-nowrap group-hover:text-secondary transition-colors"
+              >
+                {{ order.createdAt | date }}
+              </div>
             </td>
             <td class="p-6">
-            <div class="flex items-center gap-4">
-                <div
-                class="w-12 h-12 bg-dark-blue-gray rounded-lg shrink-0 flex items-center justify-center group-hover:bg-secondary/20 transition-colors"
-                >
-                <img [src]="order.image" alt="no image" class="w-full h-full object-cover"
-                (error)="$event.target.src = 'assets/images/no-image.png'">
-                </div>
+              <div class="flex items-center gap-4">
                 <div>
-                <div class="font-medium text-off-white">#{{ order.id }}</div>
-                <div class="text-xs text-dark-gray mt-1">{{`x${order.quantity}, ${order.specs.toString()}`}}</div>
+                  <div class="font-medium text-off-white">#{{ order.id }}</div>
                 </div>
-            </div>
+              </div>
             </td>
             <td class="p-6">
-            <span
+              <span
                 [class]="
-                `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
-                    order.status == 2
-                    ? 'bg-ok/10 text-ok border-ok/20'
-                    : 'bg-error/10 text-error border-error/20'
-                }`
+                  `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+                    order.orderStatus != 2
+                      ? 'bg-ok/10 text-ok border-ok/20'
+                      : 'bg-error/10 text-error border-error/20'
+                  }`
                 "
-            >
+              >
                 <span
-                [class]="
-                    `w-1.5 h-1.5 rounded-full ${
-                    order.status == 2 ? 'bg-ok' : 'bg-error'
-                    }`
-                "
+                  [class]="
+                    `w-1.5 h-1.5 rounded-full ${order.orderStatus != 2 ? 'bg-ok' : 'bg-error'}`
+                  "
                 ></span>
-                {{ getStatusName(order.status) }}
-            </span>
+                {{ getStatusName(order.orderStatus) }}
+              </span>
             </td>
-            <td class="p-6 font-bold text-off-white">{{ order.totalPrice | currency }}</td>
+            <td class="p-6 font-bold text-off-white">{{ order.orderedPrice | currency }}</td>
             <td class="p-6 text-right">
-            <div
+              <div
                 class="flex items-center justify-end gap-3 md:opacity-0 md:group-hover:opacity-100 transition-all md:translate-x-2 md:group-hover:translate-x-0"
-            >
-                <button
-                class="text-soft-gray hover:text-secondary transition-colors p-2"
-                title="View Invoice"
+              >
+                <!-- <button
+                  class="text-soft-gray hover:text-secondary transition-colors p-2"
+                  title="View Invoice"
                 >
-                <i class="fa-solid fa-file-invoice text-xl"></i>
-                </button>
+                  <i class="fa-solid fa-file-invoice text-xl"></i>
+                </button> -->
                 <button
-                class="bg-dark-blue-gray hover:bg-secondary active:scale-90 text-off-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shadow-lg"
-                (click)="invokeAction.emit(order.id)"
+                  class="bg-dark-blue-gray hover:bg-secondary active:scale-90 text-off-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shadow-lg"
+                  (click)="orderDetailsDialogService.openDialog(order.id)"
                 >
-                Buy Again
+                  View Order
                 </button>
-            </div>
+              </div>
             </td>
-        </tr>
+          </tr>
         }
-    }
-    @if(isLoading()){
-        <tr class="h-48"> 
-        <td colspan="5" class="h-full w-full">
+      } @else {
+        <tr class="h-48">
+          <td colspan="5" class="h-full w-full">
             <div class="w-full h-full flex justify-center items-center py-12">
-            <app-loading/>
+              <app-loading />
             </div>
-        </td>
+          </td>
         </tr>
-    }
+      }
     </tbody>
-</table>
+  </table>
 </div>
 
 <div class="border-t border-dark-blue-gray bg-dark-deep-blue/30 p-4">
-<div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-    <p class="text-xs text-dark-gray font-medium">Showing {{currOrders().length}} of {{allOrdersCount()}} orders</p>
+  <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+    <p class="text-xs text-dark-gray font-medium">
+      Showing {{ currOrders() ? currOrders().length : -1 }} of {{ allOrdersCount() }} orders
+    </p>
     <div class="flex items-center gap-2">
-    @if(currentSection() != 1){
+      @if (currentSection() != 1) {
         <button
-        class="px-3 py-1.5 rounded-md border border-dark-blue-gray text-xs text-soft-gray font-medium hover:bg-dark-blue-gray transition-colors cursor-pointer active:scale-95"
-        (click)="changeSection(currentSection() - 1)"
+          class="px-3 py-1.5 rounded-md border border-dark-blue-gray text-xs text-soft-gray font-medium hover:bg-dark-blue-gray transition-colors cursor-pointer active:scale-95"
+          (click)="changeSection(currentSection() - 1)"
         >
-        Previous
+          Previous
         </button>
-    }
-    @for (section of BottomNumbers(); track $index) {
+      }
+      @for (section of BottomNumbers(); track $index) {
         <button
-        [class]="
+          [class]="
             'px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer active:scale-90 ' +
             (section === currentSection()
-            ? 'bg-secondary text-white shadow-lg shadow-secondary/20'
-            : 'border border-dark-blue-gray text-soft-gray hover:bg-dark-blue-gray')
-        "
-        (click)="changeSection(section)"
+              ? 'bg-secondary text-white shadow-lg shadow-secondary/20'
+              : 'border border-dark-blue-gray text-soft-gray hover:bg-dark-blue-gray')
+          "
+          (click)="changeSection(section)"
         >
-        {{ section }}
+          {{ section }}
         </button>
-    }
-    @if(currentSection() != allOrdersCount()){
+      }
+      @if (currentSection() != numberOfSections()) {
         <button
-        class="px-3 py-1.5 rounded-md border border-dark-blue-gray text-xs text-soft-gray font-medium hover:bg-dark-blue-gray transition-colors cursor-pointer active:scale-95"
-        (click)="changeSection(currentSection() + 1)"
+          class="px-3 py-1.5 rounded-md border border-dark-blue-gray text-xs text-soft-gray font-medium hover:bg-dark-blue-gray transition-colors cursor-pointer active:scale-95"
+          (click)="changeSection(currentSection() + 1)"
         >
-        Next
+          Next
         </button>
-    }
+      }
     </div>
-</div>
+  </div>
 </div>

@@ -1,53 +1,71 @@
 <div class="bg-primary text-off-white flex overflow-hidden font-display">
-
-
   <main class="flex-1 flex flex-col overflow-y-auto">
-
     <div class="p-8 space-y-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        @for (stat of stats; track stat.title) {
-          <div class="bg-deep-blue p-6 rounded-xl border border-dark-blue-gray">
-            <div class="flex items-center justify-between mb-4">
-              <p class="text-sm font-medium text-soft-gray">{{ stat.title }}</p>
-              <span class="material-symbols-outlined" [style.color]="stat.iconColor">{{ stat.icon }}</span>
-            </div>
-            <h3 class="text-2xl font-bold">{{ stat.value }}</h3>
-            <p class="text-xs font-medium flex items-center gap-1 mt-2" [style.color]="stat.trendColor">
-              @if (stat.trendIcon) {
-                <span class="material-symbols-outlined text-xs">{{ stat.trendIcon }}</span>
-              }
-              {{ stat.trendText }}
-            </p>
-          </div>
-        }
-      </div>
+      <app-state-data [statCardData]="stateCardData()" />
 
       <div class="flex gap-6 flex-wrap">
-
         <div class="flex-2">
-          <div class=" bg-deep-blue p-6 rounded-xl border border-dark-blue-gray flex flex-col">
+          <div class="bg-deep-blue p-6 rounded-xl border border-dark-blue-gray flex flex-col">
             <div class="flex items-center justify-between mb-6">
               <div>
-                <h2 class="text-lg font-bold">Weekly Revenue Analytics</h2>
+                <h2 class="text-lg font-bold">
+                  {{ selectedRevenueFilter() === '7Days' ? 'Last Week' : 'Last Month' }} Revenue
+                </h2>
                 <p class="text-sm text-soft-gray">Sales performance over the last 7 days</p>
               </div>
-              <select class="bg-dark-deep-blue text-off-white border-none rounded-lg text-xs font-bold py-1.5 pl-3 pr-8 focus:ring-1 focus:ring-secondary outline-none">
-                <option>Last 7 Days</option>
-                <option>Last 30 Days</option>
+              <select
+                class="bg-dark-deep-blue text-off-white border-none rounded-lg text-xs font-bold py-1.5 pl-3 pr-8 focus:ring-1 focus:ring-secondary outline-none"
+                [value]="selectedRevenueFilter()" (change)="selectedRevenueFilter.set($any($event.target).value)"
+              >
+                <option value="7Days">Last 7 Days</option>
+                <option value="Month">Last 30 Days</option>
               </select>
             </div>
-            
+
             <div class="flex-1 relative">
               <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 300">
-                <line class="text-dark-blue-gray" stroke="currentColor" stroke-dasharray="4" x1="0" x2="800" y1="50" y2="50"></line>
-                <line class="text-dark-blue-gray" stroke="currentColor" stroke-dasharray="4" x1="0" x2="800" y1="150" y2="150"></line>
-                <line class="text-dark-blue-gray" stroke="currentColor" stroke-dasharray="4" x1="0" x2="800" y1="250" y2="250"></line>
-                
-                <path class="stroke-secondary" [attr.d]="linePath" fill="none" stroke-linecap="round" stroke-width="3"></path>
+                <line
+                  class="text-dark-blue-gray"
+                  stroke="currentColor"
+                  stroke-dasharray="4"
+                  x1="0"
+                  x2="800"
+                  y1="50"
+                  y2="50"
+                ></line>
+                <line
+                  class="text-dark-blue-gray"
+                  stroke="currentColor"
+                  stroke-dasharray="4"
+                  x1="0"
+                  x2="800"
+                  y1="150"
+                  y2="150"
+                ></line>
+                <line
+                  class="text-dark-blue-gray"
+                  stroke="currentColor"
+                  stroke-dasharray="4"
+                  x1="0"
+                  x2="800"
+                  y1="250"
+                  y2="250"
+                ></line>
+
+                <path
+                  class="stroke-secondary"
+                  [attr.d]="linePath()"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-width="3"
+                ></path>
               </svg>
-              
-              <div class="flex justify-between mt-4 text-[11px] font-bold text-light-steel-blue uppercase tracking-widest px-2">
-                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+
+              <div
+                class="flex justify-between mt-4 text-[11px] font-bold text-light-steel-blue uppercase tracking-widest px-2"
+              >
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span
+                ><span>Sat</span><span>Sun</span>
               </div>
             </div>
           </div>
@@ -59,81 +77,30 @@
             <button class="text-secondary text-sm font-bold hover:underline">View All</button>
           </div>
           <div class="space-y-6">
-            @for (item of inventory; track item.name) {
+            @for (item of adminService.dashboardData().inventoryItems; track $index) {
               <div>
                 <div class="flex justify-between text-sm mb-2">
-                  <span class="font-medium">{{ item.name }}</span>
-                  <span class="font-bold flex items-center gap-1" [class]="item.isAlert ? 'text-error' : 'text-soft-gray'">
-                    @if (item.isAlert) {
-                      <span class="material-symbols-outlined text-xs">priority_high</span>
+                  <span class="font-medium">{{ item.title }}</span>
+                  <span
+                    class="font-bold flex items-center gap-1"
+                    [class]="isLowStock(item.inStock) ? 'text-error' : 'text-soft-gray'"
+                  >
+                    @if (isLowStock(item.inStock)) {
+                      <span class="material-symbols-outlined text-xs">priority high</span>
                     }
-                    {{ item.count }}
+                    {{ item.inStock }}
                   </span>
                 </div>
                 <div class="w-full bg-dark-deep-blue h-2 rounded-full overflow-hidden">
-                  <div class="h-full rounded-full" [style.width]="item.percent" [class]="item.isAlert ? 'bg-error' : 'bg-secondary'"></div>
+                  <div
+                    class="h-full rounded-full"
+                    [style.width]="item.inStock / 100 + '%'"
+                    [class]="isLowStock(item.inStock) ? 'bg-error' : 'bg-secondary'"
+                  ></div>
                 </div>
               </div>
             }
           </div>
-          <div class="mt-8 p-4 bg-dark-deep-blue border border-dark-blue-gray rounded-lg">
-            <p class="text-xs font-medium text-light-steel-blue">Restock recommended for 3 items soon to maintain fulfillment speed.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-deep-blue rounded-xl border border-dark-blue-gray overflow-hidden">
-        <div class="p-6 border-b border-dark-blue-gray flex items-center justify-between">
-          <h2 class="text-lg font-bold">Pending Orders</h2>
-          <div class="flex gap-2">
-            <button class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dark-blue-gray text-xs font-bold hover:bg-dark-gray transition-colors">
-              <span class="material-symbols-outlined text-sm">filter_list</span> Filter
-            </button>
-            <button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary text-off-white text-xs font-bold hover:opacity-90 transition-opacity">
-              Export CSV
-            </button>
-          </div>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead class="bg-dark-deep-blue text-[11px] font-bold text-light-steel-blue uppercase tracking-widest">
-              <tr>
-                <th class="px-6 py-4">Order ID</th>
-                <th class="px-6 py-4">Customer</th>
-                <th class="px-6 py-4">Product Details</th>
-                <th class="px-6 py-4">Date</th>
-                <th class="px-6 py-4">Total</th>
-                <th class="px-6 py-4 text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-dark-blue-gray">
-              @for (order of orders; track order.id) {
-                <tr class="hover:bg-dark-deep-blue transition-colors group">
-                  <td class="px-6 py-4 text-sm font-bold text-secondary">{{ order.id }}</td>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="size-8 rounded-full bg-dark-gray flex items-center justify-center text-xs font-bold text-off-white">{{ order.initials }}</div>
-                      <div>
-                        <p class="text-sm font-medium">{{ order.name }}</p>
-                        <p class="text-[10px] text-soft-gray">{{ order.email }}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 text-sm text-off-white">{{ order.product }}</td>
-                  <td class="px-6 py-4 text-sm text-soft-gray">{{ order.date }}</td>
-                  <td class="px-6 py-4 text-sm font-bold">{{ order.total }}</td>
-                  <td class="px-6 py-4 text-right">
-                    <span class="px-2.5 py-1 rounded-full bg-dark-blue-gray text-off-white text-[10px] font-bold uppercase tracking-wider">
-                      {{ order.status }}
-                    </span>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        <div class="p-4 bg-dark-deep-blue text-center border-t border-dark-blue-gray">
-          <button class="text-xs font-bold text-soft-gray hover:text-secondary transition-colors uppercase tracking-widest">Load More Orders</button>
         </div>
       </div>
     </div>

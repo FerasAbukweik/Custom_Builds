@@ -118,10 +118,10 @@
         </div>
       </div>
       <div #designsDiv class="overflow-x-scroll mt-10 flex gap-6.5 max-w-[calc(100vw-3.5rem)]">
-        @for (product of productService.getProducts(); track product.id; let isLast = $last) {
+        @for (product of productService.products(); track product.id; let isLast = $last) {
           <app-product-card [productData]="product" />
         } @empty {
-          @if (!productService.getIsLoading()) {
+          @if (!productService.isLoading()) {
             <div
               class="w-full h-full flex justify-center items-center font-bold text-off-white text-2xl"
             >
@@ -131,7 +131,7 @@
         }
         <span (appIsVisable)="productService.lazyGetProducts()"></span>
 
-        @if (productService.getIsLoading()) {
+        @if (productService.isLoading()) {
           <div class="self-stretch flex items-center">
             <app-loading class="scale-150 ml-10" />
           </div>

@@ -1,4 +1,5 @@
-﻿using Custom_Builds.Core.DTO.Lazy;
+﻿using Custom_Builds.Core.Common;
+using Custom_Builds.Core.DTO.Lazy;
 using Custom_Builds.Core.DTO.Product;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
 using custom_Peripherals.ExtensionMethods;
@@ -17,6 +18,14 @@ namespace custom_Peripherals.Controllers
         {
             var result = await productService.LazyGetAllAsync(lazyData);
 
+            return result.ToActionResult();
+        }
+        
+        [HttpDelete("[action]/{id:guid}")]
+        public async Task<IActionResult> Remove(Guid id)
+        {
+            Result result = await productService.RemoveByIdAsync(id);
+            
             return result.ToActionResult();
         }
     }

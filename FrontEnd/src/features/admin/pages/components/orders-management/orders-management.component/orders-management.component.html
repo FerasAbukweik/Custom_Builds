@@ -1,25 +1,25 @@
 <main class="flex-1 min-w-0 flex flex-col">
-<div class="p-8 space-y-8 w-full">
-    
-    <app-state-data [statCardData]="stats" class="mb-8"/>
+  <div class="p-8 space-y-8 w-full">
+    <app-state-data [statCardData]="statusData()" class="mb-8" />
 
-    <div class="bg-deep-blue rounded-xl border border-dark-blue-gray overflow-hidden">
-    <div class="p-6 flex justify-between items-center border-b border-dark-blue-gray">
+    <div class="bg-deep-blue max-w-500 rounded-xl border border-dark-blue-gray overflow-hidden">
+      <div class="p-6 flex justify-between items-center border-b border-dark-blue-gray">
         <div>
-        <h2 class="text-lg font-bold">Current Fulfillment Queue</h2>
-        <p class="text-sm text-soft-gray">Real-time order processing status across global hubs.</p>
+          <h2 class="text-lg font-bold">Current Fulfillment Queue</h2>
+          <p class="text-sm text-soft-gray">
+            Real-time order processing status across global hubs.
+          </p>
         </div>
-        <div class="flex gap-3">
-        <button class="bg-dark-deep-blue border border-dark-blue-gray text-off-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-dark-gray transition-colors">
-            <span class="material-symbols-outlined text-sm">filter_list</span> Filter
-        </button>
-        <button class="bg-secondary text-off-white px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 hover:opacity-90 transition-all">
-            <span class="material-symbols-outlined text-sm">add</span> New Order
-        </button>
-        </div>
+      </div>
+
+      <app-orders-table
+        [isLoading]="ordersManagementService.isLoading()"
+        [sectionsOrders]="ordersManagementService.sectionsOrders()"
+        [allOrdersCount]="ordersManagementService.summary().pendingOrdersCount"
+        (changeSectionOutput)="ordersManagementService.loadSection($event)"
+      />
     </div>
-    
-    <!-- <app-orders-table  /> -->
-    </div>
-</div>
+  </div>
 </main>
+
+<dialog app-order-details-dialog></dialog>

@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Custom_Builds.Core.Domain.Entities;
+using Custom_Builds.Core.DTO.Lazy;
 using Custom_Builds.Core.Interfaces.RepositoryContracts;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.EntityFrameworkCore;
@@ -10,18 +11,20 @@ public class OrderItemsRepository(ApplicationDbContext dbContext) : IOrderItemsR
 {
     public void AddRange(IEnumerable<OrderItem> orderItems)
     {
-        dbContext.AddRangeAsync(orderItems);
+        dbContext.OrderItems.AddRange(orderItems);
     }
 
     public void Add(OrderItem orderItem)
     {
-        dbContext.Add(orderItem);
+        dbContext.OrderItems.Add(orderItem);
     }
 
     public async Task<IReadOnlyList<OrderItem>> FilterAsync(
         Expression<Func<OrderItem, bool>> predicate,
         Expression<Func<OrderItem, object?>>[]? include = null,
-        int ? skip = null,
+        Expression<Func<OrderItem, object?>>? orderBy = null,
+        bool orderByDescending = false,
+        int? skip  = null,
         int? take = null,
         CancellationToken cancellationToken = default)
     {
@@ -34,21 +37,27 @@ public class OrderItemsRepository(ApplicationDbContext dbContext) : IOrderItemsR
                 query = query.Include(inc);
             }
         }
-
-        query = query.Where(predicate);
         
-        if(skip != null) query = query.Skip(skip.Value);
-        if(take != null) query = query.Take(take.Value);
+        query = query.Where(predicate);
+
+        if (orderBy != null)
+        {
+            if(orderByDescending) query = query.OrderByDescending(orderBy);
+            else query = query.OrderBy(orderBy);
+        }
+        
+        if (skip != null) query = query.Skip(skip.Value);
+        if (take != null) query = query.Take(take.Value);
         
         return await query.ToListAsync(cancellationToken);
     }
 
     public Task<int> CountAsync(Expression<Func<OrderItem, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        return dbContext.OrderItems.AsNoTracking().CountAsync(predicate, cancellationToken);
+        return  dbContext.OrderItems.CountAsync(predicate, cancellationToken);
     }
 
-    public async Task<OrderItem?> GetByIdAsync(Guid orderItemId,Expression<Func<OrderItem, object?>>[]? include, CancellationToken cancellationToken = default)
+    public async Task<OrderItem?> GetByIdAsync(Guid orderItemId, Expression<Func<OrderItem, object?>>[]? include, CancellationToken cancellationToken = default)
     {
         var query = dbContext.OrderItems.AsNoTracking().AsQueryable();
 
@@ -59,12 +68,12 @@ public class OrderItemsRepository(ApplicationDbContext dbContext) : IOrderItemsR
                 query = query.Include(inc);
             }
         }
-        
-        return await query.SingleOrDefaultAsync(oi => oi.Id == orderItemId, cancellationToken);
+
+        return await query.FirstOrDefaultAsync(oi => oi.Id == orderItemId, cancellationToken);
     }
 
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return await  dbContext.SaveChangesAsync(cancellationToken) > 0;  
+        return await dbContext.SaveChangesAsync(cancellationToken) > 0;
     }
 }

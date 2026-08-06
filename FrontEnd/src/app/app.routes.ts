@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
-import { DashboardService } from '../layouts/dashboard/dashboard.service';
-import { loginSignupGuard } from '../core/guard/login-signup-guard';
+import { DashboardService } from '../layouts/dashboard/dashboard.service'; 
 import { globalGuard } from '../core/guard/global-guard';
+import { loginSignupGuard } from '../core/guard/login-signup-guard';
 
 export const routes: Routes = [
   {

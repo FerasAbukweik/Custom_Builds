@@ -1,4 +1,4 @@
 export enum OrderTypeEnum {
-    Product,
-    Custom
+  Product,
+  Custom_Build,
 }

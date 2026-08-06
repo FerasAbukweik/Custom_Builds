@@ -18,7 +18,7 @@ export class CartComponent implements OnInit {
   protected readonly cartService = inject(CartItemService);
 
   // protected
-  protected summaryInfo = this.cartService.getSummaryInfo;
+  protected summaryInfo = this.cartService.summaryInfo;
 
   ngOnInit(): void {
     // update summary info

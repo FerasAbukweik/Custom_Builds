@@ -1,31 +1,62 @@
-import { Component, computed, input, output } from '@angular/core';
-import { IHistoryOrderDTO } from '../../../core/DTO/History-orders-dto'; 
-import { OrderStateEnum } from '../../../core/enums/order-status-enum'; 
+import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { IOrderDto } from '../../../core/DTO/orders-dto';
+import { OrderStateEnum } from '../../../core/enums/order-status-enum';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { LoadingComponent } from '../loading/loading.component';
+import { OrderDetailsDialogService } from '../order-details-dialog/order-detaild-dialog-service';
 
 @Component({
   selector: 'app-orders-table',
-  imports: [CurrencyPipe, DatePipe, LoadingComponent],
+  imports: [CurrencyPipe, LoadingComponent, DatePipe],
   templateUrl: './orders-table.component.html',
 })
 export class OrdersTableComponent {
+  // DI
+  protected readonly orderDetailsDialogService = inject(OrderDetailsDialogService);
+
   // input
   isLoading = input.required<boolean>();
-  currOrders = input.required<IHistoryOrderDTO[]>();
-  currentSection = input.required<number>();
-  numberOfSections = input.required<number>();
+  sectionsOrders = input.required<IOrderDto[][]>();
   allOrdersCount = input.required<number>();
 
   // output
-  invokeAction = output<string>();
   changeSectionOutput = output<number>();
 
+  // signals
+  protected currentSection = signal<number>(1);
+
   // computed
-  BottomNumbers = computed<number[]>((maxLen: number = 3) => {
+  protected BottomNumbers = computed<number[]>(() => {
     const numberOfSections = this.numberOfSections();
     const currentSection = this.currentSection();
+    const maxLen = 3;
 
+    return this.generateBottomNumbers(numberOfSections, currentSection, maxLen);
+  });
+  protected currOrders = computed<IOrderDto[]>(() => {
+    return this.sectionsOrders()[this.currentSection() - 1];
+  });
+  protected numberOfSections = computed(() => this.sectionsOrders().length);
+
+  // methods
+
+  // get status name
+  getStatusName = (state: OrderStateEnum) => {
+    return OrderStateEnum[state];
+  };
+
+  // change section
+  changeSection = (newSection: number) => {
+    if (this.currentSection() === newSection) return;
+    if (newSection < 1 || newSection > this.numberOfSections()) return;
+
+    this.currentSection.set(newSection);
+    this.changeSectionOutput.emit(newSection);
+  };
+
+  // private
+
+  private generateBottomNumbers(numberOfSections: number, currentSection: number, maxLen: number) {
     let canTakeRight = numberOfSections - currentSection;
     let canTakeLeft = currentSection - 1;
 
@@ -47,20 +78,5 @@ export class OrdersTableComponent {
     const resArr = Array.from({ length: finalLen }, () => begin++);
 
     return resArr;
-  });
-
-  // methods
-
-  // get status name
-  getStatusName = (status: OrderStateEnum) => {
-    return OrderStateEnum[status];
-  };
-
-  // change section
-  changeSection = (newSection: number) => {
-    if (this.currentSection() === newSection) return;
-    if (newSection < 1 || newSection > this.numberOfSections()) return;
-
-    this.changeSectionOutput.emit(newSection);
-  };
+  }
 }

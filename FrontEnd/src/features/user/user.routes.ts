@@ -4,7 +4,7 @@ export const routes: Routes = [
   {
     path: 'my-orders',
     loadComponent: () =>
-      import('./pages/components/my-orders.component/my-orders.component').then(
+      import('./pages/components/my-orders/my-orders.component').then(
         (x) => x.MyOrdersComponent,
       ),
   },
@@ -18,7 +18,7 @@ export const routes: Routes = [
   {
     path: 'history',
     loadComponent: () =>
-      import('./pages/components/history.component/history.component').then(
+      import('./pages/components/history/history.component').then(
         (x) => x.HistoryComponent,
       ),
   },
@@ -26,7 +26,7 @@ export const routes: Routes = [
   {
     path: 'support',
     loadComponent: () =>
-      import('./pages/components/support.component/support.component').then(
+      import('./pages/components/support/support.component').then(
         (x) => x.SupportComponent,
       ),
   },

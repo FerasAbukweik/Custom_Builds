@@ -23,6 +23,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             toEdit.Title = newData.Name ?? toEdit.Title;
             toEdit.Price = newData.Price ?? toEdit.Price;
             toEdit.Description = newData.Description ?? toEdit.Description;
+            toEdit.InStock = newData.InStock ?? toEdit.InStock;
 
             return toEdit;
         }
@@ -71,6 +72,29 @@ namespace Custom_Builds.Infrastructure.Repositories
         public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await dbContext.SaveChangesAsync(cancellationToken) > 0;
+        }
+
+        public async Task<IReadOnlyList<MiniInventoryItemDTO>> GetDashboardMiniInfoAsync(
+            int? skip = null,
+            int? take = null,
+            CancellationToken cancellationToken = default)
+        {
+            var query = dbContext.Products.AsQueryable();
+            
+            if(skip != null) query = query.Skip(skip.Value);
+            if (take != null) query = query.Take(take.Value);
+
+            return await query.OrderBy(p => p.InStock).Select(p =>
+                new MiniInventoryItemDTO()
+                {
+                    InStock = p.InStock,
+                    Title = p.Title,
+                }).ToListAsync(cancellationToken);
+        }
+
+        public Task<int> CountAsync(Expression<Func<Product, bool>> filters, CancellationToken cancellationToken = default)
+        {
+            return dbContext.Products.CountAsync(filters, cancellationToken);
         }
     }
 }

@@ -18,7 +18,7 @@
     <section
       class="flex flex-col gap-7 flex-1 overflow-y-auto min-[1169px]:max-h-[calc(100vh-300px)]"
     >
-      @for (item of cartService.getCartItems(); track $index; let isLast = $last) {
+      @for (item of cartService.cartItems(); track $index; let isLast = $last) {
         <div
           class="group flex h-fit flex-wrap gap-6 bg-dark-deep-blue p-6 rounded-xl border border-dark-gray/50 min-w-170 max-[760px]:min-w-75 justify-center"
         >
@@ -78,13 +78,13 @@
           </div>
         </div>
 
-        @if (isLast && cartService.getIsLoading()) {
+        @if (isLast && cartService.isLoading()) {
           <app-loading class="w-full flex justify-center" />
         }
       } @empty {
         <span (appIsVisable)="cartService.lazyGetCartItems()"></span>
 
-        @if (cartService.getIsLoading()) {
+        @if (cartService.isLoading()) {
           <app-loading class="w-full flex justify-center" />
         } @else {
           <div class="text-white w-fit h-fit p-5 mx-auto text-2xl font-bold">

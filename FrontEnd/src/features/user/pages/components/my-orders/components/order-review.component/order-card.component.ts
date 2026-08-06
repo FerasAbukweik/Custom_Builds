@@ -1,8 +1,8 @@
 import { Component, input } from '@angular/core';
-import { IOrderDTO } from '../../../../../../../core/DTO/mini-order-dto';
 import { CommonModule, DatePipe } from '@angular/common';
 import { OrderStateEnum } from '../../../../../../../core/enums/order-status-enum';
 import { IStep } from './order-review.model';
+import { IOrderDto } from '../../../../../../../core/DTO/orders-dto';
 
 const steps: IStep[] = [
   { id: 1, label: 'DESIGN CONFIRMED', date: 'Oct 10', status: 'completed', icon: 'fa-check' },
@@ -12,9 +12,9 @@ const steps: IStep[] = [
 ];
 
 @Component({
-  selector: 'app-order-review',
-  imports: [CommonModule, DatePipe],
-  templateUrl: './order-review.component.html',
+  selector: 'app-order-card',
+  imports: [CommonModule],
+  templateUrl: './order-card.component.html',
   host: {
     class:
       'group bg-deep-blue/50 border border-dark-gray/20 rounded-2xl p-4 md:p-6 lg:p-8 pb-8 shadow-xl w-full',
@@ -22,17 +22,17 @@ const steps: IStep[] = [
 })
 export class OrderReviewComponent {
   // inputs
-  order = input.required<IOrderDTO>();
+  order = input.required<IOrderDto>();
 
   // protected
   protected steps = steps;
 
   // methods
   isStepActive(stepId: number): boolean {
-    if (this.order().status === OrderStateEnum.Completed) return true;
-    if (this.order().status === OrderStateEnum.Testing) return stepId <= 3;
-    if (this.order().status === OrderStateEnum.Processing) return stepId <= 2;
-    if (this.order().status === OrderStateEnum.Shipped) return stepId <= 1;
+    if (this.order().orderStatus === OrderStateEnum.Completed) return true;
+    if (this.order().orderStatus === OrderStateEnum.Testing) return stepId <= 3;
+    if (this.order().orderStatus === OrderStateEnum.Processing) return stepId <= 2;
+    if (this.order().orderStatus === OrderStateEnum.Shipped) return stepId <= 1;
 
     return false;
   }

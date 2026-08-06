@@ -8,20 +8,21 @@ import { Router } from '@angular/router';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   // DI
-  private readonly router = inject(Router);
-  private readonly authApiService = inject(AuthApiService);
+  private readonly _router = inject(Router);
+  private readonly _authApiService = inject(AuthApiService);
 
   // signals
   userData = signal<IUserData | null>(null);
   loginServerError = signal<string>('');
 
+
   // methods
 
   login(loginData: ILoginDTO) {
-    this.authApiService.login(loginData).subscribe({
+    this._authApiService.login(loginData).subscribe({
       next: (data) => {
         this.userData.set(data);
-        this.router.navigateByUrl('/');
+        this._router.navigateByUrl('/');
       },
       error: (err) => {
         this.loginServerError.set(err.error.ErrorMessage || err.error || 'unexpected error');
@@ -31,7 +32,7 @@ export class AuthService {
 
   async isAuthenticatedAsync() {
     try {
-      await firstValueFrom(this.authApiService.isAuthenticated());
+      await firstValueFrom(this._authApiService.isAuthenticated());
       return true;
     } catch {
       return false;

@@ -1,10 +1,8 @@
 using Custom_Builds.Core.Domain.Entities;
-using Custom_Builds.Core.DTO;
 using Custom_Builds.Infrastructure.DBcontext;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Custom_Builds.Core.DTO.Cart;
-using Custom_Builds.Core.DTO.Lazy;
 using Custom_Builds.Core.Interfaces.RepositoryContracts;
 
 namespace Custom_Builds.Infrastructure.Repositories
@@ -30,6 +28,8 @@ namespace Custom_Builds.Infrastructure.Repositories
         public async Task<List<CartItem>> FilterAsync(
             Expression<Func<CartItem, bool>> extraChecks,
             Expression<Func<CartItem, object?>>[]? includes = null,
+            Expression<Func<CartItem, object?>>? orderBy = null,
+            bool orderByDescending = false,
             int? skip = null,
             int? take = null,
             CancellationToken cancellationToken = default)
@@ -45,7 +45,12 @@ namespace Custom_Builds.Infrastructure.Repositories
             }
 
             query = query.Where(extraChecks);
-            
+
+            if (orderBy != null)
+            {
+                if (orderByDescending) query = query.OrderByDescending(orderBy);
+                else query = query.OrderBy(orderBy);
+            }
             if (skip != null) query = query.Skip(skip.Value);
             if(take != null) query = query.Take(take.Value);
             
@@ -92,6 +97,11 @@ namespace Custom_Builds.Infrastructure.Repositories
         public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return (await dbContext.SaveChangesAsync(cancellationToken)) > 0;
+        }
+
+        public async Task ClearCartAsync(CancellationToken cancellationToken = default)
+        {
+            await dbContext.CartItems.ExecuteDeleteAsync(cancellationToken);
         }
     }
 }

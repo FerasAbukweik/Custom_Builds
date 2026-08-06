@@ -12,7 +12,7 @@ public class ProductService(
     IProductRepository productRepository,
     ILogger<ProductService> logger) : IProductService
 {
-    public async Task<Result<ProductDTO>> AddAsync(ProductAddDTO_DB toAdd, CancellationToken cancellationToken = default)
+    public async Task<Result<ProductDTO>> AddAsync(ProductAddDTO toAdd, CancellationToken cancellationToken = default)
     {
         // new product
         Product newProduct = new Product()
@@ -21,7 +21,8 @@ public class ProductService(
             Title = toAdd.Name,
             Price = toAdd.Price,
             Description = toAdd.Description,
-            Images = toAdd.Images
+            Images = toAdd.Images,
+            InStock = toAdd.InStock
         };
 
         productRepository.Add(newProduct);
@@ -71,5 +72,15 @@ public class ProductService(
         }
 
         return Result<ProductDTO>.Success(removed.toDTO());
+    }
+
+    public async Task<Result<IReadOnlyList<MiniInventoryItemDTO>>> GetDashboardMiniInfoAsync(int take, CancellationToken cancellationToken = default)
+    {
+        return Result<IReadOnlyList<MiniInventoryItemDTO>>.Success(await productRepository.GetDashboardMiniInfoAsync(null ,take, cancellationToken));
+    }
+
+    public async Task<Result<int>> GetLowStockCountAsync(int lowAmount ,CancellationToken cancellationToken = default)
+    {
+        return Result<int>.Success(await productRepository.CountAsync(p => p.InStock <= lowAmount, cancellationToken));
     }
 }

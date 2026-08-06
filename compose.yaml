@@ -8,7 +8,7 @@
       - "8080:8080"
       - "8081:8081"
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_ENVIRONMENT=development
       - Jwt__Key=${JWT_KEY}
       - ConnectionStrings__Default=Server=custom-builds-sqlserver;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
       - ConnectionStrings__Redis=custom-builds-redis:6379

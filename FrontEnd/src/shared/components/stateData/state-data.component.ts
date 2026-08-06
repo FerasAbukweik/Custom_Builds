@@ -6,7 +6,7 @@ import { stateCardData } from '../../../core/interfaces/state-card-data';
   imports: [],
   templateUrl: './state-data.component.html',
   host: {
-    class: 'flex flex-wrap gap-6',
+    class: 'flex flex-wrap gap-6 w-full',
   },
 })
 export class StateDataComponent {

@@ -1,8 +1,8 @@
 <app-live-chatting
-  [isLoading]="messagesService.getIsLoading()"
+  [isLoading]="messagesService.isLoading()"
   [isTyping]="isTyping()"
-  [messages]="messagesService.getMessages()"
-  [isSignalRConnected]=" messagesSignalRService.getIsConnected()"
+  [messages]="messagesService.messages()"
+  [isSignalRConnected]=" messagesSignalRService.isConnected()"
   [quickActions]="quickActions"
   (handleSendMessage)="handleSendMessage($event)"
   (lazyLoadMessages)="messagesService.lazyGetMessages()"

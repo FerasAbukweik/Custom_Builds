@@ -24,7 +24,7 @@ public class OrderItem
     // relations
     
     [Required]
-    public Guid OrderId { get; set; }
+    public required Guid OrderId { get; set; }
     public Order? Order { get; set; }
         
     [MustHaveOneOnly(nameof(ProductId))]
@@ -37,7 +37,7 @@ public class OrderItem
     
     
     // DTO
-    // must include product or custom build based on order type
+    // must include product, customBuild and Order based on order type
     public OrderItemDTO ToDTO()
     {
         return new OrderItemDTO()
@@ -46,6 +46,7 @@ public class OrderItem
             OrderType = OrderType,
             Quantity = Quantity,
             OrderedPrice = OrderedPrice,
+            State = Order?.OrderStatus ?? OrderStateEnum.Processing,
             Image = OrderType switch
             {
                 OrderTypeEnum.Custom => "Custom Build",

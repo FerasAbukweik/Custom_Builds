@@ -1,6 +1,6 @@
 <div class="border-b border-dark-blue-gray bg-deep-blue/30 px-2 pt-4">
   <div class="flex overflow-x-auto gap-2 px-2">
-    @for (part of partServices.getParts(); track part.id) {
+    @for (part of partServices.parts(); track part.id) {
       <button
         (click)="activePartId.set(part.id)"
         [class]="

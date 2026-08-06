@@ -19,5 +19,7 @@ namespace Custom_Builds.Core.Interfaces.RepositoryContracts
             LazyDTO reqData,
             CancellationToken cancellationToken = default);
         Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<MiniInventoryItemDTO>> GetDashboardMiniInfoAsync(int? skip = null, int? take = null, CancellationToken cancellationToken = default);
+        Task<int> CountAsync(Expression<Func<Product, bool>> filters, CancellationToken cancellationToken = default);
     }
 }

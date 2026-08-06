@@ -3,25 +3,23 @@ import { CartItemApiServices } from '../api-services/cart-item-api-services';
 import { IMiniCartItemDTO } from '../../DTO/mini-cart-item-dto';
 import { ICartSummaryInfo } from '../../DTO/cart-summary-info-dto';
 import { Id_Quantity_DTO, INewQuantities } from '../../../features/cart/cart.model';
-import { catchError, debounceTime, firstValueFrom, map, of, switchMap, tap } from 'rxjs';
+import { debounceTime, switchMap, tap } from 'rxjs';
 import { ILazyDTO } from '../../DTO/lazy-dto';
 import { Subject } from 'rxjs';
 import { ICustomBuildAddDTO } from '../../DTO/add-custom-build-dto';
-import { CustomBuildTypeEnum } from '../../enums/custom-build-type-enum';
-import { OrderTypeEnum } from '../../enums/order-type-enum';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CartItemService {
   // injections
-  private readonly cartItemApiService = inject(CartItemApiServices);
+  private readonly _cartItemApiService = inject(CartItemApiServices);
 
   // signals
-  private cartItems = signal<IMiniCartItemDTO[]>([]);
-  private isLoading = signal<boolean>(false);
-  private isDeleteing = signal<boolean>(false);
-  private summaryInfo = signal<ICartSummaryInfo>({
+  private _cartItems = signal<IMiniCartItemDTO[]>([]);
+  private _isLoading = signal<boolean>(false);
+  private _isDeleteing = signal<boolean>(false);
+  private _summaryInfo = signal<ICartSummaryInfo>({
     shippingCost: 0,
     tax: 0,
     totalOrders: 0,
@@ -42,16 +40,16 @@ export class CartItemService {
   };
 
   // getters
-  get getCartItems() {
-    return this.cartItems.asReadonly();
+  get cartItems() {
+    return this._cartItems.asReadonly();
   }
 
-  get getSummaryInfo() {
-    return this.summaryInfo.asReadonly();
+  get summaryInfo() {
+    return this._summaryInfo.asReadonly();
   }
 
-  get getIsLoading() {
-    return this.isLoading.asReadonly();
+  get isLoading() {
+    return this._isLoading.asReadonly();
   }
 
   // constructor
@@ -63,9 +61,9 @@ export class CartItemService {
 
   // update summary info
   updateSummaryInfo = () => {
-    this.cartItemApiService.GetSummaryInfo().subscribe({
+    this._cartItemApiService.GetSummaryInfo().subscribe({
       next: (res) => {
-        this.summaryInfo.set(res);
+        this._summaryInfo.set(res);
       },
       error: (err) => {
         // toDo: show error message
@@ -75,39 +73,39 @@ export class CartItemService {
 
   // get cart items from api with lazy laoding
   lazyGetCartItems = async () => {
-    if (!this.isMoreDataAvailable || this.isLoading()) return;
-    this.isLoading.set(true);
+    if (!this.isMoreDataAvailable || this._isLoading()) return;
+    this._isLoading.set(true);
 
-    while (this.isDeleteing()) {
+    while (this._isDeleteing()) {
       await new Promise<void>((res) => setTimeout(res, 250));
     }
 
-    this.cartItemApiService.GetCartItems(this.requestData).subscribe({
+    this._cartItemApiService.GetCartItems(this.requestData).subscribe({
       next: (data) => {
-        this.cartItems.update((curr) => [...curr, ...data]);
+        this._cartItems.update((curr) => [...curr, ...data]);
 
         this.requestData.taken += data.length;
         this.isMoreDataAvailable = data.length > 0;
-        this.isLoading.set(false);
+        this._isLoading.set(false);
       },
       error: () => {
-        this.isLoading.set(false);
+        this._isLoading.set(false);
       },
     });
   };
 
   // remove cart item
   removeCartItem = (id: string) => {
-    if (this.isDeleteing() || this.isLoading()) return;
-    this.isDeleteing.set(true);
+    if (this._isDeleteing() || this._isLoading()) return;
+    this._isDeleteing.set(true);
     // to get back to previous state if something went wrong
-    const prevItems = this.cartItems();
-    const prevSummary = this.summaryInfo();
+    const prevItems = this._cartItems();
+    const prevSummary = this._summaryInfo();
 
     let itemPrice: number = 0;
     let quantity: number = 0;
 
-    this.cartItems.update((curr) =>
+    this._cartItems.update((curr) =>
       curr.filter((ci) => {
         if (ci.id === id) {
           itemPrice = ci.price;
@@ -119,31 +117,31 @@ export class CartItemService {
       }),
     );
 
-    this.summaryInfo.update((curr) => ({
+    this._summaryInfo.update((curr) => ({
       ...curr,
       totalOrders: curr.totalOrders - quantity,
       totalPrice: curr.totalPrice - itemPrice * quantity,
     }));
 
-    this.cartItemApiService.remove(id).subscribe({
+    this._cartItemApiService.remove(id).subscribe({
       next: () => {
         this.requestData.taken--;
-        this.isDeleteing.set(false);
+        this._isDeleteing.set(false);
       },
       error: () => {
-        this.cartItems.set(prevItems);
-        this.summaryInfo.set(prevSummary);
-        this.isDeleteing.set(false);
+        this._cartItems.set(prevItems);
+        this._summaryInfo.set(prevSummary);
+        this._isDeleteing.set(false);
       },
     });
   };
 
   addCustomBuild(customBuildData: ICustomBuildAddDTO) {
-    this.cartItemApiService.addCustomBuild(customBuildData).subscribe();
+    this._cartItemApiService.addCustomBuild(customBuildData).subscribe();
   }
 
   addProduct(productId: string) {
-    this.cartItemApiService.addProduct(productId).subscribe();
+    this._cartItemApiService.addProduct(productId).subscribe();
   }
 
   // private
@@ -175,14 +173,14 @@ export class CartItemService {
           }
 
           // only the first time we need backup so we dont loose data
-          if (!prevItems) prevItems = this.cartItems();
-          if (!prevSummary) prevSummary = this.summaryInfo();
+          if (!prevItems) prevItems = this._cartItems();
+          if (!prevSummary) prevSummary = this._summaryInfo();
 
           let operation: number = 0; // -1 or 1
           let itemPrice: number = 0;
 
           // generate new cart items
-          const newCartItems: IMiniCartItemDTO[] = this.cartItems().map((item) => {
+          const newCartItems: IMiniCartItemDTO[] = this._cartItems().map((item) => {
             if (item.id == newQ.itemId) {
               operation = newQ.newQuantity - item.quantity;
               itemPrice = item.price;
@@ -193,18 +191,18 @@ export class CartItemService {
 
           // generate new summary
           const newSummaryInfo: ICartSummaryInfo = {
-            ...this.summaryInfo(),
-            totalOrders: this.summaryInfo().totalOrders + operation,
-            totalPrice: this.summaryInfo().totalPrice + operation * itemPrice,
+            ...this._summaryInfo(),
+            totalOrders: this._summaryInfo().totalOrders + operation,
+            totalPrice: this._summaryInfo().totalPrice + operation * itemPrice,
           };
 
           // optimistic update for better ux
-          this.cartItems.set(newCartItems);
-          this.summaryInfo.set(newSummaryInfo);
+          this._cartItems.set(newCartItems);
+          this._summaryInfo.set(newSummaryInfo);
         }),
         debounceTime(500),
         switchMap(() => {
-          return this.cartItemApiService.updateQuantity(this.newQuantities);
+          return this._cartItemApiService.updateQuantity(this.newQuantities);
         }),
       )
       .subscribe({
@@ -215,8 +213,8 @@ export class CartItemService {
           this.newQuantities = [];
         },
         error: () => {
-          this.cartItems.set(prevItems!);
-          this.summaryInfo.set(prevSummary!);
+          this._cartItems.set(prevItems!);
+          this._summaryInfo.set(prevSummary!);
 
           prevItems = null;
           prevSummary = null;

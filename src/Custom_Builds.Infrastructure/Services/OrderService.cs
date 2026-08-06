@@ -1,6 +1,7 @@
 using System.Net;
 using Custom_Builds.Core.Common;
 using Custom_Builds.Core.Domain.Entities;
+using Custom_Builds.Core.DTO.Lazy;
 using Custom_Builds.Core.DTO.Order;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Interfaces.RepositoryContracts;
@@ -15,14 +16,21 @@ public class OrderService(
     IOrderItemsRepository orderItemsRepository,
     ILogger<OrderService> logger) : IOrderService
 {
-    public async Task<Result<OrderDTO>> AddOrderFromCartItemsAsync(Guid currUserId, CancellationToken cancellationToken = default)
+    public async Task<Result<OrderDTO>> AddOrderWithCartItemsAsync(Guid currUserId, CancellationToken cancellationToken = default)
     {
-        var cartItems = await cartItemRepository.FilterAsync(ci => ci.UserId == currUserId,null,null,null,cancellationToken);
+        var cartItems = await cartItemRepository.FilterAsync(
+            ci => ci.UserId == currUserId,
+            null,
+            null,
+            false,
+            null,
+            null,
+            cancellationToken);
 
         if (cartItems.Count == 0)
         {
             logger.LogWarning("{serviceName}.{methodName} user with id: {currUserId} tried adding order with no items in cart",
-                nameof(OrderService), nameof(AddOrderFromCartItemsAsync), cartItems);
+                nameof(OrderService), nameof(AddOrderWithCartItemsAsync), cartItems);
             return Result<OrderDTO>.Failure("no items in cart"); 
         }
         
@@ -49,9 +57,12 @@ public class OrderService(
         if (!await orderRepository.SaveChangesAsync(cancellationToken))
         {
             logger.LogError("{serviceName}.{methodName} failed saving changes to DB",
-                nameof(OrderService), nameof(AddOrderFromCartItemsAsync));
+                nameof(OrderService), nameof(AddOrderWithCartItemsAsync));
             return Result<OrderDTO>.Failure("failed saving changes to DB", HttpStatusCode.InternalServerError);
         }
+        
+        // clear cart
+        await cartItemRepository.ClearCartAsync(cancellationToken);
 
         // for the DTO
         newOrder.OrderedItems = orderItems;
@@ -72,23 +83,83 @@ public class OrderService(
         return Result<OrderHistoryDTO>.Success(result); 
     }
 
-    public async Task<Result<OrderDTO>> AddAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<decimal>> GetTotalRevenueAsync(CancellationToken cancellationToken = default)
     {
-        var newOrder = new Order()
+        var result = await orderRepository.GetTotalRevenueAsync(cancellationToken);
+        
+        return Result<decimal>.Success(result);
+    }
+
+    public async Task<Result<int>> GetPendingOrdersCount(CancellationToken cancellationToken = default)
+    {
+        var pendingStatus = new OrderStateEnum[]
         {
-            UserId = userId,
-            OrderStatus = OrderStateEnum.Processing,
+            OrderStateEnum.Processing,
+            OrderStateEnum.Testing,
+            OrderStateEnum.Shipped
+        };
+        var result = await orderRepository.CountAsync(o => pendingStatus.Contains(o.OrderStatus), cancellationToken);
+        
+        return Result<int>.Success(result);
+    }
+
+    public async Task<Result<IReadOnlyList<decimal>>> GetDailyRevenueAsync(int days, CancellationToken cancellationToken = default)
+    {
+        var result =(List<decimal>) await orderRepository.GetDailyRevenueAsync(days, cancellationToken);
+
+        int missingDays = days - result.Count;
+        if (missingDays > 0)
+            result.AddRange(Enumerable.Repeat(0m, missingDays));
+        
+        return Result<IReadOnlyList<decimal>>.Success(result);
+    }
+
+    public async Task<Result<int>> GetLatestOrdersCountAsync(int days, CancellationToken cancellationToken = default)
+    {
+        return Result<int>.Success(await orderRepository.CountAsync(o => o.CreatedAt >= DateTime.UtcNow.AddDays(-1 * days), cancellationToken));
+    }
+
+    public async Task<Result<IReadOnlyList<OrderDTO>>> LazyGetOrdersAsync(Guid? userId, LazyDTO lazyData, CancellationToken cancellationToken = default)
+    {
+        var result = await orderRepository.FilterAsync(
+            o => (userId == null || o.UserId == userId.Value),
+            [o => o.OrderedItems],
+            o => o.CreatedAt,
+            true,
+            lazyData,
+            cancellationToken
+        );
+
+        return Result<IReadOnlyList<OrderDTO>>.Success(result.Select(r => r.toDTO()).ToList());
+    }
+    
+    public async Task<Result<IReadOnlyList<OrderDTO>>> LazyGetPendingOrdersAsync(Guid? userId, LazyDTO lazyData, CancellationToken cancellationToken = default)
+    {
+        var pendingStatus = new OrderStateEnum[]
+        {
+            OrderStateEnum.Processing,
+            OrderStateEnum.Testing,
+            OrderStateEnum.Shipped
         };
         
-        orderRepository.Add(newOrder);
+        var result = await orderRepository.FilterAsync(
+            o => ((userId == null || o.UserId == userId.Value) &&  pendingStatus.Contains(o.OrderStatus)),
+            [o => o.OrderedItems],
+            o => o.CreatedAt,
+            true,
+            lazyData,
+            cancellationToken
+        );
 
-        if (!await orderRepository.SaveChangesAsync(cancellationToken))
-        {
-            logger.LogError("{serviceName}.{methodName} failed saving changes to DB",
-                nameof(OrderService), nameof(AddAsync));
-            return Result<OrderDTO>.Failure("Failed saving changes to DB");
-        }
-        
-        return Result<OrderDTO>.Success(newOrder.toDTO());
+        return Result<IReadOnlyList<OrderDTO>>.Success(result.Select(r => r.toDTO()).ToList());
+    }
+
+    public async Task<Result<OrderDetailsDto>> GetDetailsAsync(Guid orderId, CancellationToken cancellationToken = default)
+    {
+        var order = await orderRepository.GetByIdAsync(orderId, [o => o.User], cancellationToken);
+        if (order == null)
+            return Result<OrderDetailsDto>.Failure("Order Not found");
+
+        return Result<OrderDetailsDto>.Success(order.ToDetailsDto());
     }
 }

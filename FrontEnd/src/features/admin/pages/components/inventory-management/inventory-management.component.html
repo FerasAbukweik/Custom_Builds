@@ -12,103 +12,79 @@
     <section class="mb-8">
       <div class="bg-deep-blue rounded-xl border border-dark-blue-gray overflow-hidden">
         <div class="flex justify-between items-center p-6 border-b border-dark-blue-gray">
-          <div class="flex items-center gap-4">
-            <h3 class="text-lg font-bold text-off-white flex items-center gap-2">
-              <span class="material-symbols-outlined text-secondary">keyboard</span>
-              Normal Products
-            </h3>
-            <span
-              class="text-[10px] font-bold px-2 py-0.5 bg-secondary/10 text-secondary rounded border border-secondary/20"
-              >42 SKUs Active</span
-            >
-          </div>
+          <div class="font-bold text-xl">Products</div>
           <button
-            class="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-off-white text-sm font-bold hover:bg-secondary/90 transition-all shadow-lg shadow-secondary/20"
+            class="flex cursor-pointer items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-off-white text-sm font-bold hover:bg-secondary/90 transition-all shadow-lg shadow-secondary/20"
           >
-            <span class="material-symbols-outlined text-sm">add</span>
-            <span>Add Product</span>
+            Add Product
           </button>
         </div>
 
         <div class="p-6 space-y-4">
-          @for (product of products; track product.sku) {
+          @for (product of productsService.products(); track product.id) {
             <div
               class="flex items-center justify-between p-4 rounded-xl bg-dark-deep-blue/50 border border-dark-blue-gray hover:border-secondary/50 transition-all group"
             >
-              <div class="flex items-center gap-6 flex-1">
+              <div class="flex items-center gap-6 flex-1 min-w-0">
                 <div
                   class="w-16 h-16 rounded-lg overflow-hidden bg-primary shrink-0 border border-dark-blue-gray"
                 >
                   <img
-                    [alt]="product.name"
+                    [alt]="product.title"
                     class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                     [src]="product.image"
                   />
                 </div>
-                <div class="min-w-50">
+                <div class="min-w-50 flex flex-col gap-1 flex-1 overflow-hidden">
                   <h4 class="font-bold text-off-white group-hover:text-secondary transition-colors">
-                    {{ product.name }}
+                    {{ product.title }}
                   </h4>
-                  <p class="text-[10px] text-soft-gray font-bold uppercase tracking-wider">
-                    SKU: {{ product.sku }}
-                  </p>
-                </div>
-                <div class="hidden md:flex flex-col border-l border-dark-blue-gray pl-6">
-                  <p class="text-[10px] text-soft-gray font-bold uppercase">Category</p>
-                  <p class="text-sm text-off-white">{{ product.category }}</p>
+                  <span class="truncate block">
+                    Description:
+                    {{ product.description }}
+                  </span>
                 </div>
               </div>
               <div class="flex items-center gap-8">
                 <div class="text-right min-w-30">
                   <p class="font-bold text-off-white">{{ product.stock }} in stock</p>
-                  <p
-                    class="text-[10px] flex items-center justify-end gap-1 font-bold"
-                    [class]="product.status === 'low' ? 'text-error' : 'text-ok'"
-                  >
-                    <span
-                      class="w-1.5 h-1.5 rounded-full"
-                      [class]="product.status === 'low' ? 'bg-error animate-pulse' : 'bg-ok'"
-                    ></span>
-                    {{ product.statusText }}
-                  </p>
                 </div>
                 <div class="flex gap-2">
                   <button
-                    class="px-3 py-1 rounded-lg border border-dark-blue-gray flex items-center justify-center text-light-steel-blue hover:border-secondary hover:text-secondary transition-all"
+                    class="px-3 cursor-pointer py-1 rounded-lg border border-dark-blue-gray flex items-center justify-center text-light-steel-blue hover:border-secondary hover:text-secondary transition-all"
                   >
                     <span class="text-[18px]">edit</span>
                   </button>
                   <button
-                    class="px-3 py-1 rounded-lg border border-dark-blue-gray flex items-center justify-center text-light-steel-blue hover:border-error hover:text-error transition-all"
+                    class="px-3 py-1 cursor-pointer rounded-lg border border-dark-blue-gray flex items-center justify-center text-light-steel-blue hover:border-error hover:text-error transition-all"
+                    (click)="productsService.remove(product.id)"
                   >
                     <span class="text-[18px]">delete</span>
                   </button>
                 </div>
               </div>
             </div>
+          } @empty {
+            @if (!productsService.isLoading()) {
+              <div class="w-full text-center font-bold text-xl">No Products Avaiable</div>
+            }
+          }
+
+          @if (productsService.isLoading()) {
+            <div class="w-full flex justify-center items-center">
+              <app-loading />
+            </div>
           }
         </div>
 
-        <div class="px-6 pb-6">
-          <button
-            class="w-full py-2 border border-dashed border-dark-blue-gray rounded-xl text-soft-gray hover:text-secondary hover:border-secondary transition-all flex items-center justify-center gap-2 text-sm font-medium"
-          >
-            <span>View All</span>
-          </button>
-        </div>
+        <div (appIsVisable)="productsService.lazyGetProducts()"></div>
       </div>
     </section>
 
     <section class="mb-8">
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-bold text-off-white flex items-center gap-2">
-          <span class="material-symbols-outlined text-secondary">settings_input_component</span>
-          Custom Parts Builder Hierarchy
-        </h3>
-        <span class="text-[10px] text-soft-gray uppercase tracking-[0.2em] font-bold"
-          >Part > Section > Modification</span
-        >
-      </div>
+      <h3 class="text-lg font-bold text-off-white flex items-center gap-2 mb-6">
+        Custom Modifications
+      </h3>
 
       <div class="grid grid-cols-12 gap-6">
         <div class="col-span-4 flex flex-col gap-4">
@@ -118,15 +94,13 @@
             <div
               class="p-4 border-b border-dark-blue-gray flex justify-between items-center bg-dark-deep-blue/50"
             >
-              <span class="font-bold text-xs text-off-white uppercase tracking-wider"
-                >1. Parts</span
-              >
-              <button class="text-secondary text-[10px] font-bold uppercase hover:underline">
-                Add Part
+              <span class="font-bold text-xs text-off-white uppercase tracking-wider">Parts</span>
+              <button class="text-secondary cursor-pointer">
+                <i class="fa-solid fa-plus"></i>
               </button>
             </div>
             <div class="flex-1 overflow-y-auto p-3 space-y-2">
-              @for (item of parts; track item.name) {
+              @for (item of parts; track $index) {
                 <div
                   class="p-3.5 rounded-lg flex items-center justify-between cursor-pointer transition-all"
                   [class]="
@@ -135,19 +109,11 @@
                       : 'bg-dark-deep-blue border border-dark-blue-gray hover:bg-primary/50'
                   "
                 >
-                  <div class="flex items-center gap-3">
-                    <span
-                      class="material-symbols-outlined"
-                      [class]="item.active ? 'text-secondary' : 'text-soft-gray'"
-                      >{{ item.icon }}</span
-                    >
-                    <span class="font-bold text-sm text-off-white">{{ item.name }}</span>
-                  </div>
-                  <span
-                    class="material-symbols-outlined text-sm"
-                    [class]="item.active ? 'text-secondary' : 'text-dark-gray'"
-                    >chevron_right</span
-                  >
+                  <span class="font-bold text-sm text-off-white truncate block">{{
+                    item.name
+                  }}</span>
+
+                  <i class="fa-solid fa-chevron-right"></i>
                 </div>
               }
             </div>
@@ -162,14 +128,14 @@
               class="p-4 border-b border-dark-blue-gray flex justify-between items-center bg-dark-deep-blue/50"
             >
               <span class="font-bold text-xs text-off-white uppercase tracking-wider"
-                >2. Sections (PS5 Shell)</span
+                >Sections</span
               >
-              <button class="text-secondary text-[10px] font-bold uppercase hover:underline">
-                Add Section
+              <button class="text-secondary cursor-pointer">
+                <i class="fa-solid fa-plus"></i>
               </button>
             </div>
             <div class="flex-1 overflow-y-auto p-3 space-y-2">
-              @for (item of sections; track item.name) {
+              @for (item of sections; track $index) {
                 <div
                   class="p-3.5 rounded-lg flex items-center justify-between cursor-pointer transition-all"
                   [class]="
@@ -178,19 +144,11 @@
                       : 'bg-dark-deep-blue border border-dark-blue-gray hover:bg-primary/50'
                   "
                 >
-                  <div class="flex items-center gap-3">
-                    <span
-                      class="material-symbols-outlined"
-                      [class]="item.active ? 'text-secondary' : 'text-soft-gray'"
-                      >{{ item.icon }}</span
-                    >
-                    <span class="font-bold text-sm text-off-white">{{ item.name }}</span>
-                  </div>
-                  <span
-                    class="material-symbols-outlined text-sm"
-                    [class]="item.active ? 'text-secondary' : 'text-dark-gray'"
-                    >chevron_right</span
-                  >
+                  <span class="font-bold truncate block text-sm text-off-white">{{
+                    item.name
+                  }}</span>
+
+                  <i class="fa-solid fa-chevron-right turnca"></i>
                 </div>
               }
             </div>
@@ -205,28 +163,31 @@
               class="p-4 border-b border-dark-blue-gray flex justify-between items-center bg-dark-deep-blue/50"
             >
               <span class="font-bold text-xs text-off-white uppercase tracking-wider"
-                >3. Mods (Faceplate)</span
+                >Modifications</span
               >
-              <button class="text-secondary text-[10px] font-bold uppercase hover:underline">
-                Add Mod
+              <button class="text-secondary cursor-pointer">
+                <i class="fa-solid fa-plus"></i>
               </button>
             </div>
             <div class="flex-1 overflow-y-auto p-3 space-y-2">
-              @for (mod of mods; track mod.name) {
+              @for (mod of mods; track $index) {
                 <div
                   class="p-3.5 rounded-lg bg-dark-deep-blue border border-dark-blue-gray flex items-center justify-between group cursor-default hover:border-dark-gray transition-all"
                 >
                   <div class="flex items-center gap-3">
-                    <div class="w-4 h-4 rounded-full"></div>
+                    <img [src]="mod.image" alt="" class="aspect-square h-full" />
                     <div class="flex flex-col">
-                      <span class="text-sm text-off-white font-medium">{{ mod.name }}</span>
+                      <span class="text-sm text-off-white truncate block font-medium">{{
+                        mod.name
+                      }}</span>
                       <span class="text-[10px] text-secondary font-bold">{{ mod.price }}</span>
                     </div>
                   </div>
                   <button
-                    class="opacity-0 group-hover:opacity-100 transition-opacity text-soft-gray hover:text-error"
+                    class="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-soft-gray hover:text-error"
+                    title="Remove"
                   >
-                    <span class="material-symbols-outlined text-sm">close</span>
+                    <i class="fa-solid fa-xmark"></i>
                   </button>
                 </div>
               }

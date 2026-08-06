@@ -12,6 +12,8 @@ public interface IOrderItemsRepository
     Task<IReadOnlyList<OrderItem>> FilterAsync(
         Expression<Func<OrderItem, bool>> predicate,
         Expression<Func<OrderItem, object?>>[]? include = null,
+        Expression<Func<OrderItem, object?>>? orderBy = null,
+        bool orderByDescending = false,
         int ? skip = null,
         int? take = null,
         CancellationToken cancellationToken = default);

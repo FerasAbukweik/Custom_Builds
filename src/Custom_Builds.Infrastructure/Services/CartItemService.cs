@@ -101,6 +101,8 @@ public class CartItemService(
         var cartItems = await cartItemRepository.FilterAsync(
             ci => ci.UserId == userId,
             [ci => ci.Product, ci => ci.CustomBuild],
+            ci => ci.CreatedAt,
+            true,
             lazyData.Taken,
             lazyData.SectionSize,
             cancellationToken
@@ -163,7 +165,14 @@ public class CartItemService(
         var ids = needsUpdate.Select(nu => nu.ItemId);
 
         // get items needed to be updated
-        var items = await cartItemRepository.FilterAsync(ci => ids.Contains(ci.Id), [],null,null, cancellationToken);
+        var items = await cartItemRepository.FilterAsync(
+            ci => ids.Contains(ci.Id),
+            null,
+            null,
+            false,
+            null,
+            null,
+            cancellationToken);
         
         if(items.Count != needsUpdate.Count)
             return Result<IReadOnlyList<CartItemDTO>>.Failure("some cart items were not found");

@@ -9,6 +9,5 @@ namespace Custom_Builds.Core.DTO.Order
         public required decimal OrderedPrice { get; set; }
         public required OrderStateEnum OrderStatus { get; set; }
         public required DateTime CreatedAt { get; set; }
-        public required IReadOnlyList<OrderItemDTO> OrderedItems { get; set; } = [];
     }
 }

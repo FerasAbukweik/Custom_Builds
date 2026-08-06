@@ -5,31 +5,31 @@ import { IPart } from '../../interfaces/customize-data.model';
 @Injectable({ providedIn: 'root' })
 export class PartService {
   // DI
-  private readonly partApiService = inject(PartApiServices);
+  private readonly _partApiService = inject(PartApiServices);
 
   // signals
-  private isLoading = signal<boolean>(false);
-  private parts = signal<IPart[]>([]);
+  private _isLoading = signal<boolean>(false);
+  private _parts = signal<IPart[]>([]);
 
   // getters
 
-  get getParts() {
-    return this.parts.asReadonly();
+  get parts() {
+    return this._parts.asReadonly();
   }
 
-  get getIsLoading() {
-    return this.isLoading.asReadonly();
+  get isLoading() {
+    return this._isLoading.asReadonly();
   }
 
   // methods
 
   updateParts() {
-    if (this.isLoading()) return;
-    this.isLoading.set(true);
+    if (this._isLoading()) return;
+    this._isLoading.set(true);
 
-    this.partApiService.getAllParts().subscribe({
+    this._partApiService.getAllParts().subscribe({
       next: (data) => {
-        this.parts.set(data);
+        this._parts.set(data);
       },
     });
   }

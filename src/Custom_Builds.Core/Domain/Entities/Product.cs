@@ -22,8 +22,11 @@ namespace Custom_Builds.Core.Domain.Entities
         public required decimal Price { get; set; }
         public List<string> Images { get; set; } = ["No images"];
 
-        
-        
+        [Required] 
+        public required int InStock { get; set; }
+
+
+
         // relations
 
         public List<OrderItem> OrderItems { get; set; } = [];
@@ -37,8 +40,9 @@ namespace Custom_Builds.Core.Domain.Entities
                 Id = Id,
                 Title = Title,
                 Price = Price,
-                Images = Images,
-                Description = Description
+                Image = Images.Count > 0 ? Images[0] : "no image",
+                Description = Description,
+                Stock = InStock
             };
         }
     }

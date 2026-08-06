@@ -26,19 +26,19 @@ export class MessagesService {
   private _isMoreDataAvaiable: boolean = true;
 
   // getters
-  get getIsLoading() {
+  get isLoading() {
     return this._isLoading.asReadonly();
   }
 
-  get getMessages() {
+  get messages() {
     return this._messages.asReadonly();
   }
 
-  get getIsTyping() {
+  get isTyping() {
     return this._isTyping.asReadonly();
   }
 
-  get getIsSignalRConnected() {
+  get isSignalRConnected() {
     return this._isSignalRConnected.asReadonly();
   }
 

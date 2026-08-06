@@ -21,4 +21,12 @@ export class ProductApiService {
 
     return this.httpClient.get<IProductDTO[]>(this.url + '/GetAll', { params });
   }
+
+  remove(productId: string){
+    return this.httpClient.delete(`${this.url}/Remove/${productId}`);
+  }
+
+  update(){
+    
+  }
 }

@@ -1,6 +1,8 @@
 export interface IProductDTO {
   id: string;
-  name: string;
+  title: string;
   price: number;
-  images: string[];
+  image: string;
+  stock: number;
+  description: string;
 }

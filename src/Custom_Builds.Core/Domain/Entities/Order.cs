@@ -1,6 +1,7 @@
 using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection.Emit;
 using Custom_Builds.Core.DTO.Order;
 
 namespace Custom_Builds.Core.Domain.Entities
@@ -31,8 +32,22 @@ namespace Custom_Builds.Core.Domain.Entities
                 Id = Id,
                 CreatedAt = CreatedAt,
                 OrderStatus = OrderStatus,
-                OrderedPrice = OrderedItems.Sum(o => o.OrderedPrice),
-                OrderedItems = OrderedItems.Select(orderedItem => orderedItem.ToDTO()).ToList()
+                OrderedPrice = OrderedItems.Sum(o => (o.OrderedPrice * o.Quantity)),
+            };
+        }
+
+        // to order details dto
+        // must include user
+        public OrderDetailsDto ToDetailsDto()
+        {
+            return new OrderDetailsDto()
+            {
+                Id = Id,
+                OrderedDate = CreatedAt,
+                PhoneNumber = User?.PhoneNumber ?? "unknown",
+                UserName = User?.UserName ?? "unknown",
+                UserId = UserId,
+                Status = OrderStatus
             };
         }
     }

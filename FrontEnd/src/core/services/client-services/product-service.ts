@@ -1,54 +1,71 @@
-import { DestroyRef, inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { ProductApiService } from '../api-services/product-api-service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ILazyDTO } from '../../DTO/lazy-dto';
 import { IProductDTO } from '../../DTO/product-dto';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
   // DI
-  private readonly productApiService = inject(ProductApiService);
+  private readonly _productApiService = inject(ProductApiService);
 
   // signals
-  private products = signal<IProductDTO[]>([]);
-  private isLoading = signal<boolean>(false);
+  private _products = signal<IProductDTO[]>([]);
+  private _isLoading = signal<boolean>(false);
 
   // fields
 
   // private
-  private isMoreDataAvaiable = true;
-  private readonly lazyData: ILazyDTO = {
+  private _isMoreDataAvaiable = true;
+  private readonly _lazyData: ILazyDTO = {
     sectionSize: 10,
     taken: 0,
   };
 
   // getters
-  get getProducts() {
-    return this.products.asReadonly();
+  get products() {
+    return this._products.asReadonly();
   }
 
-  get getIsLoading() {
-    return this.isLoading.asReadonly();
+  get isLoading() {
+    return this._isLoading.asReadonly();
   }
 
   // methods
 
   // lazyGetProducts
   lazyGetProducts = () => {
-    if (this.isLoading() || !this.isMoreDataAvaiable) return;
-    this.isLoading.set(true);
+    if (this._isLoading() || !this._isMoreDataAvaiable) return;
+    this._isLoading.set(true);
 
-    this.productApiService.getAll(this.lazyData).subscribe({
+    this._productApiService.getAll(this._lazyData).subscribe({
       next: (res) => {
-        this.products.update((curr) => [...curr, ...res]);
+        this._products.update((curr) => [...curr, ...res]);
 
-        this.lazyData.taken += res.length;
-        this.isMoreDataAvaiable = res.length > 0;
-        this.isLoading.set(false);
+        this._lazyData.taken += res.length;
+        this._isMoreDataAvaiable = res.length > 0;
+        this._isLoading.set(false);
+
+        console.log('Products:', this._products());
       },
       error: (err) => {
-        this.isLoading.set(false);
+        this._isLoading.set(false);
       },
     });
   };
+
+  remove(productId: string) {
+    // old data used to return to old data
+    const oldData = this._products();
+
+    this._products.update((curr) => curr.filter((p) => p.id !== productId));
+
+    this._productApiService.remove(productId).subscribe({
+      error: () => {
+        // TODO: show error
+
+        // return to old data
+        this._products.set(oldData);
+      },
+    });
+  }
 }

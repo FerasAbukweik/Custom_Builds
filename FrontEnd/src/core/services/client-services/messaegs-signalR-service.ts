@@ -16,12 +16,12 @@ export class MessagesSignalRService {
   private readonly _hubUrl: string = Urls.baseUrl + '/hubs/chat';
 
   // signals
-  private isConntected = signal<boolean>(false);
+  private _isConntected = signal<boolean>(false);
 
   // getters
 
-  get getIsConnected() {
-    return this.isConntected.asReadonly();
+  get isConnected() {
+    return this._isConntected.asReadonly();
   }
 
   startConnection = async (): Promise<boolean> => {
@@ -35,12 +35,12 @@ export class MessagesSignalRService {
     try {
       await this._hubConnection.start();
       this.registerHandlers();
-      this.isConntected.set(true);
+      this._isConntected.set(true);
 
       return true;
     } catch (ex) {
       // toDo: show error message
-      this.isConntected.set(false);
+      this._isConntected.set(false);
       return false;
     }
   };
@@ -74,7 +74,7 @@ export class MessagesSignalRService {
   stopConnection = () => {
     try {
       this._hubConnection?.stop();
-      this.isConntected.set(false);
+      this._isConntected.set(false);
       return true;
     } catch {
       return false;

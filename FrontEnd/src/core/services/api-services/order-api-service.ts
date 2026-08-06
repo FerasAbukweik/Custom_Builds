@@ -1,11 +1,11 @@
 import { inject } from '@angular/core';
 import { Urls } from '../../constants/urls';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { IOrderDTO } from '../../DTO/mini-order-dto';
 import { Injectable } from '@angular/core';
-import { IHistoryOrderDTO } from '../../DTO/History-orders-dto';
-import { IOrderHistorySummaryDTO } from '../../DTO/order-history-dto';
+import { IOrderDto } from '../../DTO/orders-dto';
+import { IOrderHistoryStatusDTO } from '../../DTO/order-history-status-dto';
 import { ILazyDTO } from '../../DTO/lazy-dto';
+import { OrderDetailsDto } from '../../DTO/order-details-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -24,40 +24,42 @@ export class OrderApiService {
   }
 
   // get all orders
-  public getAllProcessingOrders(data: ILazyDTO) {
+  public LazyGetProcessingOrders(data: ILazyDTO) {
     let params = new HttpParams();
     Object.entries(data).forEach(([key, value]) => {
       params = params.append(key, value.toString());
     });
 
-    return this.http.get<IOrderDTO[]>(`${this.url}/GetAllProcessingOrders`, { params });
+    return this.http.get<IOrderDto[]>(`${this.url}/GetPendingOrders`, { params });
+  }
+
+  // get processing orders count
+  getProcessingOrders() {
+    return this.http.get<number>(this.url + '/GetPendingOrdersCount');
   }
 
   // get all completed orders
-  public lazyGetCompletedOrders(data: ILazyDTO) {
+  public lazyGetOrders(data: ILazyDTO) {
     let params = new HttpParams();
 
     Object.entries(data).forEach(([key, val]) => {
       params = params.append(key, val);
     });
 
-    return this.http.get<IHistoryOrderDTO[]>(`${this.url}/GetAllCompletedOrders`, {
-      params,
-    });
-  }
-
-  // get orders count
-  public getProcessingOrdersCount() {
-    return this.http.get<number>(`${this.url}/GetProcessingOrdersCount`);
+    return this.http.get<IOrderDto[]>(`${this.url}`, { params });
   }
 
   // get completed orders count
   public getHistorySummary() {
-    return this.http.get<IOrderHistorySummaryDTO>(`${this.url}/GetHistorySummary`);
+    return this.http.get<IOrderHistoryStatusDTO>(`${this.url}/GetHistorySummary`);
   }
 
-  // buy order again
-  public buyAgain(orderItemId: string) {
-    return this.http.post(this.url + '/BuyAgain', JSON.stringify(orderItemId));
+  // get order details
+  getOrderDetails(orderId: string) {
+    let params = new HttpParams();
+
+    params = params.append('orderId', orderId);
+
+    return this.http.get<OrderDetailsDto>(this.url + '/GetOrderDetails', { params });
   }
 }
