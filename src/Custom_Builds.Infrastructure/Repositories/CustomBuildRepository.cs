@@ -81,6 +81,9 @@ namespace Custom_Builds.Infrastructure.Repositories
         {
             return await dbContext.SaveChangesAsync(cancellationToken) > 0;
         }
-
+        public void AttachRange(IEnumerable<Modification> entities)
+        {
+            dbContext.Set<Modification>().AttachRange(entities);
+        }
     }
 }

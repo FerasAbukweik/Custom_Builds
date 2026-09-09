@@ -4,57 +4,82 @@ using System.Collections.Concurrent;
 using Custom_Builds.Core.DTO.Message;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
-using custom_Peripherals.ExtensionMethods;
+using System.Security.Claims;
 
 namespace custom_Peripherals.Hub
 {
     public class ChatHub(
         IMessageService messageService,
-        IChatGroupService chatGroupService,
-        IHttpContextAccessor httpContextAccessor
+        IChatGroupService chatGroupService
         ) : Hub<IChatHub>
     {
         private static readonly ConcurrentDictionary<string, Guid> _usersTyping = new();
 
-        // on connected
         public override async Task OnConnectedAsync()
         {
-            var chatGroupId = await GetChatGroupIdAsync();
-            if (chatGroupId == null) return;
+            // Automatically add normal users to their specific chat group upon connection
+            if (!IsAdmin())
+            {
+                var userGroupId = await GetUserChatGroupId();
+                if (userGroupId.HasValue)
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, userGroupId.Value.ToString());
+                }
+            }
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, chatGroupId.Value.ToString());
+            await base.OnConnectedAsync();
         }
 
-        public async Task SendMessage(string content)
+        // ==========================================
+        // Join and Leave methods (Crucial for Admin)
+        // ==========================================
+        public async Task JoinChatGroup(Guid chatGroupId)
         {
-            var chatGroupId = await GetChatGroupIdAsync();
+            await Groups.AddToGroupAsync(Context.ConnectionId, chatGroupId.ToString());
+        }
+
+        public async Task LeaveChatGroup(Guid chatGroupId)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatGroupId.ToString());
+        }
+
+        // ==========================================
+        // Sending Messages
+        // ==========================================
+        
+        // Added adminChatGroupId so the admin can specify the target chat group
+        public async Task SendMessage(string content, Guid? adminChatGroupId = null)
+        {
+            var targetGroupId = await GetTargetChatGroupIdAsync(adminChatGroupId);
             var currUserId = GetUserId();
-            
-            if (chatGroupId == null || currUserId == null) return;
-            
-            //store message to DB
+
+            if (targetGroupId == null || currUserId == null) return;
+
+            // Save message to the database
             var result = await messageService.AddAsync(new MessageAddDTO()
             {
-                ChatGroupId = chatGroupId.Value,
+                ChatGroupId = targetGroupId.Value,
                 Content = content
-            },
-                currUserId.Value);
-            
+            }, currUserId.Value);
+
             if (!result.IsSuccess) return;
 
-            // send full DTO to receiver
-            await Clients.Group(chatGroupId.Value.ToString()).ReceiveMessageAsync(result.Value!);
+            // Send the DTO to everyone in the chat group
+            await Clients.Group(targetGroupId.Value.ToString()).ReceiveMessageAsync(result.Value!);
         }
 
-        public async Task NotifyTyping()
+        // ==========================================
+        // Typing Indicators
+        // ==========================================
+        public async Task NotifyTyping(Guid? adminChatGroupId = null)
         {
-            var chatGroupId = await GetChatGroupIdAsync();
+            var chatGroupId = await GetTargetChatGroupIdAsync(adminChatGroupId);
             if (chatGroupId == null) return;
 
-            // if user switched to another chat group, remove previous typing status
+            // Update or add the user's typing status
             _usersTyping.AddOrUpdate(Context.ConnectionId, chatGroupId.Value, (_, __) => chatGroupId.Value);
 
-            // add user to users typing dictionary with current chat group id
+            // Notify others in the chat group that someone is typing
             await Clients.OthersInGroup(chatGroupId.Value.ToString()).UserIsTypingAsync(chatGroupId.Value);
         }
 
@@ -66,87 +91,66 @@ namespace custom_Peripherals.Hub
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             await ResolveStoppedTyping();
-
             await base.OnDisconnectedAsync(exception);
         }
-        
-        
-        // helper methods
-        
-        // this can be used with users only
+
+        // ==========================================
+        // Helper Methods
+        // ==========================================
+
         private async Task<Guid?> GetUserChatGroupId()
         {
             var currUserId = GetUserId();
             if (currUserId == null) return null;
 
-            var getCurrUserChatGroupIdResult = await chatGroupService.GetChatGroupIdAsync(currUserId.Value);
-            if (!getCurrUserChatGroupIdResult.IsSuccess) return null;
-
-            return getCurrUserChatGroupIdResult.Value;
+            var result = await chatGroupService.GetChatGroupIdAsync(currUserId.Value);
+            return result.IsSuccess ? result.Value : null;
         }
 
         private bool IsAdmin() =>
             Context.User?.IsInRole(nameof(RolesEnum.Admin)) ?? false;
 
-        private async Task ResolveStoppedTyping()
+        private async Task<Guid?> GetTargetChatGroupIdAsync(Guid? adminChatGroupId)
         {
-            // get current chatGroupId user is typing in
-            // if user isnt typing stop
-            if (!_usersTyping.TryRemove(Context.ConnectionId, out Guid chatGroupId)) return;
-
-
-            List<string> currChatGroupUsersTyping = _usersTyping
-                .Where(kvp => kvp.Value == chatGroupId)
-                .Select(kvp => kvp.Key).ToList();
-            
-            int numberOfUsersTyping = currChatGroupUsersTyping.Count;
-
-            if (numberOfUsersTyping == 0)
-            {
-                // if no one is typing notify everyone no one is typing
-                await Clients.Group(chatGroupId.ToString()).UserStoppedTypingAsync(chatGroupId);
-            }
-            else if (numberOfUsersTyping == 1)
-            {
-                // if only one is typing only he should be notified that no one is typing (everyone else should still have userIsTyping)
-                await Clients.Client(currChatGroupUsersTyping[0]).UserStoppedTypingAsync(chatGroupId);
-            }
-
-            // otherwise everyone in the chat should have someone is typing
-        }
-
-        private Guid? GetChatGroupId()
-        {
-            var context = httpContextAccessor.HttpContext;
-            if(context == null) return  null;
-
-            if (!context.Request.Query.TryGetValue("chatGroupId", out var chatGroupIdString))
-                return null;
-
-            if (!Guid.TryParse(chatGroupIdString, out var chatGroupId))
-                return null;
-
-            return chatGroupId;
+            // If admin, use the provided ID; otherwise, use the user's own group to prevent tampering
+            if (IsAdmin()) return adminChatGroupId;
+            return await GetUserChatGroupId();
         }
 
         private Guid? GetUserId()
         {
-            var context = httpContextAccessor.HttpContext;
-            if(context == null) return  null;
-
-            var result = context.User.GetId();
-            if (!result.IsSuccess) return null;
+            // Extract the ID directly from the SignalR Context without using HttpContextAccessor
+            var userIdString = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             
-            return result.Value;
+            if (Guid.TryParse(userIdString, out var userId))
+                return userId;
+
+            return null;
         }
 
-        private async Task<Guid?> GetChatGroupIdAsync()
+        private async Task ResolveStoppedTyping()
         {
-            Guid? chatGroupId;
-            if (IsAdmin()) chatGroupId = GetChatGroupId();
-            else chatGroupId = await GetUserChatGroupId();
-            
-            return chatGroupId;
+            if (!_usersTyping.TryRemove(Context.ConnectionId, out Guid chatGroupId)) return;
+
+            // Find who else is still typing in the same chat group
+            var currChatGroupUsersTyping = _usersTyping
+                .Where(kvp => kvp.Value == chatGroupId)
+                .Select(kvp => kvp.Key)
+                .ToList();
+
+            int numberOfUsersTyping = currChatGroupUsersTyping.Count;
+
+            if (numberOfUsersTyping == 0)
+            {
+                // No one is typing, notify everyone to hide the typing indicator
+                await Clients.Group(chatGroupId.ToString()).UserStoppedTypingAsync(chatGroupId);
+            }
+            else if (numberOfUsersTyping == 1)
+            {
+                // If only one person is still typing, notify only them that the others stopped 
+                // (Kept based on your original logic)
+                await Clients.Client(currChatGroupUsersTyping[0]).UserStoppedTypingAsync(chatGroupId);
+            }
         }
     }
 }

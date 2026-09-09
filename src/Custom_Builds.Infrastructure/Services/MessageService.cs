@@ -43,15 +43,25 @@ public class MessageService(
 
         return Result<MessageDTO>.Success(message.toDTO(senderId));
     }
-    public async Task<Result<IReadOnlyList<MessageDTO>>> GetMessagesAsync(
+
+    public async Task<Result<IReadOnlyList<MessageDTO>>> GetGroupMessagesAsync(
+        Guid groupId,
+        Guid currUserId,
         LazyDTO lazyData,
-        Guid userId,
         CancellationToken cancellationToken = default)
     {
         // get messages from repository
-        var messages = await messageRepository.LazyGetMessagesAsync(lazyData, userId, cancellationToken);
+        var messages = await messageRepository.FilterAsync(
+            m => m.ChatGroupId == groupId,
+            [m => m.Sender],
+            m => m.CreatedAt,
+            true,
+            lazyData.Taken,
+            lazyData.SectionSize,
+            cancellationToken
+            );
         
         // map messages to DTO
-        return Result<IReadOnlyList<MessageDTO>>.Success(messages.Select(m => m.toDTO(userId)).ToList());
+        return Result<IReadOnlyList<MessageDTO>>.Success(messages.Select(m => m.toDTO(currUserId)).ToList());
     }
 }

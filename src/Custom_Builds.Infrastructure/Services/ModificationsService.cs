@@ -9,21 +9,24 @@ namespace Custom_Builds.Infrastructure.Services;
 
 public class ModificationsService(
     IModificationsRepository modificationsRepository,
-    ILogger<ModificationsService> logger 
+    ILogger<ModificationsService> logger,
+    IImageService imageService
     ) : IModificationsService
 {
     public async Task<Result<ModificationDTO>> AddAsync(
         ModificationAddDTO toAddModification,
         CancellationToken cancellationToken = default)
     {
+        // add image
+        var addImageResult = await imageService.Add(toAddModification.Image,cancellationToken);
+        if (!addImageResult.IsSuccess) return addImageResult.MapFailure<ModificationDTO>();
+        
         // new modification to add
         Modification newModification = new Modification()
         {
             Name = toAddModification.Name,
             Price = toAddModification.Price,
-            Description = toAddModification.Description,
-            Icon = toAddModification.Icon,
-            Value = toAddModification.Value,
+            ImageId = addImageResult.Value!.Id,
             SectionId = toAddModification.SectionId
         };
 

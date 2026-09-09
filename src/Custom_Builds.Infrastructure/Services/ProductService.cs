@@ -10,29 +10,25 @@ namespace Custom_Builds.Infrastructure.Services;
 
 public class ProductService(
     IProductRepository productRepository,
-    ILogger<ProductService> logger) : IProductService
+    ILogger<ProductService> logger,
+    IImageService imageService) : IProductService
 {
     public async Task<Result<ProductDTO>> AddAsync(ProductAddDTO toAdd, CancellationToken cancellationToken = default)
     {
         // new product
         Product newProduct = new Product()
         {
-            Id = Guid.NewGuid(),
             Title = toAdd.Name,
             Price = toAdd.Price,
             Description = toAdd.Description,
-            Images = toAdd.Images,
             InStock = toAdd.InStock
         };
-
         productRepository.Add(newProduct);
+        
 
-        if (!await productRepository.SaveChangesAsync(cancellationToken))
-        {
-            logger.LogError("{serviceName}.{methodName} failed saving changes to DB",
-                nameof(ProductService), nameof(AddAsync));
-            return Result<ProductDTO>.Failure("failed saving changes to DB");
-        }
+        // add images and link them with new product + save changes
+        var addImagesResult = await imageService.AddRange(toAdd.Images.ToArray(), newProduct.Id, cancellationToken);
+        if(!addImagesResult.IsSuccess) return addImagesResult.MapFailure<ProductDTO>();
 
         return Result<ProductDTO>.Success(newProduct.toDTO());
     }
@@ -82,5 +78,21 @@ public class ProductService(
     public async Task<Result<int>> GetLowStockCountAsync(int lowAmount ,CancellationToken cancellationToken = default)
     {
         return Result<int>.Success(await productRepository.CountAsync(p => p.InStock <= lowAmount, cancellationToken));
+    }
+
+    public async Task<Result<ProductDTO>> EditAsync(ProductEditDTO editData, CancellationToken cancellationToken = default)
+    {
+        var edited = await productRepository.EditByIdAsync(editData, cancellationToken);
+        
+        if(edited == null) return Result<ProductDTO>.Failure("failed to edit product");
+        
+        if (!await productRepository.SaveChangesAsync(cancellationToken))
+        {
+            logger.LogError("{serviceName}.{methodName} failed saving changes to DB",
+                nameof(ProductService), nameof(RemoveByIdAsync));
+            return Result<ProductDTO>.Failure("failed saving changes to DB");
+        }
+        
+        return Result<ProductDTO>.Success(edited.toDTO());
     }
 }

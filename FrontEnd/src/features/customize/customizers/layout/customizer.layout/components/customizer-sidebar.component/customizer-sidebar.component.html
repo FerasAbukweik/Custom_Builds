@@ -39,52 +39,16 @@
                 selectedModifications()[section.id] === modification.id
                   ? 'border-secondary bg-white/5 ring-1 ring-secondary/30'
                   : 'border-dark-blue-gray hover:border-soft-gray/30 bg-transparent'
-              } ${
-                modification.type === 'card'
-                  ? 'p-3 items-center justify-between'
-                  : 'flex-col items-center p-2'
-              }`
+              } flex-col items-center p-2`
             "
           >
-            @if (modification.type === 'color') {
-              <div class="flex items-center gap-3 w-full">
-                <div
-                  class="w-10 h-10 rounded border border-white/10"
-                  [style.backgroundColor]="modification.value"
-                ></div>
-                <span
-                  class="text-xs font-bold"
-                  [class.text-white]="selectedModifications()[section.id] === modification.id"
-                  [class.text-soft-gray]="selectedModifications()[section.id] !== modification.id"
-                >
-                  {{ modification.name }}
-                </span>
-              </div>
-            }
-
-            @if (modification.type === 'image') {
-              <div
-                class="w-full aspect-square rounded bg-cover bg-center mb-2"
-                [style.backgroundImage]="'url(' + modification.value + ')'"
-              ></div>
-              <span class="text-[10px] font-bold uppercase text-dark-gray">
-                {{ modification.name }}
-              </span>
-            }
-
-            @if (modification.type === 'card') {
-              <div class="flex items-center gap-3">
-                <div
-                  class="p-2 bg-deep-blue rounded text-white w-9 h-9 flex items-center justify-center"
-                >
-                  <i [class]="modification.icon + ' text-lg'"></i>
-                </div>
-                <div class="text-left">
-                  <p class="text-xs font-bold text-white">{{ modification.name }}</p>
-                  <p class="text-[10px] text-soft-gray">{{ modification.desc }}</p>
-                </div>
-              </div>
-            }
+            <div
+              class="w-full aspect-square rounded bg-cover bg-center mb-2"
+              [style.backgroundImage]="'url(' + modification.image + ')'"
+            ></div>
+            <span class="text-[10px] font-bold uppercase text-dark-gray">
+              {{ modification.name }}
+            </span>
           </button>
         }
       </div>
@@ -96,7 +60,9 @@
   <div class="flex items-end justify-between gap-3 mb-2">
     <div>
       <p class="text-dark-gray text-[10px] font-bold uppercase tracking-wider">Estimated Total</p>
-      <h4 class="text-white text-3xl font-bold max-[335px]:text-lg"> {{totalPrice() | currency}} </h4>
+      <h4 class="text-white text-3xl font-bold max-[335px]:text-lg">
+        {{ totalPrice() | currency }}
+      </h4>
     </div>
     <button
       class="whitespace-nowrap bg-secondary text-white px-8 py-3 rounded-lg font-bold text-sm hover:bg-blue-600 transition-all uppercase tracking-wider cursor-pointer max-[335px]:px-4 max-[335px]:text-xs"

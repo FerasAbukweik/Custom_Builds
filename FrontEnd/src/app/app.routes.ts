@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { DashboardService } from '../layouts/dashboard/dashboard.service'; 
 import { globalGuard } from '../core/guard/global-guard';
 import { loginSignupGuard } from '../core/guard/login-signup-guard';
+import { adminGuard } from 'src/core/guard/admin-guard';
 
 export const routes: Routes = [
   {
@@ -56,6 +57,7 @@ export const routes: Routes = [
           import('.././layouts/dashboard/dashboard.layout').then((x) => x.DashboardLayout),
         loadChildren: () => import('../features/admin/admin.routes').then((x) => x.routes),
         providers: [DashboardService],
+        canMatch: [adminGuard],
         data: {
           pagesData: [
             { icon: 'fa-solid fa-box-open', name: 'Dashboard', goTo: 'dashboard' },

@@ -7,7 +7,7 @@ import { IUserData } from '../../DTO/userDataDTO';
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
   // inject
-  private readonly http = inject(HttpClient);
+  private readonly _http = inject(HttpClient);
 
   // private
   private readonly url = Urls.apiUrl + '/Auth';
@@ -15,18 +15,22 @@ export class AuthApiService {
   // api calls
 
   isAuthenticated() {
-    return this.http.post(this.url + '/IsAuthenticated', {});
+    return this._http.post(this.url + '/IsAuthenticated', {});
   }
 
   login(loginData: ILoginDTO) {
-    return this.http.post<IUserData>(this.url + '/Login', loginData);
+    return this._http.post<IUserData>(this.url + '/Login', loginData);
   }
 
   logout() {
-    return this.http.post(this.url + 'Logout', {});
+    return this._http.post(this.url + 'Logout', {});
   }
 
   updateTokens() {
-    return this.http.post(this.url + '/UpdateTokens', {});
+    return this._http.post(this.url + '/UpdateTokens', {});
+  }
+
+  isAdmin() {
+    return this._http.post(this.url + '/IsAdmin', {});
   }
 }

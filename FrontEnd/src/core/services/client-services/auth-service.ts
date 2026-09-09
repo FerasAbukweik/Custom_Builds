@@ -15,7 +15,6 @@ export class AuthService {
   userData = signal<IUserData | null>(null);
   loginServerError = signal<string>('');
 
-
   // methods
 
   login(loginData: ILoginDTO) {
@@ -33,6 +32,15 @@ export class AuthService {
   async isAuthenticatedAsync() {
     try {
       await firstValueFrom(this._authApiService.isAuthenticated());
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async isAdminAsync() {
+    try {
+      await firstValueFrom(this._authApiService.isAdmin());
       return true;
     } catch {
       return false;

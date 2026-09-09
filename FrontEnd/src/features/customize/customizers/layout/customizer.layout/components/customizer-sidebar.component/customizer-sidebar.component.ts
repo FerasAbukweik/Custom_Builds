@@ -1,6 +1,5 @@
 import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { IPart } from '../../../../../../../core/interfaces/customize-data.model';
 import { PartService } from '../../../../../../../core/services/client-services/part-service';
 import { CartItemService } from '../../../../../../../core/services/client-services/cart-item-service-service';
 import { CustomBuildTypeEnum } from '../../../../../../../core/enums/custom-build-type-enum';
@@ -25,14 +24,13 @@ export class CustomizerSidebarComponent implements OnInit {
 
   // signals
   protected activePartId = signal<string>('');
-  protected customizeData = signal<IPart[]>([]);
   protected selectedModifications = signal<Record<string, string>>({});
 
   // computed
   protected totalPrice = computed<number>(() => {
     const idsSet = new Set(Object.values(this.selectedModifications()));
 
-    return this.customizeData().reduce(
+    return this.partServices.parts().reduce(
       (sum, p) =>
         sum +
         p.sections.reduce(
@@ -44,9 +42,8 @@ export class CustomizerSidebarComponent implements OnInit {
       0,
     );
   });
-  // computed
   protected currentPartSections = computed(
-    () => this.customizeData()?.find((part) => part.id === this.activePartId())?.sections ?? [],
+    () => this.partServices.parts().find((part) => part.id === this.activePartId())?.sections ?? [],
   );
 
   // getters

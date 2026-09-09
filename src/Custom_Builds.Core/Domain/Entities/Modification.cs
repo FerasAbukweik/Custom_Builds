@@ -1,5 +1,4 @@
-﻿using Custom_Builds.Core.DTO;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Custom_Builds.Core.DTO.Modification;
 
@@ -14,15 +13,6 @@ namespace Custom_Builds.Core.Domain.Entities
         [Column(TypeName = "nvarchar(100)")]
         public required string Name { get; set; }
 
-        [Column(TypeName = "varchar(150)")]
-        public string? Value { get; set; }
-        
-        [Column(TypeName = "varchar(150)")]
-        public string? Description { get; set; }
-
-        [Column(TypeName = "varchar(100)")]
-        public string? Icon { get; set; }
-
         [Required]
         public required decimal Price { get; set; }
 
@@ -32,6 +22,10 @@ namespace Custom_Builds.Core.Domain.Entities
         public required Guid SectionId { get; set; }
         public Section? Section { get; set; }
         public List<CustomBuild> CustomBuilds { get; set; } = [];
+        
+        [Required]
+        public required Guid ImageId { get; set; }
+        public Image? Image { get; set; }
 
 
         
@@ -41,11 +35,9 @@ namespace Custom_Builds.Core.Domain.Entities
             return new ModificationDTO()
             {
                 Id = Id,
-                Description = Description,
                 Name = Name,
                 Price = Price,
-                Icon = Icon,
-                Image = Value
+                Image = Image?.ImageUrl ?? ""
             };
         }
     }

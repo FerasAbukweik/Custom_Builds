@@ -16,5 +16,6 @@ namespace Custom_Builds.Core.Interfaces.RepositoryContracts
         Task<Result<List<CustomBuild>>> FilterAsync(Expression<Func<CustomBuild, bool>> extraChecks, Expression<Func<CustomBuild, object?>>[]? includes = null);
         Task<Result<decimal>> GetPriceAsync(Guid customBuildId, CancellationToken cancellationToken = default);
         Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
+        void AttachRange(IEnumerable<Modification> mods);
     }
 }

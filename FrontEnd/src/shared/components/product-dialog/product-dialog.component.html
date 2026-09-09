@@ -1,1 +1,168 @@
-<p>product-dialog.component works!</p>
+<!-- Header -->
+<div
+  class="px-6 py-4 border-b border-dark-gray/30 flex justify-between items-center bg-deep-blue/50"
+>
+  <div class="flex items-center gap-3">
+    <h2 class="text-xl font-medium text-off-white">
+      {{ isEditMode() ? 'Edit Product' : 'Add New Product' }}
+    </h2>
+  </div>
+  <!-- Close Button -->
+  <button
+    (click)="close()"
+    type="button"
+    class="text-soft-gray hover:text-white transition-colors rounded-full py-1 px-2 cursor-pointer hover:bg-dark-blue-gray/50"
+  >
+    <span class="material-symbols-outlined">close</span>
+  </button>
+</div>
+
+<!-- Body (Scrollable) -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="p-6 overflow-y-auto flex-1 space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Name Input -->
+      <div class="space-y-2 md:col-span-2">
+        <label
+          class="block text-xs text-soft-gray uppercase tracking-wider font-semibold"
+          for="productName"
+          >Product Name</label
+        >
+        <input
+          [formControl]="form.controls.productName"
+          class="input-recessed w-full rounded-lg px-4 py-2.5 text-off-white text-sm placeholder-soft-gray/40"
+          [ngClass]="{ 'border-error!': isError('productName') }"
+          id="productName"
+          placeholder="e.g. Quantum Processor X1"
+          type="text"
+        />
+      </div>
+
+      <!-- Price Input -->
+      <div class="space-y-2">
+        <label
+          class="block text-xs text-soft-gray uppercase tracking-wider font-semibold"
+          for="productPrice"
+          >Price (USD)</label
+        >
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-soft-gray text-sm">$</span>
+          <input
+            [formControl]="form.controls.price"
+            [ngClass]="{ 'border-error!': isError('price') }"
+            class="input-recessed w-full rounded-lg pl-8 pr-4 py-2.5 text-off-white text-sm placeholder-soft-gray/40"
+            id="productPrice"
+            placeholder="0.00"
+            step="0.01"
+            type="number"
+          />
+        </div>
+      </div>
+
+      <!-- In Stock Input -->
+      <div class="space-y-2">
+        <label
+          class="block text-xs text-soft-gray uppercase tracking-wider font-semibold"
+          for="productPrice"
+          >In Stock</label
+        >
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-soft-gray text-sm">$</span>
+          <input
+            [ngClass]="{ 'border-error!': isError('inStock') }"
+            [formControl]="form.controls.inStock"
+            class="input-recessed w-full rounded-lg pl-8 pr-4 py-2.5 text-off-white text-sm placeholder-soft-gray/40"
+            id="productPrice"
+            placeholder="0.00"
+            step="0.01"
+            type="number"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Description Textarea -->
+    <div class="space-y-2">
+      <label
+        class="block text-xs text-soft-gray uppercase tracking-wider font-semibold"
+        for="productDesc"
+        >Description</label
+      >
+      <textarea
+        [ngClass]="{ 'border-error!': isError('description') }"
+        [formControl]="form.controls.description"
+        class="input-recessed w-full rounded-lg px-4 py-3 text-off-white text-sm placeholder-soft-gray/40 resize-none"
+        id="productDesc"
+        placeholder="Provide detailed specifications..."
+        rows="4"
+      ></textarea>
+    </div>
+
+    <!-- Image Upload Zone -->
+    @if (!isEditMode()) {
+      <div class="space-y-2">
+        <label class="block text-xs text-soft-gray uppercase tracking-wider font-semibold"
+          >Product Imagery</label
+        >
+        <div class="">
+          <!-- Primary Upload Area -->
+          @if (selectedImagesUrl().length == 0) {
+            <button
+              class="col-span-2 sm:col-span-2 aspect-video rounded-lg border-2 border-dashed border-dark-gray bg-dark-deep-blue hover:border-secondary/50 hover:bg-secondary/5 transition-all cursor-pointer flex flex-col items-center justify-center text-center p-4 group"
+              type="button"
+              (click)="imagesInput.click()"
+            >
+              <span>Select Product Images</span>
+            </button>
+          }
+
+          <div class="max-w-full overflow-x-scroll flex gap-2 w-full">
+            @for (image of selectedImagesUrl(); track $index; let idx = $index) {
+              <div
+                class="aspect-square min-w-40 rounded-lg border border-dark-gray/30 bg-deep-blue flex items-center justify-center relative overflow-hidden group"
+              >
+                <img [src]="image" alt="" />
+
+                <button
+                  class="absolute top-2 right-2 text-error hidden group-hover:block cursor-pointer shadow"
+                  type="button"
+                  (click)="removeImage(idx)"
+                >
+                  <i class="fa-regular fa-circle-xmark scale-125"></i>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+  <!-- Footer Actions -->
+  <div
+    class="px-6 py-4 border-t border-dark-gray/30 bg-deep-blue/80 flex justify-end gap-3 rounded-b-xl"
+  >
+    <!-- Cancel Button -->
+    <button
+      (click)="close()"
+      type="button"
+      class="px-5 py-2.5 rounded-lg border border-dark-gray text-off-white text-sm hover:bg-dark-blue-gray/50 transition-colors cursor-pointer"
+    >
+      Cancel
+    </button>
+    <button
+      class="btn-primary px-6 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 cursor-pointer"
+      type="submit"
+    >
+      Save Product
+    </button>
+  </div>
+</form>
+
+<input
+  type="file"
+  #imagesInput
+  accept="image/*"
+  multiple
+  (change)="selectImages($event)"
+  class="hidden"
+/>

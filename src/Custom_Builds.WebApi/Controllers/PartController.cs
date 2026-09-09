@@ -13,12 +13,11 @@ namespace custom_Peripherals.Controllers
         ) : ApplicationControllerBase
     {
         // add part
-        //[Authorize(Roles = nameof(RoleEnums.Admin))]
         [Authorize(Roles = nameof(RolesEnum.Admin))]
         [HttpPost("[action]")]
-        public async Task<IActionResult> Add([FromBody] PartAddDTO toPartAdd)
+        public async Task<ActionResult<PartDTO>> Add([FromBody] PartAddDTO toPartAdd)
         {
-            Result result = await partService.AddAsync(toPartAdd);
+            var result = await partService.AddAsync(toPartAdd);
 
             return result.ToActionResult();
         }

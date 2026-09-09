@@ -4,7 +4,7 @@ import { OrderManagementStatusDto } from '../../../../../../core/DTO/orders-mana
 import { AdminApiService } from '../../../../../../core/services/api-services/admin-api-service';
 import { ILazyDTO } from '../../../../../../core/DTO/lazy-dto';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class OrdersManagementService {
   // injections
   private readonly _adminApiService = inject(AdminApiService);

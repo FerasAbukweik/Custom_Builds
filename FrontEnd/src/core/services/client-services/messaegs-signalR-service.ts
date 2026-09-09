@@ -59,16 +59,24 @@ export class MessagesSignalRService {
     });
   };
 
-  sendMessage = (content: string) => {
-    return this._hubConnection.invoke('SendMessage', content);
+  sendMessage = (content: string, chatGroupId: string | null = null) => {
+    return this._hubConnection.invoke('SendMessage', content, chatGroupId);
   };
 
-  notifyTyping = () => {
-    return this._hubConnection.invoke('NotifyTyping');
+  notifyTyping = (chatGroupId: string | null = null) => {
+    return this._hubConnection.invoke('NotifyTyping', chatGroupId);
   };
 
   notifyStoppedTyping = () => {
     return this._hubConnection.invoke('NotifyStoppedTyping');
+  };
+
+  JoinChatGroup = (chatGroupId: string) => {
+    return this._hubConnection.invoke('JoinChatGroup', chatGroupId);
+  };
+
+  LeaveChatGroup = (chatGroupId: string) => {
+    return this._hubConnection.invoke('LeaveChatGroup', chatGroupId);
   };
 
   stopConnection = () => {

@@ -12,4 +12,5 @@ public interface IProductService
     Task<Result<ProductDTO>> RemoveByIdAsync(Guid productId, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<MiniInventoryItemDTO>>> GetDashboardMiniInfoAsync(int take, CancellationToken cancellationToken = default);
     Task<Result<int>> GetLowStockCountAsync(int lowAmount, CancellationToken cancellationToken = default);
+    Task<Result<ProductDTO>> EditAsync(ProductEditDTO editData, CancellationToken cancellationToken = default);
 }

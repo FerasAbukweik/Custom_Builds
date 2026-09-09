@@ -13,13 +13,16 @@ namespace Custom_Builds.Infrastructure.Repositories
         {
             dbContext.Messages.Add(newMessage);
         }
-        public async Task<List<Message>> FilterAsync(
+        public IQueryable<Message> FilterQuery(
             Expression<Func<Message, bool>> extraChecks,
             Expression<Func<Message, object?>>[]? includes = null,
-            CancellationToken cancellationToken = default)
+            Expression<Func<Message, object?>>? orderBy = null,
+            bool orderByDescending = false,
+            int? skip = null,
+            int? take = null)
         {
 
-            var query = dbContext.Messages.AsNoTracking().AsQueryable();
+            var query = dbContext.Messages.AsQueryable().AsNoTracking();
 
             if (includes != null)
             {
@@ -29,25 +32,35 @@ namespace Custom_Builds.Infrastructure.Repositories
                 }
             }
 
-            return await query.Where(extraChecks).ToListAsync(cancellationToken);
+            query = query.Where(extraChecks);
+            
+            if (orderBy != null)
+            {
+                if (orderByDescending) query = query.OrderByDescending(orderBy);
+                else query = query.OrderBy(orderBy);
+            }
+            
+            if(skip != null) query = query.Skip(skip.Value);
+            if(take != null) query = query.Take(take.Value);
+            
+            return query;
+        }
+
+        public async Task<List<Message>> FilterAsync(
+            Expression<Func<Message, bool>> extraChecks,
+            Expression<Func<Message, object?>>[]? includes = null,
+            Expression<Func<Message, object?>>? orderBy = null,
+            bool orderByDescending = false,
+            int? skip = null,
+            int? take = null,
+            CancellationToken cancellationToken = default)
+        {
+            return await FilterQuery(extraChecks, includes, orderBy, orderByDescending, skip, take)
+                .ToListAsync(cancellationToken);
         }
         public void UpdateRange(List<Message> newData)
         {
             dbContext.Messages.UpdateRange(newData);
-        }
-        public async Task<IReadOnlyList<Message>> LazyGetMessagesAsync(
-            LazyDTO lazyLoadData,
-            Guid userId,
-            CancellationToken cancellationToken = default)
-        {
-            return await dbContext.Messages
-                .AsNoTracking()
-                .Where(m => m.ChatGroup!.UserId == userId)
-                .Include(m => m.Sender)
-                .OrderByDescending(m => m.CreatedAt)
-                .Skip(lazyLoadData.Taken)
-                .Take(lazyLoadData.SectionSize)
-                .ToListAsync(cancellationToken);
         }
 
         public async Task<Message?> GetByIdAsync(Guid messageId, Expression<Func<Message, object?>>[]? include = null, CancellationToken cancellationToken = default)

@@ -15,5 +15,6 @@ namespace Custom_Builds.Core.Domain.Identity
         public List<CustomBuild> CustomBuilds = [];
         public List<ChatGroup> ChatGroups = [];
         public ChatGroup? ChatGroup { get; set; }
+        public Image? Image { get; set; }
     }
 }

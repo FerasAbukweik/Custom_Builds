@@ -1,35 +1,69 @@
-<div class="flex h-screen overflow-hidden font-display bg-dark-deep-blue text-off-white antialiased">
+<div class="flex overflow-hidden font-display bg-dark-deep-blue text-off-white antialiased h-full">
   <div class="flex-1 flex flex-col overflow-hidden">
     <main class="flex-1 flex overflow-hidden">
-      <section class="w-80 border-r border-dark-blue-gray flex flex-col bg-dark-deep-blue/50 overflow-hidden">
-        <div class="p-6 border-b border-dark-blue-gray flex items-center justify-between">
-          <h2 class="font-bold text-lg">Active Chats</h2>
-          <span class="bg-secondary/10 text-secondary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">3 Online</span>
+      <section
+        class="w-80 border-r border-dark-blue-gray flex flex-col bg-dark-deep-blue/50 overflow-hidden"
+      >
+        <div class="p-6 border-b border-dark-blue-gray w-full">
+          <h2 class="font-bold text-lg w-full text-center">Active Chats</h2>
         </div>
         <div class="flex-1 overflow-y-auto custom-scrollbar">
-          @for (chat of activeChats; track chat.name) {
-            <button [class]="chat.active 
-                             ? 'w-full p-4 flex items-start space-x-3 border-l-4 border-secondary bg-secondary/10 transition-all text-left' 
-                             : 'w-full p-4 flex items-start space-x-3 hover:bg-deep-blue transition-all text-left group'" >
+          @for (chat of chatGroupService.chatGroups(); track chat.id) {
+            <button
+              class="w-full p-4 flex items-start space-x-3 hover:bg-deep-blue transition-all text-left group cursor-pointer"
+              [class]="selectedChatGroupId() === chat.id ? 'bg-secondary/15!' : ''"
+              (click)="selectedChatGroupId.set(chat.id)"
+            >
               <div class="relative shrink-0">
-                <img [alt]="chat.name" class="size-12 rounded-lg object-cover" [src]="chat.img"/>
-                <span class="absolute -bottom-1 -right-1 size-3 rounded-full border-2 border-dark-deep-blue"
-                      [class]="chat.online ? 'bg-ok' : 'bg-dark-gray'"></span>
+                <img
+                  [alt]="chat.userName"
+                  class="size-12 rounded-lg object-cover"
+                  [src]="chat.userImageUrl"
+                />
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-center">
-                  <span class="font-bold truncate" [class]="{'text-soft-gray group-hover:text-off-white': !chat.active}">{{ chat.name }}</span>
-                  <span class="text-[10px] text-light-steel-blue">{{ chat.time }}</span>
+                  <span class="font-bold truncate text-soft-gray group-hover:text-off-white">{{
+                    chat.userName
+                  }}</span>
+                  <span class="text-[10px] text-light-steel-blue">{{
+                    chat.latestMessageAt | date
+                  }}</span>
                 </div>
-                <p class="text-xs truncate mt-1" [class]="chat.isTyping ? 'text-secondary font-medium' : 'text-light-steel-blue'">{{ chat.snippet }}</p>
+                <p class="text-xs truncate mt-1 text-secondary font-medium">Typing</p>
               </div>
             </button>
+          } @empty {
+            @if (!chatGroupService.isLoading()) {
+              <div class="w-full text-center p-4">No Chat Groups</div>
+            }
           }
+
+          @if (chatGroupService.isLoading()) {
+            <div class="flex justify-center p-4">
+              <app-loading />
+            </div>
+          }
+
+          <div (appIsVisable)="chatGroupService.lazyGetChatGroups()"></div>
         </div>
       </section>
 
-      <section class="flex-1 flex flex-col bg-dark-deep-blue relative border-r border-dark-blue-gray">
-        <!-- <app-live-chatting /> -->
+      <section
+        class="flex-1 flex flex-col bg-dark-deep-blue relative border-r border-dark-blue-gray"
+      >
+        @if (showMessagesComponent()) {
+          <app-live-chatting
+            [messages]="adminMessagesService.messages()[selectedChatGroupId()]"
+            [isLoading]="adminMessagesService.isLoading()[selectedChatGroupId()]"
+            [isSignalRConnected]="messagesSignalRService.isConnected()"
+            [isTyping]="adminMessagesService.isTyping()[selectedChatGroupId()]"
+            [quickActions]="[]"
+            (appIsVisable)="adminMessagesService.lazyGetMessages(selectedChatGroupId())"
+            (handleIsTyping)="handleIsTyping($event)"
+            (handleSendMessage)="messagesSignalRService.sendMessage($event, selectedChatGroupId())"
+          />
+        }
       </section>
     </main>
   </div>

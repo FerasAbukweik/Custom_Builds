@@ -15,6 +15,7 @@
           <div class="font-bold text-xl">Products</div>
           <button
             class="flex cursor-pointer items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-off-white text-sm font-bold hover:bg-secondary/90 transition-all shadow-lg shadow-secondary/20"
+            (click)="productDialogService.open()"
           >
             Add Product
           </button>
@@ -52,6 +53,7 @@
                 <div class="flex gap-2">
                   <button
                     class="px-3 cursor-pointer py-1 rounded-lg border border-dark-blue-gray flex items-center justify-center text-light-steel-blue hover:border-secondary hover:text-secondary transition-all"
+                    (click)="productDialogService.open(product)"
                   >
                     <span class="text-[18px]">edit</span>
                   </button>
@@ -95,26 +97,54 @@
               class="p-4 border-b border-dark-blue-gray flex justify-between items-center bg-dark-deep-blue/50"
             >
               <span class="font-bold text-xs text-off-white uppercase tracking-wider">Parts</span>
-              <button class="text-secondary cursor-pointer">
+              <button class="text-secondary cursor-pointer" (click)="toggleIsAdding(0)">
                 <i class="fa-solid fa-plus"></i>
               </button>
             </div>
             <div class="flex-1 overflow-y-auto p-3 space-y-2">
-              @for (item of parts; track $index) {
+              @if (isAdding() === 0) {
                 <div
-                  class="p-3.5 rounded-lg flex items-center justify-between cursor-pointer transition-all"
+                  class="p-3.5 rounded-lg flex gap-2 items-center cursor-pointer transition-all bg-secondary/10 border border-secondary/30 shadow-sm group"
+                >
+                  <input
+                    type="text"
+                    #partIconCLass
+                    class="outline-none border-secondary/30 border-2 rounded-lg p-2 flex-1 max-w-15"
+                    placeholder="Icon"
+                  />
+                  <input
+                    type="text"
+                    #partName
+                    class="outline-none border-secondary/30 border-2 rounded-lg p-2 flex-1 w-full"
+                    placeholder="Enter Part Name"
+                  />
+
+                  <button
+                    class="cursor-pointer"
+                    type="button"
+                    (click)="handleAddPart(partIconCLass.value, partName.value)"
+                  >
+                    <i class="fa-solid fa-floppy-disk scale-125"></i>
+                  </button>
+                </div>
+              }
+              @for (part of partService.parts(); track $index) {
+                <button
+                  class="p-3.5 rounded-lg flex items-center cursor-pointer transition-all gap-2 w-full"
+                  (click)="selectedPartId.set(part.id)"
                   [class]="
-                    item.active
+                    selectedPartId() == part.id
                       ? 'bg-secondary/10 border border-secondary/30 shadow-sm group'
                       : 'bg-dark-deep-blue border border-dark-blue-gray hover:bg-primary/50'
                   "
                 >
-                  <span class="font-bold text-sm text-off-white truncate block">{{
-                    item.name
+                  <i [class]="part.icon"></i>
+                  <span class="font-bold text-sm text-off-white truncate block flex-1 text-left">{{
+                    part.name
                   }}</span>
 
                   <i class="fa-solid fa-chevron-right"></i>
-                </div>
+                </button>
               }
             </div>
           </div>
@@ -130,26 +160,52 @@
               <span class="font-bold text-xs text-off-white uppercase tracking-wider"
                 >Sections</span
               >
-              <button class="text-secondary cursor-pointer">
+              <button
+                class="text-secondary cursor-pointer"
+                type="button"
+                (click)="selectedPartId() && toggleIsAdding(1)"
+              >
                 <i class="fa-solid fa-plus"></i>
               </button>
             </div>
             <div class="flex-1 overflow-y-auto p-3 space-y-2">
-              @for (item of sections; track $index) {
+              @if (isAdding() === 1) {
                 <div
-                  class="p-3.5 rounded-lg flex items-center justify-between cursor-pointer transition-all"
+                  class="p-3.5 rounded-lg flex gap-2 items-center cursor-pointer transition-all bg-secondary/10 border border-secondary/30 shadow-sm group"
+                >
+                  <input
+                    type="text"
+                    #sectionName
+                    class="outline-none border-secondary/30 border-2 rounded-lg p-2 flex-1 w-full"
+                    placeholder="Enter Section Name"
+                  />
+
+                  <button
+                    class="cursor-pointer"
+                    type="button"
+                    (click)="handleAddSection(selectedPartId(), sectionName.value)"
+                  >
+                    <i class="fa-solid fa-floppy-disk scale-125"></i>
+                  </button>
+                </div>
+              }
+              @for (section of sections(); track $index) {
+                <button
+                  class="w-full p-3.5 rounded-lg flex items-center justify-between cursor-pointer transition-all"
+                  type="button"
+                  (click)="selectedSectionId.set(section.id)"
                   [class]="
-                    item.active
+                    selectedSectionId() == section.id
                       ? 'bg-secondary/10 border border-secondary/30 shadow-sm group'
                       : 'bg-dark-deep-blue border border-dark-blue-gray hover:bg-primary/50'
                   "
                 >
                   <span class="font-bold truncate block text-sm text-off-white">{{
-                    item.name
+                    section.title
                   }}</span>
 
                   <i class="fa-solid fa-chevron-right turnca"></i>
-                </div>
+                </button>
               }
             </div>
           </div>
@@ -165,17 +221,57 @@
               <span class="font-bold text-xs text-off-white uppercase tracking-wider"
                 >Modifications</span
               >
-              <button class="text-secondary cursor-pointer">
+              <button class="text-secondary cursor-pointer" (click)="toggleIsAdding(2)">
                 <i class="fa-solid fa-plus"></i>
               </button>
             </div>
             <div class="flex-1 overflow-y-auto p-3 space-y-2">
-              @for (mod of mods; track $index) {
+              @if (isAdding() === 2) {
+                <div
+                  class="p-3.5 rounded-lg flex gap-2 items-center cursor-pointer transition-all bg-secondary/10 border border-secondary/30 shadow-sm group"
+                >
+                  <button
+                    class="cursor-pointer"
+                    type="button"
+                    (click)="modificationImageInput.click()"
+                  >
+                    <i class="fa-solid fa-image scale-125"></i>
+                  </button>
+                  <input
+                    type="text"
+                    #modificationName
+                    class="outline-none border-secondary/30 border-2 rounded-lg p-2 flex-1 w-full"
+                    placeholder="Name"
+                  />
+
+                  <input
+                    type="number"
+                    #modificationPrice
+                    placeholder="price"
+                    class="outline-none border-secondary/30 border-2 rounded-lg p-2 flex-1 w-full"
+                  />
+
+                  <button
+                    class="cursor-pointer"
+                    type="button"
+                    (click)="
+                      handleAddModification(
+                        selectedSectionId(),
+                        modificationName.value,
+                        modificationPrice.value
+                      )
+                    "
+                  >
+                    <i class="fa-solid fa-floppy-disk scale-125"></i>
+                  </button>
+                </div>
+              }
+              @for (mod of mods(); track $index) {
                 <div
                   class="p-3.5 rounded-lg bg-dark-deep-blue border border-dark-blue-gray flex items-center justify-between group cursor-default hover:border-dark-gray transition-all"
                 >
                   <div class="flex items-center gap-3">
-                    <img [src]="mod.image" alt="" class="aspect-square h-full" />
+                    <img [src]="mod.image" alt="" class="aspect-square h-12" />
                     <div class="flex flex-col">
                       <span class="text-sm text-off-white truncate block font-medium">{{
                         mod.name
@@ -185,6 +281,8 @@
                   </div>
                   <button
                     class="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-soft-gray hover:text-error"
+                    type="button"
+                    (click)="removeMod(mod.id)"
                     title="Remove"
                   >
                     <i class="fa-solid fa-xmark"></i>
@@ -198,3 +296,6 @@
     </section>
   </main>
 </div>
+
+<dialog app-product-dialog></dialog>
+<input type="file" accept="image/*" class="hidden" #modificationImageInput />

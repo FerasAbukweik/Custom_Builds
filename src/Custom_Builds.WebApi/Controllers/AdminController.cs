@@ -1,6 +1,8 @@
 using Custom_Builds.Core.Common;
 using Custom_Builds.Core.DTO.Admin;
+using Custom_Builds.Core.DTO.ChatGroup;
 using Custom_Builds.Core.DTO.Lazy;
+using Custom_Builds.Core.DTO.Message;
 using Custom_Builds.Core.DTO.Order;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
@@ -10,10 +12,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace custom_Peripherals.Controllers;
 
-// [Authorize(Roles = nameof(RolesEnum.Admin))] disabled for testing
+[Authorize(Roles = nameof(RolesEnum.Admin))]
 public class AdminController(
     IProductService productService,
-    IOrderService orderService
+    IOrderService orderService,
+    IChatGroupService chatGroupService,
+    IMessageService messageService
     ) : ApplicationControllerBase
 {
     [HttpGet("[action]")]
@@ -69,10 +73,38 @@ public class AdminController(
     }
     
     [HttpGet("[action]")]
-    public async Task<ActionResult<IReadOnlyList<OrderDTO>>> GetPendingOrders([FromQuery]LazyDTO lazyData, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<IReadOnlyList<OrderDTO>>> GetOrders(
+        [FromQuery]LazyDTO lazyData,
+        CancellationToken cancellationToken = default)
     {
-        var result = await orderService.LazyGetPendingOrdersAsync(null, lazyData, cancellationToken);
+        var result = await orderService.LazyGetOrdersAsync(null, lazyData, cancellationToken);
 
         return result.ToActionResult();
+    }
+
+    [HttpGet("[action]")]
+    public async Task<ActionResult<IReadOnlyList<ChatGroupDTO>>> GetChatGroups(
+        [FromQuery] LazyDTO lazyData,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await chatGroupService.LazyGetChatGroupsAsync(lazyData, cancellationToken);
+
+        return result.ToActionResult();
+    }
+
+    [HttpGet("[action]")]
+    public async Task<ActionResult<IReadOnlyList<MessageDTO>>> GetGroupMessages(
+        [FromQuery] Guid groupId,
+        [FromQuery] LazyDTO lazyData,
+        CancellationToken cancellationToken = default
+    )
+    {
+        // get currUser id
+        var getCurrUserId = User.GetId();
+        if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult();
+            
+        var result = await messageService.GetGroupMessagesAsync(groupId, getCurrUserId.Value, lazyData, cancellationToken);
+
+        return result.ToActionResult(); 
     }
 }

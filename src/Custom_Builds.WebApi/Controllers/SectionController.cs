@@ -15,9 +15,9 @@ namespace custom_Peripherals.Controllers
     {
         // add section
         [HttpPost("[action]")]
-        public async Task<IActionResult> Add([FromBody] SectionAddDTO toSectionAdd)
+        public async Task<ActionResult<SectionDTO>> Add([FromBody] SectionAddDTO toSectionAdd)
         {
-            Result result = await sectionService.AddAsync(toSectionAdd);
+            var result = await sectionService.AddAsync(toSectionAdd);
 
             return result.ToActionResult();
         }

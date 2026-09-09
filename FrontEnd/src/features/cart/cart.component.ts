@@ -7,6 +7,7 @@ import { LoadingComponent } from '../../shared/components/loading/loading.compon
 import { RouterLink } from '@angular/router';
 import { TopNavComponent } from '../../layouts/top-nav/top-nav.component';
 import { IsVisableDirective } from '../../shared/directives/is-visable.directive';
+import { OrderService } from 'src/core/services/client-services/order-service';
 
 @Component({
   selector: 'app-cart',
@@ -16,6 +17,7 @@ import { IsVisableDirective } from '../../shared/directives/is-visable.directive
 export class CartComponent implements OnInit {
   // injections
   protected readonly cartService = inject(CartItemService);
+  protected readonly orderService = inject(OrderService);
 
   // protected
   protected summaryInfo = this.cartService.summaryInfo;

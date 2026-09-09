@@ -71,7 +71,6 @@ public class CartItemService(
         // new cart item to add
         CartItem newCartItem = new CartItem()
         {
-            Id = Guid.NewGuid(),
             OrderType = OrderTypeEnum.Custom,
             UserId = userId,
             CustomBuildId = addCustomBuildResult.Value!.Id,

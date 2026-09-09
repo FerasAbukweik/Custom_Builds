@@ -22,21 +22,6 @@ namespace Custom_Builds.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ApplicationUserChatGroup", b =>
-                {
-                    b.Property<Guid>("ChatGroupsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SupportersId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ChatGroupsId", "SupportersId");
-
-                    b.HasIndex("SupportersId");
-
-                    b.ToTable("ChatGroup_User_ManyToMany", (string)null);
-                });
-
             modelBuilder.Entity("CustomBuildModification", b =>
                 {
                     b.Property<Guid>("CustomBuildsId")
@@ -126,6 +111,37 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.ToTable("CustomBuilds");
                 });
 
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Image", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.ToTable("Images");
+                });
+
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Message", b =>
                 {
                     b.Property<Guid>("Id")
@@ -160,11 +176,8 @@ namespace Custom_Builds.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<string>("Icon")
-                        .HasColumnType("varchar(100)");
+                    b.Property<Guid>("ImageId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -176,10 +189,10 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Property<Guid>("SectionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Value")
-                        .HasColumnType("varchar(150)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("ImageId")
+                        .IsUnique();
 
                     b.HasIndex("SectionId");
 
@@ -273,10 +286,6 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("varchar(500)");
-
-                    b.PrimitiveCollection<string>("Images")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("InStock")
                         .HasColumnType("int");
@@ -552,21 +561,6 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ApplicationUserChatGroup", b =>
-                {
-                    b.HasOne("Custom_Builds.Core.Domain.Entities.ChatGroup", null)
-                        .WithMany()
-                        .HasForeignKey("ChatGroupsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("SupportersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("CustomBuildModification", b =>
                 {
                     b.HasOne("Custom_Builds.Core.Domain.Entities.CustomBuild", null)
@@ -629,6 +623,23 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Image", b =>
+                {
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Custom_Builds.Core.Domain.Identity.ApplicationUser", "User")
+                        .WithOne("Image")
+                        .HasForeignKey("Custom_Builds.Core.Domain.Entities.Image", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Message", b =>
                 {
                     b.HasOne("Custom_Builds.Core.Domain.Entities.ChatGroup", "ChatGroup")
@@ -650,11 +661,19 @@ namespace Custom_Builds.Infrastructure.Migrations
 
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Modification", b =>
                 {
+                    b.HasOne("Custom_Builds.Core.Domain.Entities.Image", "Image")
+                        .WithOne("Modification")
+                        .HasForeignKey("Custom_Builds.Core.Domain.Entities.Modification", "ImageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Custom_Builds.Core.Domain.Entities.Section", "Section")
                         .WithMany("Modifications")
                         .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Image");
 
                     b.Navigation("Section");
                 });
@@ -780,6 +799,11 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Navigation("OrderItem");
                 });
 
+            modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Image", b =>
+                {
+                    b.Navigation("Modification");
+                });
+
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Order", b =>
                 {
                     b.Navigation("OrderedItems");
@@ -793,6 +817,8 @@ namespace Custom_Builds.Infrastructure.Migrations
             modelBuilder.Entity("Custom_Builds.Core.Domain.Entities.Product", b =>
                 {
                     b.Navigation("CartItems");
+
+                    b.Navigation("Images");
 
                     b.Navigation("OrderItems");
                 });
@@ -809,6 +835,8 @@ namespace Custom_Builds.Infrastructure.Migrations
                     b.Navigation("ChatGroup");
 
                     b.Navigation("CustomBuilds");
+
+                    b.Navigation("Image");
 
                     b.Navigation("MessageSenders");
 

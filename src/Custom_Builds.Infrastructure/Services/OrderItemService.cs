@@ -14,7 +14,12 @@ public class OrderItemService(
     {
         var result = await orderItemsRepository.FilterAsync(
             (o => (currUserId == null || o.Order!.UserId == currUserId) &&  o.OrderId == orderId),
-            [o => o.Product, o => o.CustomBuild, o => o.Order],
+            [
+                o => o.Product,
+                o => o.CustomBuild,
+                o => o.CustomBuild!.Modifications,
+                o => o.Order
+            ],
             o => o.Order!.CreatedAt,
             true,
             lazyData.Taken,

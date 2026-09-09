@@ -15,11 +15,15 @@ public class CustomBuildService(
 {
     public async Task<Result<CustomBuildDTO>> AddCustomBuild(CustomBuildAddDTO toAddCustomBuild,Guid userId, CancellationToken cancellationToken = default)
     {
+        // get modifications from DB
         var modifications = await modificationsRepository
             .FilterAsync(m => toAddCustomBuild.ModificationIds.Contains(m.Id), [], cancellationToken);
         
+        // check all modifications are avaiable
         if(modifications.Count != toAddCustomBuild.ModificationIds.Count)
             return Result<CustomBuildDTO>.Failure("some modifications where not found");
+        
+        customBuildRepository.AttachRange(modifications);
 
         var newCustomBuild = new CustomBuild()
         {

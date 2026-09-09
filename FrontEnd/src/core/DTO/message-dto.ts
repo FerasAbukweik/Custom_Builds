@@ -9,4 +9,5 @@ export interface IMessageDTO {
   createdAt: string;
   messageType: MessageTypeEnum;
   fileName?: string;
+  chatGroupId: string;
 }

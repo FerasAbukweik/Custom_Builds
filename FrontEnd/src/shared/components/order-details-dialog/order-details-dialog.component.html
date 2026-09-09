@@ -109,10 +109,14 @@
               </div>
               <div class="flex-1 items-center flex gap-2 flex-wrap">
                 <div class="flex-1">
-                  <p class="text-xs sm:text-sm font-bold truncate">{{ item.title }}</p>
-                  <p class="text-[11px] sm:text-xs truncate">
-                    {{ getOrderType(item.orderType) }}
-                  </p>
+                  <p class="text-xs sm:text-sm font-bold truncate mb-2">{{ item.title }}</p>
+                  <div class="flex gap-1 items-center">
+                    @for (spec of item.specs; track $index) {
+                      <p class="text-[11px] sm:text-xs truncate rounded-xl bg-dark-blue-gray/50 px-2 py-0.5 text-soft-gray font-medium">
+                        {{ spec }}
+                      </p>
+                    }
+                  </div>
                 </div>
                 <div>
                   <span>{{ item.orderedPrice | currency }} x {{ item.quantity }}</span>

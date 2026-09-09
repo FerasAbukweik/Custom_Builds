@@ -1,8 +1,11 @@
 using Custom_Builds.Core.Common;
+using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.DTO.Auth;
+using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
 using custom_Peripherals.ExtensionMethods;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace custom_Peripherals.Controllers;
@@ -14,7 +17,7 @@ public class AuthController(
     // check token
     [HttpPost("[action]")]
     [Authorize]
-    public IActionResult IsAuthenticated()
+    public async Task<IActionResult> IsAuthenticated()
     {
         return Ok();
     }
@@ -52,5 +55,12 @@ public class AuthController(
         Result result = await authService.UpdateTokensAsync(getRefreshTokenResult.Value!, cancellationToken);
 
         return result.ToActionResult();
+    }
+
+    [HttpPost("[action]")]
+    public IActionResult IsAdmin()
+    {
+        if (HttpContext.User.IsInRole(nameof(RolesEnum.Admin))) return Ok();
+        return Unauthorized();
     }
 }

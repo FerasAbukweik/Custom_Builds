@@ -19,14 +19,13 @@ public class OrderItemsRepository(ApplicationDbContext dbContext) : IOrderItemsR
         dbContext.OrderItems.Add(orderItem);
     }
 
-    public async Task<IReadOnlyList<OrderItem>> FilterAsync(
+    private IQueryable<OrderItem> FilterQuery(
         Expression<Func<OrderItem, bool>> predicate,
         Expression<Func<OrderItem, object?>>[]? include = null,
         Expression<Func<OrderItem, object?>>? orderBy = null,
         bool orderByDescending = false,
         int? skip  = null,
-        int? take = null,
-        CancellationToken cancellationToken = default)
+        int? take = null)
     {
         var query = dbContext.OrderItems.AsNoTracking().AsQueryable();
 
@@ -49,7 +48,19 @@ public class OrderItemsRepository(ApplicationDbContext dbContext) : IOrderItemsR
         if (skip != null) query = query.Skip(skip.Value);
         if (take != null) query = query.Take(take.Value);
         
-        return await query.ToListAsync(cancellationToken);
+        return query;
+    }
+
+    public async Task<IReadOnlyList<OrderItem>> FilterAsync(
+        Expression<Func<OrderItem, bool>> predicate,
+        Expression<Func<OrderItem, object?>>[]? include = null,
+        Expression<Func<OrderItem, object?>>? orderBy = null,
+        bool orderByDescending = false,
+        int? skip = null,
+        int? take = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await FilterQuery(predicate, include, orderBy, orderByDescending, skip, take).ToListAsync(cancellationToken);
     }
 
     public Task<int> CountAsync(Expression<Func<OrderItem, bool>> predicate, CancellationToken cancellationToken = default)

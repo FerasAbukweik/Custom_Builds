@@ -8,7 +8,6 @@ import { OrderDetailsDialogComponent } from '../../../../../../shared/components
 @Component({
   selector: 'app-orders-management.component',
   imports: [StateDataComponent, OrdersTableComponent, OrderDetailsDialogComponent],
-  providers: [OrdersManagementService],
   templateUrl: './orders-management.component.html',
   host: {
     class: 'bg-primary text-off-white min-h-screen font-display w-full flex',

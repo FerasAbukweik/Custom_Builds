@@ -8,4 +8,5 @@ export interface IOrderItemDto {
   orderedPrice: number;
   image: string;
   state: string;
+  specs: string[];
 }

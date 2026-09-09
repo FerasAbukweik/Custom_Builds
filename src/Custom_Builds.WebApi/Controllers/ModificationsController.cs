@@ -15,9 +15,9 @@ namespace custom_Peripherals.Controllers
     {
         // add modification
         [HttpPost("[action]")]
-        public async Task<IActionResult> Add([FromBody]ModificationAddDTO toModificationAdd, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<ModificationDTO>> Add([FromForm]ModificationAddDTO toModificationAdd, CancellationToken cancellationToken = default)
         {
-            Result result = await modificationsService.AddAsync(toModificationAdd, cancellationToken);
+            var result = await modificationsService.AddAsync(toModificationAdd, cancellationToken);
 
             return result.ToActionResult();
         }

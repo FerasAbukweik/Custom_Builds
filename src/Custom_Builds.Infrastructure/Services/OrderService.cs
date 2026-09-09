@@ -3,6 +3,7 @@ using Custom_Builds.Core.Common;
 using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.DTO.Lazy;
 using Custom_Builds.Core.DTO.Order;
+using Custom_Builds.Core.DTO.Product;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Interfaces.RepositoryContracts;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
@@ -14,19 +15,22 @@ public class OrderService(
     IOrderRepository orderRepository,
     ICartItemRepository cartItemRepository,
     IOrderItemsRepository orderItemsRepository,
-    ILogger<OrderService> logger) : IOrderService
+    ILogger<OrderService> logger,
+    IProductRepository productRepository) : IOrderService
 {
     public async Task<Result<OrderDTO>> AddOrderWithCartItemsAsync(Guid currUserId, CancellationToken cancellationToken = default)
     {
+        // items in the cart
         var cartItems = await cartItemRepository.FilterAsync(
             ci => ci.UserId == currUserId,
-            null,
+            [ci => ci.Product],
             null,
             false,
             null,
             null,
             cancellationToken);
 
+        // if no items in the cart stop
         if (cartItems.Count == 0)
         {
             logger.LogWarning("{serviceName}.{methodName} user with id: {currUserId} tried adding order with no items in cart",
@@ -34,26 +38,50 @@ public class OrderService(
             return Result<OrderDTO>.Failure("no items in cart"); 
         }
         
+        // check inStock if the item is product
+        foreach (var cartItem in cartItems)
+        {
+            if (cartItem.Product != null && cartItem.Product.InStock < cartItem.Quantity)
+            {
+                return Result<OrderDTO>.Failure($"{cartItem.Product.Title} is low in stock");
+            }
+        }
+        
+        // update inStock amount for products
+        foreach (var cartItem in cartItems)
+        {
+            if(cartItem.Product == null) continue;
+
+            productRepository.EditByIdAsync(new ProductEditDTO()
+            {
+                Id = cartItem.Product.Id,
+                InStock = cartItem.Product.InStock - cartItem.Quantity
+            });
+        }
+        
+        // new order entity
         var newOrder = new Order()
         {
             UserId = currUserId,
             OrderStatus = OrderStateEnum.Processing
         };
         
-        orderRepository.Add(newOrder);
-
+        // link the same cart items with the new order
         List<OrderItem> orderItems = cartItems.Select(ci => new OrderItem()
         {
+            OrderId = newOrder.Id,
             OrderType = ci.OrderType,
             OrderedPrice = ci.OrderPrice,
             Quantity = ci.Quantity,
-            OrderId = newOrder.Id,
             CustomBuildId = ci.CustomBuildId,
             ProductId = ci.ProductId,
         }).ToList();
         
+        // add items to the local DB
+        orderRepository.Add(newOrder);
         orderItemsRepository.AddRange(orderItems);
 
+        // save changes to DB
         if (!await orderRepository.SaveChangesAsync(cancellationToken))
         {
             logger.LogError("{serviceName}.{methodName} failed saving changes to DB",
@@ -69,7 +97,6 @@ public class OrderService(
 
         return Result<OrderDTO>.Success(newOrder.toDTO());
     }
-
     public async Task<Result<OrderHistoryDTO>> GetOrderHistoryAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var result = await orderRepository.GetHistorySummaryAsync(userId, cancellationToken);
@@ -82,14 +109,12 @@ public class OrderService(
         
         return Result<OrderHistoryDTO>.Success(result); 
     }
-
     public async Task<Result<decimal>> GetTotalRevenueAsync(CancellationToken cancellationToken = default)
     {
         var result = await orderRepository.GetTotalRevenueAsync(cancellationToken);
         
         return Result<decimal>.Success(result);
     }
-
     public async Task<Result<int>> GetPendingOrdersCount(CancellationToken cancellationToken = default)
     {
         var pendingStatus = new OrderStateEnum[]
@@ -102,14 +127,18 @@ public class OrderService(
         
         return Result<int>.Success(result);
     }
-
     public async Task<Result<IReadOnlyList<decimal>>> GetDailyRevenueAsync(int days, CancellationToken cancellationToken = default)
     {
         var result =(List<decimal>) await orderRepository.GetDailyRevenueAsync(days, cancellationToken);
 
         int missingDays = days - result.Count;
         if (missingDays > 0)
+        {
+            var tempRes = result;
+            result = [];
             result.AddRange(Enumerable.Repeat(0m, missingDays));
+            result.AddRange(tempRes);
+        }
         
         return Result<IReadOnlyList<decimal>>.Success(result);
     }

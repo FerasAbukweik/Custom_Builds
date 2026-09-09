@@ -1,40 +1,95 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { ProductService } from 'src/core/services/client-services/product-service';
 import { LoadingComponent } from 'src/shared/components/loading/loading.component';
 import { IsVisableDirective } from 'src/shared/directives/is-visable.directive';
+import { ProductDialogComponent } from 'src/shared/components/product-dialog/product-dialog.component';
+import { ProductDialogService } from 'src/shared/components/product-dialog/product-dialog.service';
+import { PartService } from 'src/core/services/client-services/part-service';
+import { ModificationAddDTO } from 'src/core/DTO/modification-add-dto';
+
+enum Adding {
+  Part,
+  Section,
+  Modification,
+  none,
+}
 
 @Component({
   selector: 'app-inventory-management',
-  imports: [LoadingComponent, IsVisableDirective],
+  imports: [LoadingComponent, IsVisableDirective, ProductDialogComponent],
+  providers: [ProductDialogService],
   templateUrl: './inventory-management.component.html',
 })
-export class InventoryManagementComponent {
+export class InventoryManagementComponent implements OnInit {
   // DI
   protected readonly productsService = inject(ProductService);
+  protected readonly productDialogService = inject(ProductDialogService);
+  protected readonly partService = inject(PartService);
 
-  parts = [
-    { icon: 'videogame_asset', name: 'PS5 Shell', active: true },
-    { icon: 'keyboard', name: '65% PCB Base', active: false },
-    { icon: 'cable', name: 'Aviator Cables', active: false },
-  ];
+  // signals
+  protected selectedPartId = signal<string>('');
+  protected selectedSectionId = signal<string>('');
+  protected isAdding = signal<Adding>(Adding.none);
 
-  sections = [
-    { icon: 'layers', name: 'Faceplate', active: true },
-    { icon: 'touchpad_mouse', name: 'Touchpad', active: false },
-    { icon: 'switch_access_shortcut', name: 'Triggers (L2/R2)', active: false },
-  ];
-  mods = [
-    { name: 'Matte Black', price: '+$15.00 Premium', colorClass: 'bg-[#000] border-dark-gray', image: 'assets/images/mods/matte-black.jpg' },
-    {
-      name: 'Iridescent Blue',
-      price: '+$25.00 Premium',
-      colorClass: 'bg-secondary border-off-white/20 shadow-[0_0_8px_rgba(19,91,236,0.4)]',
-      image: 'assets/images/mods/iridescent-blue.jpg'
-    },
-    {
-      name: 'Carbon Fiber',
-      price: '+$35.00 Premium',
-      colorClass: 'bg-dark-gray border-dark-blue-gray',
-    },
-  ];
+  // view child
+  private modificationImageInput =
+    viewChild<ElementRef<HTMLInputElement>>('modificationImageInput');
+
+  // computed
+  protected sections = computed(
+    () => this.partService.parts().find((p) => p.id === this.selectedPartId())?.sections ?? [],
+  );
+  protected mods = computed(
+    () => this.sections().find((s) => s.id === this.selectedSectionId())?.modifications ?? [],
+  );
+
+  // methods
+
+  ngOnInit() {
+    this.partService.updateParts();
+  }
+
+  toggleIsAdding(newAdding: Adding) {
+    this.isAdding.update((curr) => (curr === Adding.none ? newAdding : Adding.none));
+  }
+
+  stopAdding() {
+    this.isAdding.set(Adding.none);
+  }
+
+  handleAddPart(icon: string, name: string) {
+    if (!icon || !name) return;
+
+    this.partService.addPart(icon, name);
+    this.stopAdding();
+  }
+
+  handleAddSection(partId: string, name: string) {
+    if (!partId || !name) return;
+
+    this.partService.addSection(partId, name);
+    this.stopAdding();
+  }
+
+  handleAddModification(sectionId: string, name: string, price: string) {
+    if (!sectionId || !name || !price) return;
+
+    const files = this.modificationImageInput()?.nativeElement.files;
+    if (!files || files.length === 0) return;
+
+    const newModData: ModificationAddDTO = {
+      sectionId: sectionId,
+      image: files[0],
+      name: name,
+      price: parseFloat(price),
+    };
+
+    this.partService.addModification(newModData);
+    this.modificationImageInput()!.nativeElement.value = '';
+    this.stopAdding();
+  }
+
+  removeMod(modId: string) {
+    this.partService.removeMod(modId);
+  }
 }

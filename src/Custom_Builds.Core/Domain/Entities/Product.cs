@@ -20,7 +20,7 @@ namespace Custom_Builds.Core.Domain.Entities
 
         [Required]
         public required decimal Price { get; set; }
-        public List<string> Images { get; set; } = ["No images"];
+        public List<Image> Images { get; set; } = [];
 
         [Required] 
         public required int InStock { get; set; }
@@ -40,7 +40,7 @@ namespace Custom_Builds.Core.Domain.Entities
                 Id = Id,
                 Title = Title,
                 Price = Price,
-                Image = Images.Count > 0 ? Images[0] : "no image",
+                Image = Images.Count > 0 ? Images[0].ImageUrl : "no image",
                 Description = Description,
                 Stock = InStock
             };

@@ -1,14 +1,11 @@
-interface IModification {
+export interface IModification {
   id: string;
   name: string;
-  value?: string;
-  desc?: string;
-  icon?: string;
+  image?: string;
   price: number;
-  type: string;
 }
 
-interface ISection {
+export interface ISection {
   id: string;
   title: string;
   modifications: IModification[];

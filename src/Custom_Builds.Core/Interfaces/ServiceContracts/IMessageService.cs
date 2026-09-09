@@ -11,8 +11,9 @@ public interface IMessageService
         Guid senderId,
         CancellationToken cancellationToken = default);
 
-    Task<Result<IReadOnlyList<MessageDTO>>> GetMessagesAsync(
+    Task<Result<IReadOnlyList<MessageDTO>>> GetGroupMessagesAsync(
+        Guid groupId,
+        Guid currUserId,
         LazyDTO lazyData,
-        Guid userId,
         CancellationToken cancellationToken = default);
 }

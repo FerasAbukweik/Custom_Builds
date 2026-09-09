@@ -64,6 +64,7 @@ namespace Custom_Builds.Infrastructure.Repositories
                 .AsNoTracking()
                 .Include(p => p.Sections)
                 .ThenInclude(s => s.Modifications)
+                .ThenInclude(m => m.Image)
                 .ToListAsync(cancellationToken);
         }
 

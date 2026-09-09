@@ -28,5 +28,27 @@ namespace custom_Peripherals.Controllers
             
             return result.ToActionResult();
         }
+
+        [HttpPost("[action]")]
+        public async Task<ActionResult<Guid>> Add([FromForm] ProductAddDTO productDto, CancellationToken cancellationToken = default)
+        {
+            var result = await productService.AddAsync(productDto, cancellationToken);
+
+            if (!result.IsSuccess)
+                return ((Result)result).ToActionResult();
+            
+            if(result.Value == null)
+                return BadRequest("something went wrong");
+            
+            return Ok(result.Value.Id);
+        }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> Edit([FromBody]ProductEditDTO editData, CancellationToken cancellationToken = default)
+        {
+            Result result = await productService.EditAsync(editData, cancellationToken);
+
+            return result.ToActionResult();
+        }
     }
 }

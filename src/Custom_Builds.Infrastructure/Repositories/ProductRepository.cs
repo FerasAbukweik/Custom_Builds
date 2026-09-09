@@ -64,6 +64,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         {
             return await dbContext.Products
                 .AsNoTracking()
+                .Include(p => p.Images)
                 .OrderBy(p => p.Id)
                 .Skip(reqData.Taken)
                 .Take(reqData.SectionSize)

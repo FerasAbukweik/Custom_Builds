@@ -14,4 +14,8 @@ export class PartApiServices {
   public getAllParts() {
     return this.http.get<IPart[]>(`${this.url}/GetAllParts`);
   }
+
+  public addPart(icon: string, name: string) {
+    return this.http.post<IPart>(`${this.url}/Add`, { icon, name });
+  }
 }

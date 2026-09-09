@@ -32,9 +32,9 @@ export class CartItemService {
   // fields
 
   // private
-  private newQuantities: INewQuantities = [];
-  private isMoreDataAvailable: boolean = true;
-  private requestData: ILazyDTO = {
+  private _newQuantities: INewQuantities = [];
+  private _isMoreDataAvailable: boolean = true;
+  private _lazyData: ILazyDTO = {
     taken: 0,
     sectionSize: 10,
   };
@@ -59,6 +59,21 @@ export class CartItemService {
 
   // methods
 
+  reset() {
+    this._cartItems.set([]);
+    this._isLoading.set(false);
+    this._isDeleteing.set(false);
+    this._summaryInfo.set({
+      shippingCost: 0,
+      tax: 0,
+      totalOrders: 0,
+      totalPrice: 0,
+    });
+    this._newQuantities = [];
+    this._isMoreDataAvailable = true;
+    this._lazyData.taken = 0;
+  }
+
   // update summary info
   updateSummaryInfo = () => {
     this._cartItemApiService.GetSummaryInfo().subscribe({
@@ -73,19 +88,19 @@ export class CartItemService {
 
   // get cart items from api with lazy laoding
   lazyGetCartItems = async () => {
-    if (!this.isMoreDataAvailable || this._isLoading()) return;
+    if (!this._isMoreDataAvailable || this._isLoading()) return;
     this._isLoading.set(true);
 
     while (this._isDeleteing()) {
       await new Promise<void>((res) => setTimeout(res, 250));
     }
 
-    this._cartItemApiService.GetCartItems(this.requestData).subscribe({
+    this._cartItemApiService.GetCartItems(this._lazyData).subscribe({
       next: (data) => {
         this._cartItems.update((curr) => [...curr, ...data]);
 
-        this.requestData.taken += data.length;
-        this.isMoreDataAvailable = data.length > 0;
+        this._lazyData.taken += data.length;
+        this._isMoreDataAvailable = data.length > 0;
         this._isLoading.set(false);
       },
       error: () => {
@@ -125,7 +140,7 @@ export class CartItemService {
 
     this._cartItemApiService.remove(id).subscribe({
       next: () => {
-        this.requestData.taken--;
+        this._lazyData.taken--;
         this._isDeleteing.set(false);
       },
       error: () => {
@@ -160,7 +175,7 @@ export class CartItemService {
           // add the quantity update to the request qrray
           let found = false;
 
-          this.newQuantities = this.newQuantities.map((nq) => {
+          this._newQuantities = this._newQuantities.map((nq) => {
             if (nq.itemId === newQ.itemId) {
               found = true;
               return { ...nq, newQuantity: newQ.newQuantity };
@@ -169,7 +184,7 @@ export class CartItemService {
           });
 
           if (!found) {
-            this.newQuantities.push(newQ);
+            this._newQuantities.push(newQ);
           }
 
           // only the first time we need backup so we dont loose data
@@ -202,7 +217,7 @@ export class CartItemService {
         }),
         debounceTime(500),
         switchMap(() => {
-          return this._cartItemApiService.updateQuantity(this.newQuantities);
+          return this._cartItemApiService.updateQuantity(this._newQuantities);
         }),
       )
       .subscribe({
@@ -210,7 +225,7 @@ export class CartItemService {
           // reset everything for the next round
           prevItems = null;
           prevSummary = null;
-          this.newQuantities = [];
+          this._newQuantities = [];
         },
         error: () => {
           this._cartItems.set(prevItems!);
@@ -218,7 +233,7 @@ export class CartItemService {
 
           prevItems = null;
           prevSummary = null;
-          this.newQuantities = [];
+          this._newQuantities = [];
         },
       });
   }

@@ -3,11 +3,13 @@ import { OrderApiService } from '../api-services/order-api-service';
 import { ILazyDTO } from '../../DTO/lazy-dto';
 import { IOrderDto } from '../../DTO/orders-dto';
 import { OrderDetailsDto } from '../../DTO/order-details-dto';
+import { CartItemService } from './cart-item-service-service';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   // injections
   private readonly _orderApiService = inject(OrderApiService);
+  private _cartItemsService = inject(CartItemService);
 
   // signals
   private _processingOrders = signal<IOrderDto[]>([]);
@@ -92,6 +94,17 @@ export class OrderService {
       },
       error: () => {
         this._isLoadingOrderDetails.set(false);
+      },
+    });
+  }
+
+  addOrderWithCartItems() {
+    this._orderApiService.add().subscribe({
+      next: () => {
+        this._cartItemsService.reset();
+      },
+      error: () => {
+        // TODO: show error
       },
     });
   }

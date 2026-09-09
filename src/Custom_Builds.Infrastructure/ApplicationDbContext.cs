@@ -1,5 +1,6 @@
 ﻿using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.Domain.Identity;
+using Custom_Builds.Core.DTO.CustomBuild;
 using Custom_Builds.Core.Enums;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +53,12 @@ namespace Custom_Builds.Infrastructure.DBcontext
                 .HasOne(m => m.Section)
                 .WithMany(s => s.Modifications)
                 .HasForeignKey(o => o.SectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Modification>()
+                .HasOne(m => m.Image)
+                .WithOne(i => i.Modification)
+                .HasForeignKey<Modification>(m => m.ImageId)
                 .OnDelete(DeleteBehavior.Cascade);
 
              
@@ -151,10 +158,20 @@ namespace Custom_Builds.Infrastructure.DBcontext
                 .HasForeignKey<ChatGroup>(cg => cg.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.Entity<ChatGroup>()
-                .HasMany(cg => cg.Supporters)
-                .WithMany(u => u.ChatGroups)
-                .UsingEntity(e => e.ToTable("ChatGroup_User_ManyToMany"));
+            
+            
+            // image relations
+            builder.Entity<Image>()
+                .HasOne(i => i.Product)
+                .WithMany(p => p.Images)
+                .HasForeignKey(i => i.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Image>()
+                .HasOne(i => i.User)
+                .WithOne(u => u.Image)
+                .HasForeignKey<Image>(i => i.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -168,5 +185,6 @@ namespace Custom_Builds.Infrastructure.DBcontext
         public virtual DbSet<Message> Messages { get; set; }
         public virtual DbSet<ChatGroup> ChatGroups { get; set; }
         public virtual DbSet<OrderItem> OrderItems { get; set; }
+        public virtual DbSet<Image> Images { get; set; }
     }
 }

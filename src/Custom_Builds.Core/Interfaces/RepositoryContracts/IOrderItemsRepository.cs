@@ -9,6 +9,9 @@ public interface IOrderItemsRepository
     
     void Add(OrderItem orderItem);
 
+    /*
+    Func<IQueryable<OrderItem>, IQueryable<OrderItem>>? include = null
+    */
     Task<IReadOnlyList<OrderItem>> FilterAsync(
         Expression<Func<OrderItem, bool>> predicate,
         Expression<Func<OrderItem, object?>>[]? include = null,

@@ -20,7 +20,7 @@ export class OrderApiService {
   // api calls
 
   add() {
-    return this.http.post(this.url + 'Add', {});
+    return this.http.post(this.url + '/Add', {});
   }
 
   // get all orders

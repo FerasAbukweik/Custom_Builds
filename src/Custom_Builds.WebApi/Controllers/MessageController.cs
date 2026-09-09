@@ -10,7 +10,8 @@ namespace custom_Peripherals.Controllers
 { 
     [Authorize]
     public class MessageController(
-        IMessageService messageService
+        IMessageService messageService,
+        IChatGroupService chatGroupService
         ) : ApplicationControllerBase
     {
         // get messages
@@ -21,7 +22,10 @@ namespace custom_Peripherals.Controllers
             var getCurrUserId = User.GetId();
             if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult();
             
-            var result = await messageService.GetMessagesAsync(lazyLoadData, getCurrUserId.Value, cancellationToken);
+            var chatGroupId = await chatGroupService.GetChatGroupIdAsync(getCurrUserId.Value, cancellationToken);
+            if (!chatGroupId.IsSuccess) return ((Result)chatGroupId).ToActionResult();
+            
+            var result = await messageService.GetGroupMessagesAsync(chatGroupId.Value, getCurrUserId.Value, lazyLoadData, cancellationToken);
 
             return result.ToActionResult();
         }

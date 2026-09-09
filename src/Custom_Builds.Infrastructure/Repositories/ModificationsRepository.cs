@@ -37,10 +37,7 @@ namespace Custom_Builds.Infrastructure.Repositories
             if (toEdit == null) return null;
 
             toEdit.Price = newData.Price ?? toEdit.Price;
-            toEdit.Icon = newData.Icon ?? toEdit.Icon;
-            toEdit.Description = newData.Description ?? toEdit.Description;
             toEdit.Name = newData.Name ?? toEdit.Name;
-            toEdit.Value = newData.Value ?? toEdit.Value;
 
             return toEdit;
         }

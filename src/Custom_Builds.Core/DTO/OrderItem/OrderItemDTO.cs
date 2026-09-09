@@ -10,6 +10,6 @@ public class OrderItemDTO
     public required string Title { get; set; }
     public required decimal OrderedPrice { get; set; }
     public required string Image { get; set; }
-    public required IReadOnlyList<string> Specs = [];
+    public required string[] Specs { get; set; }
     public required OrderStateEnum State { get; set; }
 }

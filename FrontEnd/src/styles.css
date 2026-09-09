@@ -1,6 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --color-primary: #0f1521;
@@ -22,24 +22,10 @@
 }
 
 html,
-body,
-#root {
+body {
   width: 100%;
   height: 100%;
   background: var(--color-primary);
-  isolation: isolate;
-  font-family:
-    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol", "Noto Color Emoji";
-}
-
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  transition: background-color 99999s ease-in-out 0s;
-  -webkit-text-fill-color: #f8fafc !important;
-  caret-color: white;
 }
 
 @keyframes float {

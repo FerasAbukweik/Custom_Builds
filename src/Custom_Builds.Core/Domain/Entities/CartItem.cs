@@ -57,7 +57,7 @@ namespace Custom_Builds.Core.Domain.Entities
                 Quantity = Quantity,
                 image = OrderType switch
                 {
-                    OrderTypeEnum.Product => Product?.Images.FirstOrDefault() ?? "no image",
+                    OrderTypeEnum.Product => Product?.Images.FirstOrDefault()?.ImageUrl ?? "no image",
                     OrderTypeEnum.Custom => "Custom Build image",
                     _ => throw new Exception("unknown order type")
                 },

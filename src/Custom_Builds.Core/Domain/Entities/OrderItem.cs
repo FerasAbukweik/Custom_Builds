@@ -50,7 +50,7 @@ public class OrderItem
             Image = OrderType switch
             {
                 OrderTypeEnum.Custom => "Custom Build",
-                OrderTypeEnum.Product => Product?.Images[0] ?? "unknown",
+                OrderTypeEnum.Product => (Product?.Images.Count ?? 0) > 0 ? Product!.Images[0].ImageUrl : "",
                 _ => throw new Exception("unhandled order type")
             },
             Title = OrderType switch
@@ -62,7 +62,7 @@ public class OrderItem
             Specs = OrderType switch
             {
                 OrderTypeEnum.Product => ["Product"],
-                OrderTypeEnum.Custom => CustomBuild?.Modifications.Select(m => m.Name).ToList() ?? ["Custom Build"],
+                OrderTypeEnum.Custom => CustomBuild?.Modifications.Select(m => m.Name).ToArray() ?? ["Custom Build"],
                 _ => throw new Exception("unhandled order type")
             }
         };
