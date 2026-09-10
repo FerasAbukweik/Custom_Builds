@@ -1,7 +1,7 @@
 export interface IModification {
   id: string;
   name: string;
-  image?: string;
+  image: string;
   price: number;
 }
 

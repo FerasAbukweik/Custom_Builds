@@ -13,7 +13,7 @@ export class OrderService {
 
   // signals
   private _processingOrders = signal<IOrderDto[]>([]);
-  private _isLoadingCompletedOrders = signal<boolean>(false);
+  private _isLoadingProcessingOrders = signal<boolean>(false);
   private _processingOrdersCount = signal<number>(-1);
   private _ordersDetails = signal<Record<string, OrderDetailsDto>>({});
   private _isLoadingOrderDetails = signal<boolean>(false);
@@ -33,7 +33,7 @@ export class OrderService {
   }
 
   get isLoadingProcessingOrders() {
-    return this._isLoadingCompletedOrders.asReadonly();
+    return this._isLoadingProcessingOrders.asReadonly();
   }
 
   get processingOrdersCount() {
@@ -49,8 +49,8 @@ export class OrderService {
   }
 
   lazyGetProcessingOrders = () => {
-    if (!this._isMoreDataAvailable || this._isLoadingCompletedOrders()) return;
-    this._isLoadingCompletedOrders.set(true);
+    if (!this._isMoreDataAvailable || this._isLoadingProcessingOrders()) return;
+    this._isLoadingProcessingOrders.set(true);
 
     this._orderApiService.LazyGetProcessingOrders(this._lazyData).subscribe({
       next: (data) => {
@@ -60,10 +60,10 @@ export class OrderService {
 
         this._lazyData.taken += dataLen;
         this._isMoreDataAvailable = dataLen > 0;
-        this._isLoadingCompletedOrders.set(false);
+        this._isLoadingProcessingOrders.set(false);
       },
       error: () => {
-        this._isLoadingCompletedOrders.set(false);
+        this._isLoadingProcessingOrders.set(false);
       },
     });
   };

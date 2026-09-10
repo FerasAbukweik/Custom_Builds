@@ -1,6 +1,7 @@
 using Custom_Builds.Core.Common;
 using Custom_Builds.Core.DTO.Lazy;
 using Custom_Builds.Core.DTO.Order;
+using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
 using custom_Peripherals.ExtensionMethods;
 using Microsoft.AspNetCore.Authorization;
@@ -51,11 +52,13 @@ namespace custom_Peripherals.Controllers
             return result.ToActionResult();
         }
 
-
         [HttpGet("[action]")]
         public async Task<ActionResult<int>> GetPendingOrdersCount(CancellationToken cancellationToken = default)
         {
-            var result = await orderService.GetPendingOrdersCount(cancellationToken);
+            var getCurrUserId = User.GetId();
+            if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult();
+                
+            var result = await orderService.GetPendingOrdersCount(getCurrUserId.Value, cancellationToken);
 
             return result.ToActionResult();
         }
@@ -74,7 +77,25 @@ namespace custom_Peripherals.Controllers
         [HttpGet("[action]")]
         public async Task<ActionResult<OrderDetailsDto>> GetOrderDetails([FromQuery]Guid orderId, CancellationToken cancellationToken = default)
         {
-            var result = await orderService.GetDetailsAsync(orderId, cancellationToken);
+            Guid? currUserId = null;
+            if (!User.IsInRole(nameof(RolesEnum.Admin)))
+            {
+                var getCurrUserId = User.GetId();
+                if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult();
+
+                currUserId = getCurrUserId.Value;
+            }
+            
+            var result = await orderService.GetDetailsAsync(orderId,currUserId, cancellationToken);
+
+            return result.ToActionResult();
+        }
+
+        [Authorize(Roles = nameof(RolesEnum.Admin))]
+        [HttpPut("[action]/{orderId:guid}")]
+        public async Task<IActionResult> UpdateStatus([FromRoute]Guid orderId, [FromBody]OrderStateEnum newStatus, CancellationToken cancellationToken = default)
+        {
+            Result result = await orderService.UpdateStatus(orderId, newStatus, cancellationToken);
 
             return result.ToActionResult();
         }

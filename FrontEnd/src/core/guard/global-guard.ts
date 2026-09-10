@@ -11,5 +11,8 @@ export const globalGuard: CanMatchFn = async () => {
     // return false;
   }
 
+  // update isAdmin
+  authService.isAdminAsync();
+
   return true;
 };

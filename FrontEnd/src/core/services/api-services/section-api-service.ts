@@ -13,4 +13,8 @@ export class SectionApiServices {
   add(partId: string, title: string) {
     return this.http.post<ISection>(`${this._url}/Add`, { partId, title });
   }
+
+  remove(sectionId: string) {
+    return this.http.delete(`${this._url}/Remove/${sectionId}`);
+  }
 }

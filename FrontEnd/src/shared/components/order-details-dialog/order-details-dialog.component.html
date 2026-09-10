@@ -60,35 +60,37 @@
     </div>
 
     <!-- Order Status Management -->
-    <div class="border-t border-dark-blue-gray pt-5 sm:pt-6">
-      <p class="text-[10px] sm:text-xs uppercase tracking-widest text-dark-gray font-medium mb-3">
-        Update Status
-      </p>
-      <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-        <div class="relative flex-1">
-          <select
-            [ngModel]="selectedStatus()"
-            (ngModelChange)="selectedStatus.set($event)"
-            class="w-full appearance-none bg-primary border border-dark-blue-gray text-light-steel-blue px-3.5 sm:px-4 py-2.5 sm:py-2 pr-10 rounded-lg text-xs sm:text-sm font-bold hover:bg-dark-deep-blue transition-colors outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
-          >
-            @for (status of orderStatus; track $index; let idx = $index) {
-              <option [value]="idx">{{ status }}</option>
-            }
-          </select>
-          <span
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-dark-gray pointer-events-none text-sm flex items-center"
-          >
-            <i class="fa-solid fa-angle-down"></i>
-          </span>
-        </div>
-        <button
-          (click)="updateStatus()"
-          class="w-full sm:w-auto bg-secondary text-off-white px-4 py-2.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold hover:bg-secondary/90 transition-all whitespace-nowrap cursor-pointer text-center"
-        >
+    @if (authService.isAdmin()) {
+      <div class="border-t border-dark-blue-gray pt-5 sm:pt-6">
+        <p class="text-[10px] sm:text-xs uppercase tracking-widest text-dark-gray font-medium mb-3">
           Update Status
-        </button>
+        </p>
+
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div class="relative flex-1">
+            <select
+              #selectedStatus
+              class="w-full appearance-none bg-primary border border-dark-blue-gray text-light-steel-blue px-3.5 sm:px-4 py-2.5 sm:py-2 pr-10 rounded-lg text-xs sm:text-sm font-bold hover:bg-dark-deep-blue transition-colors outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
+            >
+              @for (status of orderStatus; track $index; let idx = $index) {
+                <option [value]="idx">{{ status }}</option>
+              }
+            </select>
+            <span
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-dark-gray pointer-events-none text-sm flex items-center"
+            >
+              <i class="fa-solid fa-angle-down"></i>
+            </span>
+          </div>
+          <button
+            (click)="updateStatus(selectedStatus.value)"
+            class="w-full sm:w-auto bg-secondary text-off-white px-4 py-2.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold hover:bg-secondary/90 transition-all whitespace-nowrap cursor-pointer text-center"
+          >
+            Update Status
+          </button>
+        </div>
       </div>
-    </div>
+    }
 
     <!-- Order Items -->
     <div>
@@ -112,7 +114,9 @@
                   <p class="text-xs sm:text-sm font-bold truncate mb-2">{{ item.title }}</p>
                   <div class="flex gap-1 items-center">
                     @for (spec of item.specs; track $index) {
-                      <p class="text-[11px] sm:text-xs truncate rounded-xl bg-dark-blue-gray/50 px-2 py-0.5 text-soft-gray font-medium">
+                      <p
+                        class="text-[11px] sm:text-xs truncate rounded-xl bg-dark-blue-gray/50 px-2 py-0.5 text-soft-gray font-medium"
+                      >
                         {{ spec }}
                       </p>
                     }

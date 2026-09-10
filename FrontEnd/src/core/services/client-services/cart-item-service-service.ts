@@ -152,11 +152,23 @@ export class CartItemService {
   };
 
   addCustomBuild(customBuildData: ICustomBuildAddDTO) {
-    this._cartItemApiService.addCustomBuild(customBuildData).subscribe();
+    this._cartItemApiService.addCustomBuild(customBuildData).subscribe({
+      next: (newItem) => {
+        this._cartItems.update((curr) => [newItem, ...curr]);
+
+        this._lazyData.taken++;
+      },
+    });
   }
 
   addProduct(productId: string) {
-    this._cartItemApiService.addProduct(productId).subscribe();
+    this._cartItemApiService.addProduct(productId).subscribe({
+      next: (newItem) => {
+        this._cartItems.update((curr) => [newItem, ...curr]);
+
+        this._lazyData.taken++;
+      },
+    });
   }
 
   // private

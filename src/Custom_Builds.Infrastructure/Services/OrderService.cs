@@ -115,7 +115,7 @@ public class OrderService(
         
         return Result<decimal>.Success(result);
     }
-    public async Task<Result<int>> GetPendingOrdersCount(CancellationToken cancellationToken = default)
+    public async Task<Result<int>> GetPendingOrdersCount(Guid? currUserId, CancellationToken cancellationToken = default)
     {
         var pendingStatus = new OrderStateEnum[]
         {
@@ -123,7 +123,10 @@ public class OrderService(
             OrderStateEnum.Testing,
             OrderStateEnum.Shipped
         };
-        var result = await orderRepository.CountAsync(o => pendingStatus.Contains(o.OrderStatus), cancellationToken);
+        var result = await orderRepository.CountAsync(o => (
+            pendingStatus.Contains(o.OrderStatus) && (currUserId == null || o.UserId == currUserId)
+            ),
+            cancellationToken);
         
         return Result<int>.Success(result);
     }
@@ -183,12 +186,32 @@ public class OrderService(
         return Result<IReadOnlyList<OrderDTO>>.Success(result.Select(r => r.toDTO()).ToList());
     }
 
-    public async Task<Result<OrderDetailsDto>> GetDetailsAsync(Guid orderId, CancellationToken cancellationToken = default)
+    public async Task<Result<OrderDetailsDto>> GetDetailsAsync(Guid orderId,Guid? currUserId, CancellationToken cancellationToken = default)
     {
         var order = await orderRepository.GetByIdAsync(orderId, [o => o.User], cancellationToken);
         if (order == null)
             return Result<OrderDetailsDto>.Failure("Order Not found");
+        
+        if(currUserId != null && order.UserId != currUserId)
+            return Result<OrderDetailsDto>.Failure("Unauthorized", HttpStatusCode.Unauthorized);
 
         return Result<OrderDetailsDto>.Success(order.ToDetailsDto());
+    }
+
+    public async Task<Result<OrderDTO>> UpdateStatus(Guid orderId, OrderStateEnum newStatus, CancellationToken cancellationToken = default)
+    {
+        var updated = await orderRepository.UpdateOrderStatus(orderId, newStatus, cancellationToken);
+
+        if (updated == null) return Result<OrderDTO>.Failure("Failed Updating order status");
+        
+        // save changes to DB
+        if (!await orderRepository.SaveChangesAsync(cancellationToken))
+        {
+            logger.LogError("{serviceName}.{methodName} failed saving changes to DB",
+                nameof(OrderService), nameof(UpdateStatus));
+            return Result<OrderDTO>.Failure("failed saving changes to DB", HttpStatusCode.InternalServerError);
+        }
+        
+        return Result<OrderDTO>.Success(updated.toDTO());
     }
 }

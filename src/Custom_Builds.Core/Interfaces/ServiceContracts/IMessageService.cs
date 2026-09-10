@@ -13,7 +13,7 @@ public interface IMessageService
 
     Task<Result<IReadOnlyList<MessageDTO>>> GetGroupMessagesAsync(
         Guid groupId,
-        Guid currUserId,
+        Guid? currUserId,
         LazyDTO lazyData,
         CancellationToken cancellationToken = default);
 }

@@ -31,15 +31,16 @@ namespace Custom_Builds.Core.Domain.Entities
         
         // DTO
         // must include sender
-        public MessageDTO toDTO(Guid currUserId)
+        public MessageDTO toDTO()
         {
             return new MessageDTO()
             {
                 Id = Id,
                 Content = Content,
                 CreatedAt = CreatedAt,
-                IsCurrUserSender = SenderId == currUserId,
+                SenderId = SenderId,
                 SenderName = Sender?.UserName ?? "unknown",
+                ChatGroupId = ChatGroupId,
             };
         }
     }

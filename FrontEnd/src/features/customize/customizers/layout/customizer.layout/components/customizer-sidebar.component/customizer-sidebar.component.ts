@@ -2,6 +2,7 @@ import { Component, computed, inject, input, OnInit, signal } from '@angular/cor
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { PartService } from '../../../../../../../core/services/client-services/part-service';
 import { CartItemService } from '../../../../../../../core/services/client-services/cart-item-service-service';
+import { CustomizerSelectionService } from '../../customizer-selection-service';
 import { CustomBuildTypeEnum } from '../../../../../../../core/enums/custom-build-type-enum';
 import { ICustomBuildAddDTO } from '../../../../../../../core/DTO/add-custom-build-dto';
 
@@ -15,63 +16,40 @@ import { ICustomBuildAddDTO } from '../../../../../../../core/DTO/add-custom-bui
   },
 })
 export class CustomizerSidebarComponent implements OnInit {
-  // injections
+  // Injections
   protected readonly cartItemServices = inject(CartItemService);
   protected readonly partServices = inject(PartService);
+  protected readonly selectionService = inject(CustomizerSelectionService);
 
-  // input
+  // Input
   currPage = input.required<CustomBuildTypeEnum>();
 
-  // signals
+  // UI-Specific Signals
   protected activePartId = signal<string>('');
-  protected selectedModifications = signal<Record<string, string>>({});
 
-  // computed
-  protected totalPrice = computed<number>(() => {
-    const idsSet = new Set(Object.values(this.selectedModifications()));
-
-    return this.partServices.parts().reduce(
-      (sum, p) =>
-        sum +
-        p.sections.reduce(
-          (sum, s) =>
-            sum +
-            s.modifications.filter((m) => idsSet.has(m.id)).reduce((sum, m) => sum + m.price, 0),
-          0,
-        ),
-      0,
-    );
-  });
+  // Computed Properties (Delegated or UI-local)
+  protected totalPrice = this.selectionService.totalPrice;
+  
   protected currentPartSections = computed(
     () => this.partServices.parts().find((part) => part.id === this.activePartId())?.sections ?? [],
   );
 
-  // getters
+  // Lifecycle
   ngOnInit() {
     this.partServices.updateParts();
   }
 
-  // methods
-
-  // add custom build to cart
+  // Methods
   addToCart = () => {
     const customBuildData: ICustomBuildAddDTO = {
-      modificationIds: Object.values(this.selectedModifications()).filter((id) => id), // to make sure we have id
+      modificationIds: Object.values(this.selectionService.selectedModifications()).filter((id) => id),
       customBuildType: this.currPage(),
     };
 
     this.cartItemServices.addCustomBuild(customBuildData);
   };
 
-  // manage selecting modification
-  selectModification = (sectionId: string, productId: string) => {
-    this.selectedModifications.update((curr) => {
-      const isSelected = curr[sectionId] === productId;
-
-      // if already selected remove it
-      const newValue = isSelected ? '' : productId;
-
-      return { ...curr, [sectionId]: newValue };
-    });
+  selectModification = (sectionId: string, modificationId: string) => {
+    this.selectionService.selectModification(sectionId, modificationId);
   };
 }

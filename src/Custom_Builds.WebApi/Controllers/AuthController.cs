@@ -1,11 +1,10 @@
+using System.Security.Claims;
 using Custom_Builds.Core.Common;
-using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.DTO.Auth;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
 using custom_Peripherals.ExtensionMethods;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace custom_Peripherals.Controllers;
@@ -19,14 +18,24 @@ public class AuthController(
     [Authorize]
     public async Task<IActionResult> IsAuthenticated()
     {
+        var getCurrUserId = User.GetId();
+        if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult();
+        
+        return Ok();
+    }
+    
+    [HttpPost("[action]")]
+    [Authorize(Roles = nameof(RolesEnum.Admin))]
+    public IActionResult IsAdmin()
+    { 
         return Ok();
     }
     
     // login
     [HttpPost("[action]")]
-    public async Task<IActionResult> Login([FromBody]LoginDTO loginInfo)
+    public async Task<ActionResult<UserDTO>> Login([FromBody]LoginDTO loginInfo)
     {
-        Result result = await authService.LoginAsync(loginInfo);
+        var result = await authService.LoginAsync(loginInfo);
 
         return result.ToActionResult();
     }
@@ -55,12 +64,5 @@ public class AuthController(
         Result result = await authService.UpdateTokensAsync(getRefreshTokenResult.Value!, cancellationToken);
 
         return result.ToActionResult();
-    }
-
-    [HttpPost("[action]")]
-    public IActionResult IsAdmin()
-    {
-        if (HttpContext.User.IsInRole(nameof(RolesEnum.Admin))) return Ok();
-        return Unauthorized();
     }
 }

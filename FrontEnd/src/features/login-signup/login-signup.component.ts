@@ -106,7 +106,7 @@ export class LoginSignupComponent {
 
     this.currPage.set(newPage);
     this.form.reset();
-    this.authService.loginServerError.set('');
+    this.authService.resetServerError();
     this.accountService.registerServerError.set('');
 
     if (newPage === 'signin') {

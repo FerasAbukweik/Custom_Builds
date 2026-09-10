@@ -1,5 +1,7 @@
-﻿using Custom_Builds.Core.Common;
+﻿using System.Security.Claims;
+using Custom_Builds.Core.Common;
 using Custom_Builds.Core.DTO.Account;
+using Custom_Builds.Core.DTO.Auth;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
 using custom_Peripherals.ExtensionMethods;
 using Microsoft.AspNetCore.Authorization;
@@ -13,9 +15,9 @@ namespace custom_Peripherals.Controllers
     {
         // register
         [HttpPost("[action]")]
-        public async Task<IActionResult> Register([FromBody]RegisterDTO registerInfo)
+        public async Task<ActionResult<UserDTO>> Register([FromBody]RegisterDTO registerInfo)
         {
-            Result result = await accountService.RegisterAsync(registerInfo);
+            var result = await accountService.RegisterAsync(registerInfo);
 
             return result.ToActionResult();
         }

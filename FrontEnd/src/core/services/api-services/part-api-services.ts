@@ -18,4 +18,8 @@ export class PartApiServices {
   public addPart(icon: string, name: string) {
     return this.http.post<IPart>(`${this.url}/Add`, { icon, name });
   }
+
+  remove(partId: string) {
+    return this.http.delete(`${this.url}/Remove/${partId}`);
+  }
 }

@@ -8,6 +8,8 @@ import { OrderStateEnum } from '../../../core/enums/order-status-enum';
 import { IsVisableDirective } from '../../directives/is-visable.directive';
 import { LoadingComponent } from '../loading/loading.component';
 import { OrderTypeEnum } from 'src/core/enums/order-type-enum';
+import { AuthService } from 'src/core/services/client-services/auth-service';
+import { AdminOrdersService } from 'src/features/admin/pages/components/orders-management/orders-management.component/admin-orders.service';
 
 @Component({
   selector: 'dialog[app-order-details-dialog]',
@@ -26,9 +28,8 @@ export class OrderDetailsDialogComponent {
   protected readonly orderItemService = inject(OrderItemService);
   protected readonly orderService = inject(OrderService);
   protected readonly orderDetailsDialogService = inject(OrderDetailsDialogService);
-
-  // signals
-  protected selectedStatus = signal<number>(0);
+  protected readonly authService = inject(AuthService);
+  private readonly _adminOrdersService = inject(AdminOrdersService);
 
   // computed
   protected orderItems = computed(
@@ -70,8 +71,11 @@ export class OrderDetailsDialogComponent {
     this._elementRef.nativeElement.close();
   }
 
-  public updateStatus(): void {
-    const newStatus = this.selectedStatus();
+  public updateStatus(newStatusIdx: string) {
+    this._adminOrdersService.updateStatus(
+      this.orderDetailsDialogService.selectedOrderId(),
+      Number(newStatusIdx),
+    );
   }
 
   public viewItem(itemId: string): void {

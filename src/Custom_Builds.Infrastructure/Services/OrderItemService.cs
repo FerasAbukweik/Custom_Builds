@@ -18,6 +18,7 @@ public class OrderItemService(
                 o => o.Product,
                 o => o.CustomBuild,
                 o => o.CustomBuild!.Modifications,
+                o => o.Product!.Images,
                 o => o.Order
             ],
             o => o.Order!.CreatedAt,

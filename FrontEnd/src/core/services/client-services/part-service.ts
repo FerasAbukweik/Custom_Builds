@@ -122,4 +122,49 @@ export class PartService {
       },
     });
   }
+
+  removeSection(sectionId: string) {
+    // old data
+    const oldParts = this._parts();
+
+    // find the partId that contains this section
+    let partId = oldParts.find((p) => p.sections.some((s) => s.id === sectionId))?.id;
+    if (!partId) return;
+
+    // optimistic update: filter out the section from the matching part
+    this._parts.update((curr) =>
+      curr.map((p) =>
+        p.id === partId
+          ? {
+              ...p,
+              sections: p.sections.filter((s) => s.id !== sectionId),
+            }
+          : p,
+      ),
+    );
+
+    // call api
+    this._sectionApiService.remove(sectionId).subscribe({
+      error: () => {
+        // revert to old data if error occurs
+        this._parts.set(oldParts);
+      },
+    });
+  }
+
+  removePart(partId: string) {
+    // old data
+    const oldParts = this._parts();
+
+    // optimistic update: filter out the part from the list
+    this._parts.update((curr) => curr.filter((p) => p.id !== partId));
+
+    // call api
+    this._partApiService.remove(partId).subscribe({
+      error: () => {
+        // revert to old data if error occurs
+        this._parts.set(oldParts);
+      },
+    });
+  }
 }

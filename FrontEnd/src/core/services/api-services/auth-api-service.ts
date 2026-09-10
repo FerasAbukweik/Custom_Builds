@@ -23,7 +23,7 @@ export class AuthApiService {
   }
 
   logout() {
-    return this._http.post(this.url + 'Logout', {});
+    return this._http.post(this.url + '/Logout', {});
   }
 
   updateTokens() {

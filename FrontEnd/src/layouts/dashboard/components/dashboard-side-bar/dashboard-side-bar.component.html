@@ -1,10 +1,9 @@
 >
-<a routerLink=""
-class="text-white text-xl font-bold pl-8 cursor-pointer"
-title="home page"
->{{ projectName }}</a>
+<a routerLink="" class="text-white text-xl font-bold pl-11 cursor-pointer" title="home page">{{
+  projectName
+}}</a>
 
-<ul class="mt-13 flex flex-col gap-3">
+<ul class="mt-13 flex flex-col gap-3 h-full">
   @for (data of pagesData(); track $index) {
     <li>
       <a
@@ -25,4 +24,14 @@ title="home page"
       </a>
     </li>
   }
+
+  <li class="mt-auto mb-2">
+    <a
+      (click)="authService.logout()"
+      class="flex gap-2 items-center px-4 py-3.5 bg-red-500 rounded-xl text-white hover:bg-red-600 transition-colors duration-200 cursor-pointer no-underline"
+    >
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <span class="font-bold">Logout</span>
+    </a>
+  </li>
 </ul>

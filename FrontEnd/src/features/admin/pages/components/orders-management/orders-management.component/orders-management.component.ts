@@ -1,13 +1,12 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { stateCardData } from '../../../../../../core/interfaces/state-card-data';
-import { OrdersManagementService } from './orders-management.service';
+import { AdminOrdersService } from './admin-orders.service';
 import { StateDataComponent } from '../../../../../../shared/components/stateData/state-data.component';
 import { OrdersTableComponent } from '../../../../../../shared/components/orders-table/orders-table.component';
-import { OrderDetailsDialogComponent } from '../../../../../../shared/components/order-details-dialog/order-details-dialog.component';
 
 @Component({
   selector: 'app-orders-management.component',
-  imports: [StateDataComponent, OrdersTableComponent, OrderDetailsDialogComponent],
+  imports: [StateDataComponent, OrdersTableComponent],
   templateUrl: './orders-management.component.html',
   host: {
     class: 'bg-primary text-off-white min-h-screen font-display w-full flex',
@@ -15,7 +14,7 @@ import { OrderDetailsDialogComponent } from '../../../../../../shared/components
 })
 export class OrdersManagementComponent implements OnInit {
   // DI
-  protected readonly ordersManagementService = inject(OrdersManagementService);
+  protected readonly ordersManagementService = inject(AdminOrdersService);
 
   // signals
   protected statusData = computed<stateCardData>(() => [

@@ -15,7 +15,7 @@ export class SelectCustomizerComponent {
       subtitle: 'Precision Engineering',
       description:
         'Engineered for professional play with hall-effect triggers and remappable back paddles.',
-      imgSrc: 'assets/images/keyboard-image.png',
+      imgSrc: 'assets/images/ps5-controller.png',
       goTo: 'controller',
     },
     {
@@ -23,7 +23,7 @@ export class SelectCustomizerComponent {
       subtitle: 'Tactile Mastery',
       description:
         'Hot-swappable switches, sound-damped gaskets, and aircraft-grade aluminum casing.',
-      imgSrc: 'assets/images/keyboard-image.png',
+      imgSrc: 'assets/images/keyboard.png',
       goTo: 'keyboard',
     },
   ];

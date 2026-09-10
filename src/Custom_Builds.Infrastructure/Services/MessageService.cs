@@ -1,3 +1,4 @@
+using System.Net;
 using Custom_Builds.Core.Common;
 using Custom_Builds.Core.Domain.Entities;
 using Custom_Builds.Core.DTO.Lazy;
@@ -10,6 +11,7 @@ namespace Custom_Builds.Infrastructure.Services;
 
 public class MessageService(
     IMessageRepository messageRepository,
+    IChatGroupRepository chatGroupRepository,
     ILogger<MessageService> logger) : IMessageService
 {
     public async Task<Result<MessageDTO>> AddAsync(
@@ -41,15 +43,24 @@ public class MessageService(
             return Result<MessageDTO>.Failure("message was not added");
 
 
-        return Result<MessageDTO>.Success(message.toDTO(senderId));
+        return Result<MessageDTO>.Success(message.toDTO());
     }
 
     public async Task<Result<IReadOnlyList<MessageDTO>>> GetGroupMessagesAsync(
         Guid groupId,
-        Guid currUserId,
+        Guid? currUserId,
         LazyDTO lazyData,
         CancellationToken cancellationToken = default)
     {
+        if (currUserId != null)
+        {
+            var userChatGroup = await chatGroupRepository.GetByUserIdAsync(currUserId.Value, cancellationToken);
+            if (userChatGroup == null)
+                return Result<IReadOnlyList<MessageDTO>>.Failure("user chat group was not found");
+            
+            if(userChatGroup.Id != groupId)
+                return Result<IReadOnlyList<MessageDTO>>.Failure("Unauthorized", HttpStatusCode.Unauthorized);
+        }
         // get messages from repository
         var messages = await messageRepository.FilterAsync(
             m => m.ChatGroupId == groupId,
@@ -62,6 +73,6 @@ public class MessageService(
             );
         
         // map messages to DTO
-        return Result<IReadOnlyList<MessageDTO>>.Success(messages.Select(m => m.toDTO(currUserId)).ToList());
+        return Result<IReadOnlyList<MessageDTO>>.Success(messages.Select(m => m.toDTO()).ToList());
     }
 }

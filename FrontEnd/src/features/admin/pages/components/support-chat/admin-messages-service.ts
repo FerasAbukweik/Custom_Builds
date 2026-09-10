@@ -54,12 +54,14 @@ export class AdminMessagesService {
   }
 
   // add message
-  private addMessage = (groupId: string, msg: IMessageDTO) => {
+  private addMessage = (msg: IMessageDTO) => {
     this._messages.update((curr) => {
-      const groupMessages = curr[groupId] || [];
+      const groupMessages = curr[msg.chatGroupId] || [];
       return {
         ...curr,
-        [groupId]: [...groupMessages, msg].sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1)),
+        [msg.chatGroupId]: [...groupMessages, msg].sort((a, b) =>
+          a.createdAt > b.createdAt ? 1 : -1,
+        ),
       };
     });
   };
@@ -101,7 +103,7 @@ export class AdminMessagesService {
     this._messagesSignalRService.receiveMessage$.subscribe({
       next: (msg) => {
         this.initGroupStateIfNotExists(msg.chatGroupId);
-        this.addMessage(msg.chatGroupId, msg);
+        this.addMessage(msg);
         this._lazyData[msg.chatGroupId].taken++;
       },
     });

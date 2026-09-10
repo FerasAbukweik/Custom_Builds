@@ -32,7 +32,7 @@ public class ClaudinaryService: IClaudinaryService
         var uploadParams = new ImageUploadParams()
         {
             File = new FileDescription(image.FileName, stream),
-            Transformation = new Transformation().Height(500).Width(500).Crop("fill"),
+            // Transformation = new Transformation().Height(500).Width(500).Crop("fill"),
             Folder = "Custom_Builds"
         };
         

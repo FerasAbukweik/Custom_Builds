@@ -6,21 +6,22 @@ import { IOrderDto } from '../../DTO/orders-dto';
 import { IOrderHistoryStatusDTO } from '../../DTO/order-history-status-dto';
 import { ILazyDTO } from '../../DTO/lazy-dto';
 import { OrderDetailsDto } from '../../DTO/order-details-dto';
+import { OrderStateEnum } from 'src/core/enums/order-status-enum';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OrderApiService {
   // DI
-  private readonly http = inject(HttpClient);
+  private readonly _http = inject(HttpClient);
 
   // private
-  private readonly url = Urls.apiUrl + '/Order';
+  private readonly _url = Urls.apiUrl + '/Order';
 
   // api calls
 
   add() {
-    return this.http.post(this.url + '/Add', {});
+    return this._http.post(this._url + '/Add', {});
   }
 
   // get all orders
@@ -30,12 +31,12 @@ export class OrderApiService {
       params = params.append(key, value.toString());
     });
 
-    return this.http.get<IOrderDto[]>(`${this.url}/GetPendingOrders`, { params });
+    return this._http.get<IOrderDto[]>(`${this._url}/GetPendingOrders`, { params });
   }
 
   // get processing orders count
   getProcessingOrders() {
-    return this.http.get<number>(this.url + '/GetPendingOrdersCount');
+    return this._http.get<number>(this._url + '/GetPendingOrdersCount');
   }
 
   // get all completed orders
@@ -46,12 +47,12 @@ export class OrderApiService {
       params = params.append(key, val);
     });
 
-    return this.http.get<IOrderDto[]>(`${this.url}`, { params });
+    return this._http.get<IOrderDto[]>(`${this._url}`, { params });
   }
 
   // get completed orders count
   public getHistorySummary() {
-    return this.http.get<IOrderHistoryStatusDTO>(`${this.url}/GetHistorySummary`);
+    return this._http.get<IOrderHistoryStatusDTO>(`${this._url}/GetHistorySummary`);
   }
 
   // get order details
@@ -60,6 +61,10 @@ export class OrderApiService {
 
     params = params.append('orderId', orderId);
 
-    return this.http.get<OrderDetailsDto>(this.url + '/GetOrderDetails', { params });
+    return this._http.get<OrderDetailsDto>(this._url + '/GetOrderDetails', { params });
+  }
+
+  updateStatus(orderId: string, newStatus: OrderStateEnum) {
+    return this._http.put(this._url + `/UpdateStatus/${orderId}`, newStatus);
   }
 }

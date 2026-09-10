@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { IsVisableDirective } from '../../directives/is-visable.directive';
 import { MessagesSignalRService } from '../../../core/services/client-services/messaegs-signalR-service';
+import { AuthService } from 'src/core/services/client-services/auth-service';
 
 @Component({
   selector: 'app-live-chatting',
@@ -28,6 +29,7 @@ export class LiveChattingComponent {
   // DI
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _messagesSignalRService = inject(MessagesSignalRService);
+  private readonly _authService = inject(AuthService);
 
   // input
   messages = input.required<IMessageDTO[]>();
@@ -114,9 +116,14 @@ export class LiveChattingComponent {
     if (isUserMessage && !this.messageInput()) return;
 
     this.handleSendMessage.emit(message);
-    
+
     if (isUserMessage) this.messageInput.set('');
 
     this._scrollToBottom();
+  }
+
+  isCurrUserSender(senderId: string) {
+    console.log(this._authService.userData()?.userId ?? 'missing');
+    return senderId === (this._authService.userData()?.userId ?? '');
   }
 }

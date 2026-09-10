@@ -13,7 +13,10 @@ namespace Custom_Builds.Core.Interfaces.RepositoryContracts
             CancellationToken cancellationToken = default);
         Task<CustomBuild?> EditByIdAsync(CustomBuildEditDTO newData, CancellationToken cancellationToken = default);
         Task<CustomBuild?> RemoveByIdAsync(Guid customBuildId, CancellationToken cancellationToken = default);
-        Task<Result<List<CustomBuild>>> FilterAsync(Expression<Func<CustomBuild, bool>> extraChecks, Expression<Func<CustomBuild, object?>>[]? includes = null);
+        Task<IReadOnlyList<CustomBuild>> FilterAsync(
+            Expression<Func<CustomBuild, bool>> extraChecks,
+            Expression<Func<CustomBuild, object?>>[]? includes = null,
+            CancellationToken cancellationToken = default);
         Task<Result<decimal>> GetPriceAsync(Guid customBuildId, CancellationToken cancellationToken = default);
         Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
         void AttachRange(IEnumerable<Modification> mods);

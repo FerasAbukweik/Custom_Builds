@@ -31,7 +31,7 @@ namespace Custom_Builds.Infrastructure.Repositories
         }
         public async Task<Order?> UpdateOrderStatus(Guid orderId, OrderStateEnum newStatus, CancellationToken cancellationToken = default)
         {
-            var toEdit = await dbContext.Orders.AsNoTracking().SingleOrDefaultAsync(o => o.Id == orderId, cancellationToken);
+            var toEdit = await dbContext.Orders.SingleOrDefaultAsync(o => o.Id == orderId, cancellationToken);
 
             if (toEdit == null) return null;
 

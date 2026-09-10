@@ -35,7 +35,7 @@ public class AdminController(
         var getWeeklyRevenueResult = await orderService.GetDailyRevenueAsync(7, cancellationToken);
         if(!getMonthlyRevenueResult.IsSuccess) return ((Result)getMonthlyRevenueResult).ToActionResult();
 
-        var getPendingOrdersCountResult = await orderService.GetPendingOrdersCount(cancellationToken);
+        var getPendingOrdersCountResult = await orderService.GetPendingOrdersCount(null, cancellationToken);
         if(!getPendingOrdersCountResult.IsSuccess) return ((Result)getPendingOrdersCountResult).ToActionResult();
 
         var getTotalRevenueResult = await orderService.GetTotalRevenueAsync(cancellationToken);
@@ -57,7 +57,7 @@ public class AdminController(
     [HttpGet("[action]")]
     public async Task<ActionResult<OrderManagementStatusDto>> GetOrderManagementStatus(CancellationToken cancellationToken = default)
     {
-        var getPendingOrdersCount = await orderService.GetPendingOrdersCount(cancellationToken);
+        var getPendingOrdersCount = await orderService.GetPendingOrdersCount(null, cancellationToken);
         if (!getPendingOrdersCount.IsSuccess) return ((Result)getPendingOrdersCount).ToActionResult();
 
         var getLatestOrdersCountResult = await orderService.GetLatestOrdersCountAsync(1, cancellationToken);
@@ -103,7 +103,7 @@ public class AdminController(
         var getCurrUserId = User.GetId();
         if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult();
             
-        var result = await messageService.GetGroupMessagesAsync(groupId, getCurrUserId.Value, lazyData, cancellationToken);
+        var result = await messageService.GetGroupMessagesAsync(groupId,null, lazyData, cancellationToken);
 
         return result.ToActionResult(); 
     }

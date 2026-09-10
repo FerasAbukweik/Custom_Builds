@@ -1,3 +1,4 @@
-export interface IUserData{
-    userName: string;
+export interface IUserData {
+  userName: string;
+  userId: string;
 }

@@ -50,7 +50,7 @@ public class OrderItem
             Image = OrderType switch
             {
                 OrderTypeEnum.Custom => "Custom Build",
-                OrderTypeEnum.Product => (Product?.Images.Count ?? 0) > 0 ? Product!.Images[0].ImageUrl : "",
+                OrderTypeEnum.Product => Product?.Images.FirstOrDefault()?.ImageUrl ?? "missing product image",
                 _ => throw new Exception("unhandled order type")
             },
             Title = OrderType switch

@@ -6,12 +6,26 @@
     <div
       class="absolute top-6 left-8 z-10 flex items-center gap-2 px-4 py-2 bg-deep-blue/40 backdrop-blur-md rounded-full border border-white/5"
     >
-      <span class="text-dark-gray text-xs font-bold uppercase"> X-Pro Stealth </span>
+      <span class="text-dark-gray text-xs font-bold uppercase"> PS5 Controller </span>
     </div>
 
-    <main>
-      <router-outlet />
-    </main>
+    <section class="relative w-full h-full">
+      <img
+        src="assets/images/controller-base/black-backpanel.png"
+        class="absolute top-1/2 left-1/2 -translate-1/2 z-1"
+      />
+      <img
+        src="assets/images/controller-base/DEFAULT-BASE-white-aim.png"
+        class="absolute top-1/2 left-1/2 -translate-1/2 z-1"
+      />
+      <img
+        src="assets/images/controller-base/front_ps5_configurator_paddles_black_front_paddles.png"
+        class="absolute top-1/2 left-1/2 -translate-1/2 z-1"
+      />
+      @for (img of customizerSelectionService.selectedModificationImages(); track $index) {
+        <img [src]="img" class="absolute top-1/2 left-1/2 -translate-1/2 z-2" />
+      }
+    </section>
   </div>
   <aside
     customizerSideBar

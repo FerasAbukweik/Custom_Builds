@@ -24,7 +24,6 @@ export class SupportChatComponent implements OnInit, OnDestroy {
 
   // private
   private oldChatGroupId: string = '';
-  private firstTimeEffect = true;
 
   // constructor
   constructor() {
@@ -40,12 +39,23 @@ export class SupportChatComponent implements OnInit, OnDestroy {
         this.showMessagesComponent.set(true);
       }, 0);
 
-      // link the admin with the new group on the server
-      if (this.oldChatGroupId) this.messagesSignalRService.LeaveChatGroup(this.oldChatGroupId);
-      this.messagesSignalRService.JoinChatGroup(newChatGroupId);
+      this.switchSignalRGroup(this.oldChatGroupId, newChatGroupId);
 
       this.oldChatGroupId = newChatGroupId;
     });
+  }
+
+  private async switchSignalRGroup(oldId: string | null, newId: string) {
+    try {
+      // 1. Leave the old group first if it exists
+      if (oldId) {
+        await this.messagesSignalRService.LeaveChatGroup(oldId);
+      }
+      // 2. Join the new group
+      await this.messagesSignalRService.JoinChatGroup(newId);
+    } catch (err) {
+      console.error('Failed to switch SignalR chat groups:', err);
+    }
   }
 
   // methods

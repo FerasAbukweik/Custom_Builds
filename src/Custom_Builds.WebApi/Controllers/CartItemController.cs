@@ -16,14 +16,14 @@ namespace custom_Peripherals.Controllers
     {
         // add normal product
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddProduct([FromBody] Guid productId, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<CartItemDTO>> AddProduct([FromBody] Guid productId, CancellationToken cancellationToken = default)
         {
             // get currUser id
             var getCurrUserId = User.GetId();
             if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult();
             
             // add item to target user cart
-            Result result = await cartItemService.AddProductAsync(productId,  getCurrUserId.Value, cancellationToken);
+            var result = await cartItemService.AddProductAsync(productId,  getCurrUserId.Value, cancellationToken);
 
             return result.ToActionResult();
         }
@@ -31,13 +31,13 @@ namespace custom_Peripherals.Controllers
 
         // add custom build
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddCustomBuild([FromBody] CustomBuildAddDTO toAddCustomBuild, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<CartItemDTO>> AddCustomBuild([FromBody] CustomBuildAddDTO toAddCustomBuild, CancellationToken cancellationToken = default)
         {
             // get currUser id
             var getCurrUserId = User.GetId();
             if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult();
             
-            Result result = await cartItemService.AddCustomBuildAsync(toAddCustomBuild, getCurrUserId.Value!, cancellationToken);
+            var result = await cartItemService.AddCustomBuildAsync(toAddCustomBuild, getCurrUserId.Value!, cancellationToken);
 
             return result.ToActionResult();
         }

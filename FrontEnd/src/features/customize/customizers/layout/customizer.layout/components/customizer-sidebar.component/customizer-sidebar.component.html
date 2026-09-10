@@ -36,7 +36,7 @@
             (click)="selectModification(section.id, modification.id)"
             [class]="
               `flex-1 min-w-40 max-w-60 max-[381px]:max-w-none! relative flex transition-all rounded-lg border-2 ${
-                selectedModifications()[section.id] === modification.id
+                selectionService.selectedModifications()[section.id] === modification.id
                   ? 'border-secondary bg-white/5 ring-1 ring-secondary/30'
                   : 'border-dark-blue-gray hover:border-soft-gray/30 bg-transparent'
               } flex-col items-center p-2`
@@ -46,9 +46,15 @@
               class="w-full aspect-square rounded bg-cover bg-center mb-2"
               [style.backgroundImage]="'url(' + modification.image + ')'"
             ></div>
-            <span class="text-[10px] font-bold uppercase text-dark-gray">
-              {{ modification.name }}
-            </span>
+            <div class="flex justify-between items-center w-full">
+              <span></span>
+              <span class="text-[10px] font-bold uppercase text-dark-gray">
+                {{ modification.name }}
+              </span>
+              <span class="text-sm font-bold uppercase text-secondary">
+                {{ modification.price | currency }}
+              </span>
+            </div>
           </button>
         }
       </div>

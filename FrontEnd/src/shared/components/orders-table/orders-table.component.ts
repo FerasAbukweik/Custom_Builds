@@ -4,10 +4,11 @@ import { OrderStateEnum } from '../../../core/enums/order-status-enum';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { LoadingComponent } from '../loading/loading.component';
 import { OrderDetailsDialogService } from '../order-details-dialog/order-detaild-dialog-service';
+import { OrderDetailsDialogComponent } from "../order-details-dialog/order-details-dialog.component";
 
 @Component({
   selector: 'app-orders-table',
-  imports: [CurrencyPipe, LoadingComponent, DatePipe],
+  imports: [CurrencyPipe, LoadingComponent, DatePipe, OrderDetailsDialogComponent],
   templateUrl: './orders-table.component.html',
 })
 export class OrdersTableComponent {

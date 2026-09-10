@@ -88,8 +88,4 @@ export class InventoryManagementComponent implements OnInit {
     this.modificationImageInput()!.nativeElement.value = '';
     this.stopAdding();
   }
-
-  removeMod(modId: string) {
-    this.partService.removeMod(modId);
-  }
 }

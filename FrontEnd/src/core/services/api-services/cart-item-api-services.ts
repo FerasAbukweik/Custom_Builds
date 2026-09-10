@@ -19,12 +19,12 @@ export class CartItemApiServices {
 
   // add product
   addProduct(productId: string) {
-    return this.httpClient.post(this.url + '/AddProduct', JSON.stringify(productId));
+    return this.httpClient.post<IMiniCartItemDTO>(this.url + '/AddProduct', JSON.stringify(productId));
   }
 
   // add customBuild
   addCustomBuild(customBuildData: ICustomBuildAddDTO) {
-    return this.httpClient.post(`${this.url}/AddCustomBuild`, customBuildData);
+    return this.httpClient.post<IMiniCartItemDTO>(`${this.url}/AddCustomBuild`, customBuildData);
   }
 
   // remove item

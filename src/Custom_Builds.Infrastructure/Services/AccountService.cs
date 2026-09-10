@@ -2,6 +2,7 @@ using System.Net;
 using Custom_Builds.Core.Common;
 using Custom_Builds.Core.Domain.Identity;
 using Custom_Builds.Core.DTO.Account;
+using Custom_Builds.Core.DTO.Auth;
 using Custom_Builds.Core.Enums;
 using Custom_Builds.Core.Interfaces.RepositoryContracts;
 using Custom_Builds.Core.Interfaces.ServiceContracts;
@@ -44,12 +45,12 @@ public class AccountService(
             nameof(AccountService), nameof(DeleteUserAsync), userId);
         return Result<ApplicationUser>.Success(userToDel);
     }
-    public async Task<Result> RegisterAsync(RegisterDTO registerInfo, CancellationToken cancellationToken = default)
+    public async Task<Result<UserDTO>> RegisterAsync(RegisterDTO registerInfo, CancellationToken cancellationToken = default)
     {
         // check if email already exists
         var doesUserExistResult = await DoesUserExist(registerInfo, cancellationToken);
         if (doesUserExistResult.IsSuccess)
-            return Result.Failure(doesUserExistResult.Value!);
+            return Result<UserDTO>.Failure(doesUserExistResult.Value!);
 
         // new user to add
         ApplicationUser newUser = new ApplicationUser()
@@ -66,7 +67,7 @@ public class AccountService(
             string errors = string.Join(" | ", addUserResult.Errors.Select(e => e.Description));
             logger.LogError("{serviceName}.{methodName} failed to create user\nErrors: {errors}",
                 nameof(AccountService), nameof(RegisterAsync), errors);
-            return Result.Failure(errors);
+            return Result<UserDTO>.Failure(errors);
         }
 
         // add user to his role
@@ -76,23 +77,27 @@ public class AccountService(
             string errors = string.Join(" | ", addToRoleResult.Errors.Select(e => e.Description));
             logger.LogError("{serviceName}.{methodName} failed adding user to role\nErrors: {errors}",
                 nameof(AccountService), nameof(RegisterAsync), errors);
-            return Result.Failure(errors);
+            return Result<UserDTO>.Failure(errors);
         }
         
         // add chatGroup for the user
         var addGroupResult = await chatGroupService.AddChatGroupAsync(newUser.Id, cancellationToken);
-        if (!addGroupResult.IsSuccess) return addGroupResult;
+        if (!addGroupResult.IsSuccess) return addGroupResult.MapFailure<UserDTO>();
 
         
         // generate Tokens
         var generateTokensResult = await tokensService.GenerateTokens(newUser, cancellationToken);
-        if (!generateTokensResult.IsSuccess) return generateTokensResult;
+        if (!generateTokensResult.IsSuccess) return generateTokensResult.MapFailure<UserDTO>();
         
         // store tokens in response cookies
         var storeTokensResult = cookieService.SetTokens(generateTokensResult.Value!);
-        if(!storeTokensResult.IsSuccess) return  storeTokensResult;
+        if(!storeTokensResult.IsSuccess) return storeTokensResult.MapFailure<UserDTO>();
 
-        return Result.Success();
+        return Result<UserDTO>.Success(new UserDTO()
+        {
+            UserId = newUser.Id,
+            UserName = newUser.UserName,
+        });
     }
     
     

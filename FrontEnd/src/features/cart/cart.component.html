@@ -22,9 +22,6 @@
         <div
           class="group flex h-fit flex-wrap gap-6 bg-dark-deep-blue p-6 rounded-xl border border-dark-gray/50 min-w-170 max-[760px]:min-w-75 justify-center"
         >
-          @if (isLast) {
-            <span (appIsVisable)="cartService.lazyGetCartItems()"></span>
-          }
           <div class="rounded-lg overflow-hidden max-[565px]:w-full">
             <img
               [src]="item.image"
@@ -82,16 +79,16 @@
           <app-loading class="w-full flex justify-center" />
         }
       } @empty {
-        <span (appIsVisable)="cartService.lazyGetCartItems()"></span>
-
-        @if (cartService.isLoading()) {
-          <app-loading class="w-full flex justify-center" />
-        } @else {
+        @if (!cartService.isLoading()) {
           <div class="text-white w-fit h-fit p-5 mx-auto text-2xl font-bold">
             Your cart is empty
           </div>
         }
       }
+      @if (cartService.isLoading()) {
+        <app-loading class="w-full flex justify-center" />
+      }
+      <span (appIsVisable)="cartService.lazyGetCartItems()"></span>
     </section>
 
     <section

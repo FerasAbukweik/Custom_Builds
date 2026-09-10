@@ -19,7 +19,8 @@ export class AccountService {
   register(registerData: IRegisterDTO) {
     return this._accountApiService.register(registerData).subscribe({
       next: (data) => {
-        this._authService.userData.set(data);
+        this._authService.setUserData(data);
+        localStorage.setItem('CB_UserData', JSON.stringify(data));
         this._router.navigateByUrl('/');
       },
       error: (err) => {

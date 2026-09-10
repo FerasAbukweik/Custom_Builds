@@ -130,7 +130,7 @@
               }
               @for (part of partService.parts(); track $index) {
                 <button
-                  class="p-3.5 rounded-lg flex items-center cursor-pointer transition-all gap-2 w-full"
+                  class="p-3.5 group rounded-lg flex items-center cursor-pointer transition-all gap-2 w-full"
                   (click)="selectedPartId.set(part.id)"
                   [class]="
                     selectedPartId() == part.id
@@ -142,6 +142,15 @@
                   <span class="font-bold text-sm text-off-white truncate block flex-1 text-left">{{
                     part.name
                   }}</span>
+
+                  <button
+                    class="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-soft-gray hover:text-error"
+                    type="button"
+                    (click)="$event.stopPropagation(); partService.removePart(part.id)"
+                    title="Remove"
+                  >
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
 
                   <i class="fa-solid fa-chevron-right"></i>
                 </button>
@@ -191,7 +200,7 @@
               }
               @for (section of sections(); track $index) {
                 <button
-                  class="w-full p-3.5 rounded-lg flex items-center justify-between cursor-pointer transition-all"
+                  class="w-full p-3.5 group rounded-lg flex items-center cursor-pointer transition-all"
                   type="button"
                   (click)="selectedSectionId.set(section.id)"
                   [class]="
@@ -200,10 +209,18 @@
                       : 'bg-dark-deep-blue border border-dark-blue-gray hover:bg-primary/50'
                   "
                 >
-                  <span class="font-bold truncate block text-sm text-off-white">{{
+                  <span class="font-bold flex-1 text-left truncate block text-sm text-off-white">{{
                     section.title
                   }}</span>
 
+                  <button
+                    class="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-soft-gray hover:text-error"
+                    type="button"
+                    (click)="$event.stopPropagation(); partService.removeSection(section.id)"
+                    title="Remove"
+                  >
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
                   <i class="fa-solid fa-chevron-right turnca"></i>
                 </button>
               }
@@ -221,7 +238,10 @@
               <span class="font-bold text-xs text-off-white uppercase tracking-wider"
                 >Modifications</span
               >
-              <button class="text-secondary cursor-pointer" (click)="toggleIsAdding(2)">
+              <button
+                class="text-secondary cursor-pointer"
+                (click)="selectedSectionId() && toggleIsAdding(2)"
+              >
                 <i class="fa-solid fa-plus"></i>
               </button>
             </div>
@@ -282,7 +302,7 @@
                   <button
                     class="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-soft-gray hover:text-error"
                     type="button"
-                    (click)="removeMod(mod.id)"
+                    (click)="this.partService.removeMod(mod.id)"
                     title="Remove"
                   >
                     <i class="fa-solid fa-xmark"></i>

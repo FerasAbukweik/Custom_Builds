@@ -3,11 +3,14 @@ import { IOrderDto } from '../../../../../../core/DTO/orders-dto';
 import { OrderManagementStatusDto } from '../../../../../../core/DTO/orders-management-status-dto';
 import { AdminApiService } from '../../../../../../core/services/api-services/admin-api-service';
 import { ILazyDTO } from '../../../../../../core/DTO/lazy-dto';
+import { OrderStateEnum } from 'src/core/enums/order-status-enum';
+import { OrderApiService } from 'src/core/services/api-services/order-api-service';
 
 @Injectable({ providedIn: 'root' })
-export class OrdersManagementService {
+export class AdminOrdersService {
   // injections
   private readonly _adminApiService = inject(AdminApiService);
+  private readonly _orderApiService = inject(OrderApiService);
 
   // signals
   private _SectionsOrders = signal<IOrderDto[][]>([]);
@@ -36,6 +39,23 @@ export class OrdersManagementService {
   }
 
   // mehtods
+
+  updateStatus(orderId: string, newStatus: OrderStateEnum) {
+    const sectionIdx = this._SectionsOrders().findIndex((x) => x.some((o) => o.id === orderId));
+    const order = this._SectionsOrders()[sectionIdx].find((o) => o.id === orderId);
+
+    if (!order || order.orderStatus === newStatus) return;
+
+    this._orderApiService.updateStatus(orderId, newStatus).subscribe({
+      next: () => {
+        this._SectionsOrders.update((curr) =>
+          curr.map((orderArr) =>
+            orderArr.map((o) => (o.id === orderId ? { ...o, orderStatus: newStatus } : o)),
+          ),
+        );
+      },
+    });
+  }
 
   async init() {
     this._adminApiService.getOrderManagementStatus().subscribe({

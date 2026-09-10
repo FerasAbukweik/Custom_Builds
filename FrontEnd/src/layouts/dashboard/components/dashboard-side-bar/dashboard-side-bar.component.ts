@@ -3,18 +3,20 @@ import { projectName } from '../../../../core/constants/project';
 import { ISideBarData } from '../../dashboard.model';
 import { RouterModule } from '@angular/router';
 import { DashboardService } from '../../dashboard.service';
+import { AuthService } from 'src/core/services/client-services/auth-service';
 
 @Component({
   selector: 'aside[dashboardSideBar]',
   imports: [RouterModule],
   templateUrl: './dashboard-side-bar.component.html',
   host: {
-    class: 'h-full border-r-2 border-slate-800 p-6.5 pt-4.5 whitespace-nowrap',
+    class: 'h-full flex flex-col border-r-2 border-slate-800 p-6.5 pt-0 whitespace-nowrap',
   },
 })
 export class DashboardSideBarComponent {
   // services
-  private dashboardService = inject(DashboardService);
+  private _dashboardService = inject(DashboardService);
+  protected authService = inject(AuthService);
 
   // input
   pagesData = input.required<ISideBarData[]>();
@@ -27,7 +29,7 @@ export class DashboardSideBarComponent {
   // methods
   onClick() {
     if (window.innerWidth <= 1024) {
-      this.dashboardService.toggleShowSideBar();
+      this._dashboardService.toggleShowSideBar();
     }
   }
 }

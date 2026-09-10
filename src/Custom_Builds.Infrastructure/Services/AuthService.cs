@@ -18,7 +18,7 @@ public class AuthService(
     IRefreshTokenRepository refreshTokenRepository
     ) : IAuthService
 {
-    public async Task<Result> LoginAsync(LoginDTO loginInfo) 
+    public async Task<Result<UserDTO>> LoginAsync(LoginDTO loginInfo) 
     {
         // find user by email
         ApplicationUser? user = await userManager.FindByEmailAsync(loginInfo.Email);
@@ -26,21 +26,25 @@ public class AuthService(
         {
             logger.LogWarning("{serviceName}.{methodName} failed login attempt for email: {email}",
                 nameof(AccountService), nameof(LoginAsync), loginInfo.Email);
-            return Result.Failure("Wrong Email or Password" , HttpStatusCode.Unauthorized);
+            return Result<UserDTO>.Failure("Wrong Email or Password" , HttpStatusCode.Unauthorized);
         }
 
         // generate Tokens
         var generateTokensResult = await tokensService.GenerateTokens(user);
-        if (!generateTokensResult.IsSuccess) return generateTokensResult;
+        if (!generateTokensResult.IsSuccess) return generateTokensResult.MapFailure<UserDTO>();
         
         // store tokens in cookies response
         var storeTokensResult = cookieService.SetTokens(generateTokensResult.Value!);
-        if (!storeTokensResult.IsSuccess) return storeTokensResult;
+        if (!storeTokensResult.IsSuccess) return storeTokensResult.MapFailure<UserDTO>();
 
         logger.LogInformation("{serviceName}.{methodName} user with id: {userId} logged in",
             nameof(AccountService), nameof(LoginAsync), user.Id);
         
-        return Result.Success();
+        return Result<UserDTO>.Success(new UserDTO()
+        {
+            UserId = user.Id,
+            UserName = user.UserName ?? "missing username",
+        });
     }
 
     public async Task<Result<AccessAndRefreshTokenDTO>> UpdateTokensAsync(string refreshTokenString, CancellationToken cancellationToken = default)

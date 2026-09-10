@@ -48,9 +48,10 @@ namespace Custom_Builds.Infrastructure.Repositories
 
             return toDel;
         }
-        public async Task<Result<List<CustomBuild>>> FilterAsync(
+        public async Task<IReadOnlyList<CustomBuild>> FilterAsync(
             Expression<Func<CustomBuild, bool>> extraChecks,
-            Expression<Func<CustomBuild, object?>>[]? includes = null)
+            Expression<Func<CustomBuild, object?>>[]? includes = null,
+            CancellationToken cancellationToken = default)
         {
 
             var query = dbContext.CustomBuilds.AsNoTracking().AsQueryable();
@@ -63,9 +64,7 @@ namespace Custom_Builds.Infrastructure.Repositories
                 }
             }
 
-            List<CustomBuild> customBuilds = await query.Where(extraChecks).ToListAsync();
-
-            return Result<List<CustomBuild>>.Success(customBuilds);
+            return await query.Where(extraChecks).ToListAsync(cancellationToken);
         }
         public async Task<Result<decimal>> GetPriceAsync(Guid customBuildId, CancellationToken cancellationToken = default)
         {

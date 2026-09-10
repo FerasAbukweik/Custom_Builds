@@ -15,6 +15,7 @@ public class CartItemService(
     ICartItemRepository cartItemRepository,
     IProductRepository productRepository,
     ICustomBuildService customBuildService,
+    ICustomBuildRepository buildRepository,
     ILogger<CartItemService> logger,
     IModificationsService modificationsService
     ) : ICartItemService
@@ -25,8 +26,12 @@ public class CartItemService(
         CancellationToken cancellationToken = default)
     {
         // get product
-        var product = await productRepository.GetByIdAsync(productId, cancellationToken);
-        if (product == null)
+        var product = await productRepository.FilterAsync(
+            p => p.Id == productId,
+            [p => p.Images],
+            cancellationToken
+            );
+        if (product.Count == 0)
             return Result<CartItemDTO>.Failure("Product not found");
         
         // new item to add
@@ -36,7 +41,7 @@ public class CartItemService(
             OrderType = OrderTypeEnum.Product,
             UserId = userId,
             ProductId = productId,
-            OrderPrice = product.Price
+            OrderPrice = product[0].Price
         };
 
         // adding item to the cart
@@ -49,6 +54,7 @@ public class CartItemService(
             return Result<CartItemDTO>.Failure("Failed saving changes to DB");
         }
 
+        newCartItem.Product = product[0];
         return Result<CartItemDTO>.Success(newCartItem.ToDTO());
     }
     
@@ -66,7 +72,12 @@ public class CartItemService(
         var getPriceResult =
             await modificationsService.GetModificationsPriceAsync(toAddCustomBuild.ModificationIds, cancellationToken);
         if (!getPriceResult.IsSuccess) return getPriceResult.MapFailure<CartItemDTO>();
-        
+
+        getPriceResult.Value += toAddCustomBuild.CustomBuildType switch
+        {
+            CustomBuildTypeEnum.Controller => 50,
+            _ => 0
+        };
 
         // new cart item to add
         CartItem newCartItem = new CartItem()
@@ -75,7 +86,7 @@ public class CartItemService(
             UserId = userId,
             CustomBuildId = addCustomBuildResult.Value!.Id,
             CreatedAt = DateTime.UtcNow,
-            OrderPrice = getPriceResult.Value!
+            OrderPrice = getPriceResult.Value
         };
 
         // adding item to the cart
@@ -88,6 +99,16 @@ public class CartItemService(
             return Result<CartItemDTO>.Failure("Failed saving changes to DB");
         }
 
+        var customBuild = await buildRepository.FilterAsync(
+            cb => cb.Id == addCustomBuildResult.Value.Id,
+            [cb => cb.Modifications],
+            cancellationToken
+        );
+
+        if (customBuild.Count == 0)
+            return Result<CartItemDTO>.Failure("Failed To fetch custom build after it was added");
+
+        newCartItem.CustomBuild = customBuild[0];
         return Result<CartItemDTO>.Success(newCartItem.ToDTO());
     }
     
@@ -99,7 +120,12 @@ public class CartItemService(
         // get user cart items
         var cartItems = await cartItemRepository.FilterAsync(
             ci => ci.UserId == userId,
-            [ci => ci.Product, ci => ci.CustomBuild],
+            [
+                ci => ci.Product,
+                ci => ci.CustomBuild,
+                ci => ci.Product!.Images,
+                ci => ci.CustomBuild!.Modifications
+            ],
             ci => ci.CreatedAt,
             true,
             lazyData.Taken,
