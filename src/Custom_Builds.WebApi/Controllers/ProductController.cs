@@ -22,6 +22,7 @@ namespace custom_Peripherals.Controllers
         }
         
         [HttpDelete("[action]/{id:guid}")]
+        [Transactional]
         public async Task<IActionResult> Remove(Guid id)
         {
             Result result = await productService.RemoveByIdAsync(id);
@@ -30,6 +31,7 @@ namespace custom_Peripherals.Controllers
         }
 
         [HttpPost("[action]")]
+        [Transactional]
         public async Task<ActionResult<Guid>> Add([FromForm] ProductAddDTO productDto, CancellationToken cancellationToken = default)
         {
             var result = await productService.AddAsync(productDto, cancellationToken);
@@ -44,6 +46,7 @@ namespace custom_Peripherals.Controllers
         }
 
         [HttpPut("[action]")]
+        [Transactional]
         public async Task<IActionResult> Edit([FromBody]ProductEditDTO editData, CancellationToken cancellationToken = default)
         {
             Result result = await productService.EditAsync(editData, cancellationToken);

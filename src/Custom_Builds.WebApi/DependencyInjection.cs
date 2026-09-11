@@ -5,7 +5,6 @@ using Custom_Builds.Core.Interfaces.ServiceContracts;
 using Custom_Builds.Infrastructure.DBcontext;
 using custom_Peripherals.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -46,15 +45,9 @@ public static class WepApiDependencyInjection
                     }
                 };
             });
-        
-        
-        // adding database
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("default")
-            )
-        );
 
 
+        // services
         services.Configure<CookieKeys>(configuration.GetSection("CookieKeys"));
         
         // add identity

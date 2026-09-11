@@ -3,7 +3,6 @@ using Custom_Builds.Infrastructure;
 using custom_Peripherals;
 using custom_Peripherals.Hub;
 using custom_Peripherals.MiddleWare;
-using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -22,7 +21,7 @@ builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider service, L
 // add services
 builder.Services
     .AddCore()
-    .AddInfrastructure()
+    .AddInfrastructure(builder.Configuration)
     .AddWepApi(builder.Configuration);
 
 

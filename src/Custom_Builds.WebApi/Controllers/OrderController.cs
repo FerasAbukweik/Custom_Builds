@@ -28,6 +28,7 @@ namespace custom_Peripherals.Controllers
         // add order
         // converts all items in cart to a single order
         [HttpPost("[action]")]
+        [Transactional]
         public async Task<IActionResult> Add(CancellationToken cancellationToken = default)
         {
             // get currUser id
@@ -93,6 +94,7 @@ namespace custom_Peripherals.Controllers
 
         [Authorize(Roles = nameof(RolesEnum.Admin))]
         [HttpPut("[action]/{orderId:guid}")]
+        [Transactional]
         public async Task<IActionResult> UpdateStatus([FromRoute]Guid orderId, [FromBody]OrderStateEnum newStatus, CancellationToken cancellationToken = default)
         {
             Result result = await orderService.UpdateStatus(orderId, newStatus, cancellationToken);

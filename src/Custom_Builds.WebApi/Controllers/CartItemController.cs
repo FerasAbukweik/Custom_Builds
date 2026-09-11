@@ -16,6 +16,7 @@ namespace custom_Peripherals.Controllers
     {
         // add normal product
         [HttpPost("[action]")]
+        [Transactional]
         public async Task<ActionResult<CartItemDTO>> AddProduct([FromBody] Guid productId, CancellationToken cancellationToken = default)
         {
             // get currUser id
@@ -31,6 +32,7 @@ namespace custom_Peripherals.Controllers
 
         // add custom build
         [HttpPost("[action]")]
+        [Transactional]
         public async Task<ActionResult<CartItemDTO>> AddCustomBuild([FromBody] CustomBuildAddDTO toAddCustomBuild, CancellationToken cancellationToken = default)
         {
             // get currUser id
@@ -45,6 +47,7 @@ namespace custom_Peripherals.Controllers
 
         // remove cart item
         [HttpDelete("[action]/{toDelCartItemId}")]
+        [Transactional]
         public async Task<IActionResult> Remove([FromRoute]Guid toDelCartItemId, CancellationToken cancellationToken = default)
         {
             // get currUser id
@@ -73,6 +76,7 @@ namespace custom_Peripherals.Controllers
 
         // update quantities
         [HttpPut("[action]")]
+        [Transactional]
         public async Task<IActionResult> UpdateQuantity(IReadOnlyList<Id_Quantity_DTO> needsUpdate, CancellationToken cancellationToken = default)
         {
             // get currUser id

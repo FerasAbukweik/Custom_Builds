@@ -15,6 +15,7 @@ namespace custom_Peripherals.Controllers
     {
         // register
         [HttpPost("[action]")]
+        [Transactional]
         public async Task<ActionResult<UserDTO>> Register([FromBody]RegisterDTO registerInfo)
         {
             var result = await accountService.RegisterAsync(registerInfo);
@@ -24,6 +25,7 @@ namespace custom_Peripherals.Controllers
 
         // delete user
         [HttpDelete("[action]/{toDelUserID}")]
+        [Transactional]
         [Authorize]
         public async Task<IActionResult> DeleteUser()
         {

@@ -56,6 +56,7 @@ public class AuthController(
     
     // update tokens
     [HttpPost("[action]")]
+    [Transactional]
     public async Task<IActionResult> UpdateTokens(CancellationToken cancellationToken = default)
     {
         var getRefreshTokenResult = cookieService.GetRefreshToken();

@@ -15,6 +15,7 @@ namespace custom_Peripherals.Controllers
     {
         // add modification
         [HttpPost("[action]")]
+        [Transactional]
         public async Task<ActionResult<ModificationDTO>> Add([FromForm]ModificationAddDTO toModificationAdd, CancellationToken cancellationToken = default)
         {
             var result = await modificationsService.AddAsync(toModificationAdd, cancellationToken);
@@ -24,6 +25,7 @@ namespace custom_Peripherals.Controllers
 
         // remove modification
         [HttpDelete("[action]/{modificationId}")]
+        [Transactional]
         public async Task<IActionResult> Remove([FromRoute]Guid modificationId)
         {
             Result result = await modificationsService.RemoveByIdAsync(modificationId);

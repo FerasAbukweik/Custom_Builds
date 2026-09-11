@@ -15,6 +15,7 @@ namespace custom_Peripherals.Controllers
         // add part
         [Authorize(Roles = nameof(RolesEnum.Admin))]
         [HttpPost("[action]")]
+        [Transactional]
         public async Task<ActionResult<PartDTO>> Add([FromBody] PartAddDTO toPartAdd)
         {
             var result = await partService.AddAsync(toPartAdd);
@@ -25,6 +26,7 @@ namespace custom_Peripherals.Controllers
         // remove part
         [Authorize(Roles = nameof(RolesEnum.Admin))]
         [HttpDelete("[action]/{partId}")]
+        [Transactional]
         public async Task<IActionResult> Remove([FromRoute]Guid partId)
         {
             Result result = await partService.RemoveByIdAsync(partId);

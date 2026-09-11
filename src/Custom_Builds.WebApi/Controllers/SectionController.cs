@@ -15,6 +15,7 @@ namespace custom_Peripherals.Controllers
     {
         // add section
         [HttpPost("[action]")]
+        [Transactional]
         public async Task<ActionResult<SectionDTO>> Add([FromBody] SectionAddDTO toSectionAdd)
         {
             var result = await sectionService.AddAsync(toSectionAdd);
@@ -24,6 +25,7 @@ namespace custom_Peripherals.Controllers
 
         // remove section
         [HttpDelete("[action]/{sectionId}")]
+        [Transactional]
         public async Task<IActionResult> Remove([FromRoute]Guid sectionId)
         {
             Result result = await sectionService.RemoveByIdAsync(sectionId);
