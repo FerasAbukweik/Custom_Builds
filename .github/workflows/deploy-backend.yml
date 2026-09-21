@@ -22,11 +22,22 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Get ACR credentials
+        id: acr_creds
+        run: |
+          username=$(az acr credential show --name custombuildsregistry --query username --output tsv)
+          acr_pwd=$(az acr credential show --name custombuildsregistry --query "passwords[0].value" --output tsv)
+          echo "::add-mask::$acr_pwd"
+          echo "username=$username" >> "$GITHUB_OUTPUT"
+          echo "acr_pwd=$acr_pwd" >> "$GITHUB_OUTPUT"
+
       - name: Build and Deploy to Azure Container App
         uses: azure/container-apps-deploy-action@v1
         with:
           appSourcePath: '${{ github.workspace }}'
           dockerfilePath: 'src/Custom_Builds.WebApi/Dockerfile'
           acrName: custombuildsregistry
+          acrUsername: ${{ steps.acr_creds.outputs.username }}
+          acrPassword: ${{ steps.acr_creds.outputs.acr_pwd }}
           containerAppName: custom-builds-api
           resourceGroup: custom-builds-rg
