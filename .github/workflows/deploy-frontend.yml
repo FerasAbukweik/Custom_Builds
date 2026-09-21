@@ -3,7 +3,7 @@ name: Deploy Angular Frontend to Azure Static Web Apps
 on:
   workflow_dispatch:
   push:
-    branches: [ main, master ] 
+    branches: [ main, master ]
     paths:
       - 'FrontEnd/**'
 
@@ -21,4 +21,4 @@ jobs:
           action: "upload"
           app_location: "/FrontEnd"
           api_location: ""
-          output_location: "dist/FrontEnd/browser"
+          output_location: "dist/custom-peripherals/browser"

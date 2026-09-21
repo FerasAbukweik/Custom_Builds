@@ -5,11 +5,10 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      - 'src/**'                          
-      - 'Custom_Builds.Core/**'           
+      - 'src/**'
+      - 'Custom_Builds.Core/**'
       - 'Custom_Builds.Infrastructure/**'
       - 'Custom_Builds.WebApi/**'
-      - '!FrontEnd/**'               
 
 jobs:
   build_and_deploy:
@@ -28,5 +27,6 @@ jobs:
         with:
           appSourcePath: '${{ github.workspace }}'
           dockerfilePath: 'src/Custom_Builds.WebApi/Dockerfile'
+          acrName: custombuildsregistry
           containerAppName: custom-builds-api
           resourceGroup: custom-builds-rg
