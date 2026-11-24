@@ -68,10 +68,10 @@ evolve independently of persistence and order-state rules.
 - **Solution** · A SignalR chat hub exposes messaging, chat groups and typing events; the message API loads history.
 - **Trade-off** · Transient typing events can be missed during a disconnect; the UI can reload history.
 
-### Authentication and token rotation
+### Authentication and session renewal
 
 - **Problem** · A customer should stay signed in across normal browsing and ordering.
-- **Solution** · ASP.NET Identity and JWT cookies back the session. The frontend interceptor refreshes an expired session, and the API checks roles on admin routes.
+- **Solution** · ASP.NET Identity and JWT cookies back the session. The frontend interceptor refreshes an expired session, and the API checks roles on admin routes. The refresh operation issues a new token pair.
 - **Trade-off** · Secure, strict cookies require aligned HTTPS origins in development.
 
 ### Order and configuration integrity
@@ -203,6 +203,7 @@ messages. The chat hub is at `/hubs/chat`.
 
 - First startup requires a separate migration and locally provisioned TLS.
 - A fresh database needs catalog data and an admin account for the full walkthrough.
+- Add refresh-token invalidation on renewal and logout.
 - Add backend tests around checkout, authorization and order-state transitions.
 - <!-- TODO: measure and add --> Measure cold versus cached catalog reads.
 
