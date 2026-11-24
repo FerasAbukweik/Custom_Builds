@@ -4,21 +4,9 @@ Configure custom controllers and mechanical keyboards, track orders and chat wit
 
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/) [![Angular 21](https://img.shields.io/badge/Angular-21-DD0031)](https://angular.dev/) [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED)](compose.yaml)
 
-## Demo and screenshots
+## Screenshots
 
-<!-- TODO: add public live demo URL -->
-Hosted demo pending.
-
-Capture these views using demo data:
-
-- the keyboard or controller configurator with a live price breakdown
-  <!-- TODO: add screenshot of the keyboard or controller configurator with a live price breakdown -->
-- a customer order timeline
-  <!-- TODO: add screenshot of a customer order timeline -->
-- the admin revenue and low-stock dashboard
-  <!-- TODO: add screenshot of the admin revenue and low-stock dashboard -->
-- a support conversation with the typing indicator
-  <!-- TODO: add screenshot of a support conversation with the typing indicator -->
+![Custom Builds controller configurator with parts and pricing](docs/screenshots/controller-configurator.jpg)
 
 ## Key features
 
@@ -198,14 +186,6 @@ Use [Scalar](https://localhost:8081/scalar/v1) in Development. The main groups
 cover account and authentication, product catalog, sections, parts,
 modifications, cart items, orders and order items, admin summaries, and
 messages. The chat hub is at `/hubs/chat`.
-
-## Known limitations and roadmap
-
-- First startup requires a separate migration and locally provisioned TLS.
-- A fresh database needs catalog data and an admin account for the full walkthrough.
-- Add refresh-token invalidation on renewal and logout.
-- Add backend tests around checkout, authorization and order-state transitions.
-- <!-- TODO: measure and add --> Measure cold versus cached catalog reads.
 
 ## Author
 
